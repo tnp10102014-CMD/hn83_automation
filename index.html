@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HN83_Automation — Giải pháp tự động hóa công nghiệp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans:ital@1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #142621;
+    --panel-dark: #0E2A24;
+    --panel-dark-2: #16362E;
+    --paper: #EDEFEA;
+    --paper-2: #FFFFFF;
+    --line: #CBD1C8;
+    --steel: #5C6B64;
+    --amber: #E8A33D;
+    --amber-deep: #C97F1F;
+    --blue: #3E7C9A;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.55;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { max-width: 100%; display: block; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3 { font-weight: 700; line-height: 1.15; margin: 0; }
+  p { margin: 0; }
+
+  /* ---------- Header ---------- */
+  header {
+    background: var(--panel-dark);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 3px solid var(--amber);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    max-width: 1120px;
+    margin: 0 auto;
+    gap: 20px;
+  }
+  .logo {
+    color: #FFFFFF;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo .mark {
+    width: 10px; height: 10px;
+    background: var(--amber);
+    display: inline-block;
+    flex-shrink: 0;
+  }
+  .logo-img {
+    height: 34px;
+    width: auto;
+    max-height: 34px;
+    object-fit: contain;
+  }
+  nav {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    flex: 1;
+    justify-content: center;
+  }
+  nav a {
+    color: #D9E2DC;
+    font-size: 0.94rem;
+    font-weight: 500;
+    padding: 6px 0;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  nav a:hover { color: #FFFFFF; border-color: var(--amber); }
+
+  /* ---------- Dropdown submenu ---------- */
+  .nav-item { position: relative; }
+  .nav-item > .nav-trigger {
+    background: none; border: none; font-family: inherit; cursor: pointer;
+    color: #D9E2DC; font-size: 0.94rem; font-weight: 500;
+    padding: 6px 0; border-bottom: 2px solid transparent;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .nav-item > .nav-trigger:hover { color: #FFFFFF; border-color: var(--amber); }
+  .nav-trigger .caret { font-size: 0.65rem; transition: transform 0.15s ease; }
+  .nav-item.open .nav-trigger .caret { transform: rotate(180deg); }
+  .dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 0;
+    min-width: 240px;
+    background: #FFFFFF;
+    border-top: 3px solid var(--amber);
+    box-shadow: 0 12px 28px rgba(14, 42, 36, 0.22);
+    padding: 8px 0;
+    z-index: 60;
+  }
+  .nav-item.open .dropdown,
+  .nav-item:hover .dropdown,
+  .nav-item:focus-within .dropdown { display: block; }
+  .dropdown a {
+    display: block;
+    color: var(--ink);
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 11px 20px;
+    border-bottom: none;
+  }
+  .dropdown a:hover { background: var(--paper); color: var(--ink); border-color: transparent; }
+
+  @media (max-width: 860px) {
+    .dropdown {
+      position: static;
+      box-shadow: none;
+      border-top: none;
+      border-left: 2px solid var(--amber);
+      margin: 4px 0 4px 4px;
+      padding: 0;
+      background: transparent;
+    }
+    .dropdown a { color: #C7D3CC; padding: 10px 16px; }
+    .dropdown a:hover { background: none; color: #FFFFFF; }
+    .nav-item > .nav-trigger { color: #D9E2DC; padding: 12px 4px; width: 100%; justify-content: space-between; border-bottom: 1px solid #22463B; }
+  }
+  .header-cta {
+    flex-shrink: 0;
+    background: var(--amber);
+    color: var(--panel-dark);
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 9px 16px;
+    white-space: nowrap;
+  }
+  .header-cta:hover { background: var(--amber-deep); }
+  #navToggle { display: none; }
+  .nav-toggle-label { display: none; }
+
+  @media (max-width: 860px) {
+    nav {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 0;
+      background: var(--panel-dark-2);
+      margin-top: 14px;
+    }
+    nav a { padding: 12px 4px; border-bottom: 1px solid #22463B; }
+    #navToggle:checked ~ nav { display: flex; }
+    .header-inner { flex-wrap: wrap; }
+    .nav-toggle-label {
+      display: block;
+      color: #FFFFFF;
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+    }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: var(--panel-dark);
+    color: #FFFFFF;
+    padding: 72px 0 84px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-inner {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .hero-eyebrow {
+    color: var(--amber);
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-bottom: 14px;
+  }
+  .hero h1 {
+    font-size: clamp(2.1rem, 4vw, 3.1rem);
+    color: #FFFFFF;
+    max-width: 15ch;
+  }
+  .hero p.lead {
+    margin-top: 20px;
+    color: #C7D3CC;
+    font-size: 1.06rem;
+    max-width: 46ch;
+  }
+  .hero-actions { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: 13px 22px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: 2px solid transparent;
+  }
+  .btn-primary { background: var(--amber); color: var(--panel-dark); }
+  .btn-primary:hover { background: var(--amber-deep); }
+  .btn-ghost { border-color: #3E5A50; color: #FFFFFF; }
+  .btn-ghost:hover { border-color: var(--amber); }
+
+  .panel-graphic {
+    background: var(--panel-dark-2);
+    border: 1px solid #274A3F;
+    padding: 28px;
+    position: relative;
+  }
+  .panel-graphic .row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #2C5245; }
+  .panel-graphic .row:last-child { border-bottom: none; }
+  .panel-graphic .led {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #2C5245;
+    flex-shrink: 0;
+  }
+  .panel-graphic .led.on { background: #5FD98A; animation: blink 2.6s ease-in-out infinite; }
+  .panel-graphic .led.amber-led { background: var(--amber); animation: blink 3.4s ease-in-out infinite 0.6s; }
+  .panel-graphic .row span.label { color: #B9C6BF; font-size: 0.86rem; }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .panel-graphic .led.on, .panel-graphic .led.amber-led { animation: none; }
+  }
+  .panel-graphic .brands {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid #274A3F;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .panel-graphic .brands span {
+    color: #8FA69B;
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Section shell ---------- */
+  section { padding: 76px 0; }
+  .section-head { max-width: 60ch; margin-bottom: 44px; }
+  .section-head .tag { color: var(--blue); font-weight: 600; font-size: 0.92rem; margin-bottom: 10px; }
+  .section-head h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); }
+  .section-head p { margin-top: 14px; color: var(--steel); font-size: 1.02rem; }
+
+  /* ---------- About ---------- */
+  .about { background: var(--paper-2); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  .about-grid p { color: #3A473F; font-size: 1.02rem; }
+  .about-grid p + p { margin-top: 16px; }
+  .about-facts { display: flex; flex-direction: column; gap: 0; border-top: 1px solid var(--line); }
+  .about-facts .fact { padding: 18px 0; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 20px; }
+  .about-facts .fact .k { font-weight: 600; }
+  .about-facts .fact .v { color: var(--steel); text-align: right; }
+  @media (max-width: 780px) { .about-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- Services ---------- */
+  .services { background: var(--paper); }
+  .service-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .service-item {
+    background: var(--paper-2);
+    padding: 30px 28px;
+  }
+  .service-item h3 { font-size: 1.08rem; margin-bottom: 10px; }
+  .service-item p { color: var(--steel); font-size: 0.96rem; }
+  .service-item .idx { color: var(--amber-deep); font-weight: 700; font-size: 0.85rem; margin-bottom: 12px; display: block; }
+  @media (max-width: 780px) { .service-list { grid-template-columns: 1fr; } }
+
+  /* ---------- Process ---------- */
+  .process { background: var(--panel-dark); color: #FFFFFF; }
+  .process .section-head p { color: #B9C6BF; }
+  .process .section-head .tag { color: var(--amber); }
+  .steps { display: flex; flex-direction: column; }
+  .step {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 20px;
+    padding: 22px 0;
+    border-bottom: 1px solid #22463B;
+  }
+  .step:last-child { border-bottom: none; }
+  .step .n { font-size: 1.6rem; font-weight: 700; color: var(--amber); }
+  .step h3 { font-size: 1.06rem; color: #FFFFFF; margin-bottom: 6px; }
+  .step p { color: #B9C6BF; font-size: 0.95rem; }
+
+  /* ---------- Contact ---------- */
+  .contact { background: var(--paper-2); }
+  .contact-card {
+    background: var(--panel-dark);
+    color: #FFFFFF;
+    padding: 46px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+    border-left: 6px solid var(--amber);
+  }
+  .contact-card h2 { color: #FFFFFF; font-size: 1.7rem; max-width: 20ch; }
+  .contact-card p.lead { margin-top: 14px; color: #C7D3CC; max-width: 42ch; }
+  .contact-list { display: flex; flex-direction: column; gap: 18px; }
+  .contact-list .row { display: flex; flex-direction: column; gap: 4px; }
+  .contact-list .row .k { color: #8FA69B; font-size: 0.82rem; font-weight: 500; }
+  .contact-list .row .v { font-size: 1.12rem; font-weight: 600; }
+  .contact-list .row a:hover { color: var(--amber); }
+  @media (max-width: 780px) { .contact-card { grid-template-columns: 1fr; padding: 32px 24px; } }
+
+  /* ---------- Footer ---------- */
+  footer { background: var(--panel-dark-2); color: #8FA69B; padding: 26px 0; font-size: 0.86rem; }
+  .footer-inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  /* ---------- Auth (header + modal) ---------- */
+  .auth-area { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+  .auth-hello { color: #D9E2DC; font-size: 0.88rem; white-space: nowrap; }
+  .auth-hello strong { color: #FFFFFF; }
+  .link-btn {
+    background: none; border: none; padding: 0; margin: 0;
+    color: #D9E2DC; font-family: inherit; font-size: 0.86rem; font-weight: 500;
+    cursor: pointer; text-decoration: underline;
+  }
+  .link-btn:hover { color: #FFFFFF; }
+  button.header-cta {
+    font-family: inherit; border: none; cursor: pointer;
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(14, 42, 36, 0.55);
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--paper-2);
+    width: 100%;
+    max-width: 400px;
+    border-top: 4px solid var(--amber);
+    padding: 32px 30px;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; font-size: 1.3rem;
+    color: var(--steel); cursor: pointer; line-height: 1;
+  }
+  .modal-close:hover { color: var(--ink); }
+  .modal-tabs { display: flex; gap: 4px; margin-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .modal-tab {
+    background: none; border: none; cursor: pointer; font-family: inherit;
+    padding: 10px 4px; margin-right: 20px;
+    font-size: 0.98rem; font-weight: 600; color: var(--steel);
+    border-bottom: 2px solid transparent;
+  }
+  .modal-tab.active { color: var(--ink); border-color: var(--amber); }
+  .auth-form { display: none; flex-direction: column; gap: 14px; }
+  .auth-form.active { display: flex; }
+  .auth-form label { font-size: 0.84rem; font-weight: 500; color: var(--steel); display: block; margin-bottom: 5px; }
+  .auth-form input {
+    width: 100%; padding: 10px 12px; font-family: inherit; font-size: 0.95rem;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+  }
+  .auth-form input:focus { border-color: var(--blue); outline: none; }
+  .auth-form .btn-primary { border: none; width: 100%; text-align: center; margin-top: 4px; cursor: pointer; }
+  .auth-msg { font-size: 0.86rem; min-height: 1.2em; }
+  .auth-msg.error { color: #B3492B; }
+  .auth-msg.info { color: var(--steel); }
+  .auth-msg a { color: var(--blue); text-decoration: underline; cursor: pointer; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#top">
+      <img src="HN.svg" alt="HN83_Automation" class="logo-img" />
+      HN83_Automation
+    </a>
+    <input type="checkbox" id="navToggle" />
+    <label class="nav-toggle-label" for="navToggle">☰</label>
+    <nav>
+      <div class="nav-item">
+        <button class="nav-trigger" type="button" aria-expanded="false" aria-controls="gioiThieuDropdown">
+          Giới thiệu <span class="caret">▾</span>
+        </button>
+        <div class="dropdown" id="gioiThieuDropdown">
+          <a href="#gioi-thieu">Về HN83_Automation</a>
+          <a href="#quy-trinh">Quy trình làm việc</a>
+          <a href="#dich-vu">Năng lực & thiết bị</a>
+          <a href="#lien-he">Thông tin liên hệ</a>
+          <a href="https://www.youtube.com/watch?v=t2f5-QSrt3E" target="_blank" rel="noopener">Video học VFD</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button class="nav-trigger" type="button" aria-expanded="false" aria-controls="KKSDropdown">
+          Tìm KKS Hệ Thống <span class="caret">▾</span>
+        </button>
+        <div class="dropdown" id="KKSDropdown">
+          <a href="tra-cuu-ma-kks.html">Tìm kiếm KKS</a>
+          <a href="#quy-trinh">Quy trình làm việc</a>
+        </div>
+      </div>
+      <a href="#dich-vu">Dịch vụ</a>
+      <a href="#quy-trinh">Quy trình</a>
+      <a href="#lien-he">Liên hệ</a>
+      <a href="tel:0913193668">Call Now: 0913.193.668</a>
+    </nav>
+    <div class="auth-area" id="authArea"></div>
+  </div>
+</header>
+
+<div class="modal-overlay" id="authModal">
+  <div class="modal-box">
+    <button class="modal-close" id="authModalClose" aria-label="Đóng">×</button>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tabLoginBtn">Đăng nhập</button>
+      <button class="modal-tab" id="tabRegisterBtn">Đăng ký tài khoản</button>
+    </div>
+
+    <form class="auth-form active" id="loginForm">
+      <div>
+        <label for="loginUsername">Tên đăng nhập</label>
+        <input type="text" id="loginUsername" autocomplete="username" />
+      </div>
+      <div>
+        <label for="loginPassword">Mật khẩu</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" />
+      </div>
+      <div class="auth-msg" id="loginMsg"></div>
+      <button type="submit" class="btn btn-primary">Đăng nhập</button>
+    </form>
+
+    <form class="auth-form" id="registerForm">
+      <div>
+        <label for="registerUsername">Tên đăng nhập</label>
+        <input type="text" id="registerUsername" autocomplete="username" />
+      </div>
+      <div>
+        <label for="registerPassword">Mật khẩu</label>
+        <input type="password" id="registerPassword" autocomplete="new-password" />
+      </div>
+      <div>
+        <label for="registerPassword2">Nhập lại mật khẩu</label>
+        <input type="password" id="registerPassword2" autocomplete="new-password" />
+      </div>
+      <div class="auth-msg" id="registerMsg"></div>
+      <button type="submit" class="btn btn-primary">Đăng ký</button>
+    </form>
+  </div>
+</div>
+
+<div id="top"></div>
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <div class="hero-eyebrow">Kỹ thuật tự động hóa công nghiệp</div>
+      <h1>Giải pháp tự động hóa trọn gói cho nhà máy của bạn</h1>
+      <p class="lead">HN83_Automation thiết kế, lập trình và tích hợp hệ thống điều khiển — từ PLC, HMI/SCADA đến tủ điện — trên các thương hiệu thiết bị phổ biến tại Việt Nam, phù hợp với từng dây chuyền sản xuất cụ thể.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#lien-he">Liên hệ tư vấn</a>
+        <a class="btn btn-ghost" href="#dich-vu">Xem dịch vụ</a>
+      </div>
+    </div>
+    <div class="panel-graphic">
+      <div class="row"><span class="led on"></span><span class="label">Hệ thống điều khiển — đang giám sát</span></div>
+      <div class="row"><span class="led amber-led"></span><span class="label">Tích hợp SCADA / HMI</span></div>
+      <div class="row"><span class="led on"></span><span class="label">Tủ điện — đạt chuẩn vận hành</span></div>
+      <div class="row"><span class="led"></span><span class="label">Bảo trì định kỳ — theo lịch</span></div>
+      <div class="brands">
+        <span>SIEMENS</span><span>OMRON</span><span>MITSUBISHI</span><span>ABB</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="about" id="gioi-thieu">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">Giới thiệu</div>
+      <h2>Đồng hành từ bản vẽ đến khi dây chuyền chạy thật</h2>
+    </div>
+    <div class="about-grid">
+      <div>
+        <p>HN83_Automation là đơn vị kỹ thuật chuyên về tự động hóa công nghiệp, làm việc trực tiếp cùng nhà máy ở từng công đoạn — từ khảo sát hiện trạng, thiết kế hệ thống điều khiển, lập trình, đến lắp đặt và vận hành thử.</p>
+        <p>Không gắn với một hãng thiết bị duy nhất, HN83_Automation làm việc trên nhiều nền tảng PLC phổ biến tại Việt Nam để chọn giải pháp phù hợp nhất với dây chuyền và ngân sách của từng khách hàng, thay vì ép hệ thống theo một hãng cố định.</p>
+      </div>
+      <div class="about-facts">
+        <div class="fact"><span class="k">Nền tảng PLC</span><span class="v">Siemens · Omron · Mitsubishi · ABB</span></div>
+        <div class="fact"><span class="k">Phạm vi công việc</span><span class="v">Thiết kế · Lập trình · Lắp đặt · Bảo trì</span></div>
+        <div class="fact"><span class="k">Hình thức làm việc</span><span class="v">Theo dự án hoặc hợp đồng dài hạn</span></div>
+        <div class="fact"><span class="k">Khu vực</span><span class="v">Liên hệ để trao đổi cụ thể</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="services" id="dich-vu">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">Dịch vụ</div>
+      <h2>Giải pháp tự động hóa</h2>
+      <p>Mỗi hạng mục có thể triển khai riêng lẻ hoặc trọn gói, tùy theo nhu cầu thực tế của dây chuyền.</p>
+    </div>
+    <div class="service-list">
+      <div class="service-item">
+        <h3>Lập trình PLC đa thương hiệu</h3>
+        <p>Viết và tối ưu chương trình điều khiển trên Siemens, Omron, Mitsubishi, ABB — theo đúng logic vận hành của từng dây chuyền.</p>
+      </div>
+      <div class="service-item">
+        <h3>Tích hợp SCADA / HMI</h3>
+        <p>Xây dựng giao diện giám sát, thu thập dữ liệu sản xuất theo thời gian thực, giúp người vận hành theo dõi và xử lý nhanh hơn.</p>
+      </div>
+      <div class="service-item">
+        <h3>Thiết kế & thi công tủ điện</h3>
+        <p>Thiết kế bản vẽ, lựa chọn thiết bị và thi công tủ điện điều khiển đạt chuẩn an toàn vận hành công nghiệp.</p>
+      </div>
+      <div class="service-item">
+        <h3>Bảo trì & nâng cấp hệ thống</h3>
+        <p>Kiểm tra định kỳ, xử lý sự cố và nâng cấp hệ thống điều khiển cũ mà không làm gián đoạn sản xuất.</p>
+      </div>
+      <div class="service-item">
+        <h3>Tư vấn giải pháp tự động hóa</h3>
+        <p>Khảo sát hiện trạng nhà máy, đề xuất phương án tự động hóa phù hợp với công suất và ngân sách thực tế.</p>
+      </div>
+      <div class="service-item">
+        <h3>Đào tạo kỹ thuật vận hành</h3>
+        <p>Hướng dẫn đội ngũ kỹ thuật của nhà máy vận hành và xử lý sự cố cơ bản trên hệ thống đã bàn giao.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="quy-trinh">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="tag">Quy trình</div>
+      <h2>Làm việc theo từng bước rõ ràng</h2>
+      <p>Từ lúc liên hệ đến khi dây chuyền vận hành ổn định.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="n">1</div>
+        <div><h3>Khảo sát & trao đổi yêu cầu</h3><p>Tìm hiểu hiện trạng dây chuyền, mục tiêu tự động hóa và ràng buộc thực tế (ngân sách, thời gian, thiết bị hiện có).</p></div>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <div><h3>Thiết kế giải pháp</h3><p>Đề xuất phương án kỹ thuật cụ thể: nền tảng PLC, cấu trúc tủ điện, phạm vi SCADA/HMI nếu cần.</p></div>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <div><h3>Lập trình & lắp đặt</h3><p>Triển khai phần mềm điều khiển, thi công tủ điện và lắp đặt tại hiện trường theo bản vẽ đã thống nhất.</p></div>
+      </div>
+      <div class="step">
+        <div class="n">4</div>
+        <div><h3>Vận hành thử & bàn giao</h3><p>Chạy thử thực tế, hiệu chỉnh cho đến khi dây chuyền ổn định, sau đó bàn giao kèm hướng dẫn vận hành.</p></div>
+      </div>
+      <div class="step">
+        <div class="n">5</div>
+        <div><h3>Bảo trì sau bàn giao</h3><p>Hỗ trợ kỹ thuật và bảo trì định kỳ để hệ thống vận hành bền theo thời gian.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="lien-he">
+  <div class="wrap">
+    <div class="contact-card">
+      <div>
+        <h2>Trao đổi về dự án tự động hóa của bạn</h2>
+        <p class="lead">Gửi email hoặc gọi trực tiếp — mô tả ngắn gọn về dây chuyền và nhu cầu, HN83_Automation sẽ phản hồi để trao đổi cụ thể hơn.</p>
+      </div>
+      <div class="contact-list">
+        <div class="row">
+          <span class="k">Email</span>
+          <a class="v" href="mailto:tnp10102014@gmail.com">tnp10102014@gmail.com</a>
+        </div>
+        <div class="row">
+          <span class="k">Điện thoại</span>
+          <a class="v" href="tel:0913193668">0913.193.668</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>© <span id="year"></span> HN83_Automation</span>
+    <span>Tự động hóa công nghiệp — PLC · SCADA/HMI · Tủ điện</span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  document.querySelectorAll('nav a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      var toggle = document.getElementById('navToggle');
+      if (toggle) toggle.checked = false;
+    });
+  });
+
+  document.querySelectorAll('.nav-item').forEach(function (item) {
+    var trigger = item.querySelector('.nav-trigger');
+    trigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.nav-item.open').forEach(function (o) { o.classList.remove('open'); });
+      if (!isOpen) { item.classList.add('open'); trigger.setAttribute('aria-expanded', 'true'); }
+      else { trigger.setAttribute('aria-expanded', 'false'); }
+    });
+  });
+  document.addEventListener('click', function () {
+    document.querySelectorAll('.nav-item.open').forEach(function (o) {
+      o.classList.remove('open');
+      o.querySelector('.nav-trigger').setAttribute('aria-expanded', 'false');
+    });
+  });
+  (function () {
+    var STORAGE_KEY = 'hn83_accounts';
+    var SESSION_KEY = 'hn83_current_user';
+
+    function getAccounts() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch (e) { return []; }
+    }
+    function saveAccounts(list) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+    function getCurrentUser() {
+      try { return localStorage.getItem(SESSION_KEY) || null; }
+      catch (e) { return null; }
+    }
+    function setCurrentUser(username) {
+      if (username) localStorage.setItem(SESSION_KEY, username);
+      else localStorage.removeItem(SESSION_KEY);
+    }
+
+    var authArea = document.getElementById('authArea');
+    var modal = document.getElementById('authModal');
+    var modalClose = document.getElementById('authModalClose');
+    var tabLoginBtn = document.getElementById('tabLoginBtn');
+    var tabRegisterBtn = document.getElementById('tabRegisterBtn');
+    var loginForm = document.getElementById('loginForm');
+    var registerForm = document.getElementById('registerForm');
+    var loginMsg = document.getElementById('loginMsg');
+    var registerMsg = document.getElementById('registerMsg');
+
+    function renderAuthArea() {
+      var user = getCurrentUser();
+      authArea.innerHTML = '';
+      if (user) {
+        var span = document.createElement('span');
+        span.className = 'auth-hello';
+        span.innerHTML = 'Xin chào, <strong>' + escapeHtml(user) + '</strong>';
+        var logoutBtn = document.createElement('button');
+        logoutBtn.className = 'link-btn';
+        logoutBtn.textContent = 'Đăng xuất';
+        logoutBtn.addEventListener('click', function () {
+          setCurrentUser(null);
+          renderAuthArea();
+        });
+        authArea.appendChild(span);
+        authArea.appendChild(logoutBtn);
+      } else {
+        var btn = document.createElement('button');
+        btn.className = 'header-cta';
+        btn.textContent = 'Đăng nhập';
+        btn.addEventListener('click', openModal);
+        authArea.appendChild(btn);
+      }
+    }
+
+    function escapeHtml(str) {
+      var d = document.createElement('div');
+      d.textContent = str == null ? '' : String(str);
+      return d.innerHTML;
+    }
+
+    function openModal() {
+      modal.classList.add('open');
+      showTab('login');
+      setTimeout(function () { document.getElementById('loginUsername').focus(); }, 0);
+    }
+    function closeModal() {
+      modal.classList.remove('open');
+      loginMsg.textContent = ''; loginMsg.className = 'auth-msg';
+      registerMsg.textContent = ''; registerMsg.className = 'auth-msg';
+      loginForm.reset(); registerForm.reset();
+    }
+    function showTab(which) {
+      var isLogin = which === 'login';
+      tabLoginBtn.classList.toggle('active', isLogin);
+      tabRegisterBtn.classList.toggle('active', !isLogin);
+      loginForm.classList.toggle('active', isLogin);
+      registerForm.classList.toggle('active', !isLogin);
+    }
+
+    modalClose.addEventListener('click', closeModal);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+    tabLoginBtn.addEventListener('click', function () { showTab('login'); });
+    tabRegisterBtn.addEventListener('click', function () { showTab('register'); });
+
+    loginForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var username = document.getElementById('loginUsername').value.trim();
+      var password = document.getElementById('loginPassword').value;
+      if (!username || !password) {
+        loginMsg.textContent = 'Nhập đủ tên đăng nhập và mật khẩu.';
+        loginMsg.className = 'auth-msg error';
+        return;
+      }
+      var accounts = getAccounts();
+      var exists = accounts.some(function (a) { return a.username === username; });
+      var match = accounts.find(function (a) { return a.username === username && a.password === password; });
+      if (match) {
+        setCurrentUser(username);
+        renderAuthArea();
+        closeModal();
+        return;
+      }
+      if (!exists) {
+        loginMsg.innerHTML = 'Chưa có tài khoản này trên trình duyệt hiện tại. <a id="switchToRegister">Đăng ký ngay?</a>';
+        loginMsg.className = 'auth-msg info';
+        document.getElementById('switchToRegister').addEventListener('click', function () {
+          document.getElementById('registerUsername').value = username;
+          showTab('register');
+        });
+      } else {
+        loginMsg.textContent = 'Sai mật khẩu, thử lại nhé.';
+        loginMsg.className = 'auth-msg error';
+      }
+    });
+
+    registerForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var username = document.getElementById('registerUsername').value.trim();
+      var password = document.getElementById('registerPassword').value;
+      var password2 = document.getElementById('registerPassword2').value;
+      if (!username || !password) {
+        registerMsg.textContent = 'Nhập đủ tên đăng nhập và mật khẩu.';
+        registerMsg.className = 'auth-msg error';
+        return;
+      }
+      if (password !== password2) {
+        registerMsg.textContent = 'Mật khẩu nhập lại không khớp.';
+        registerMsg.className = 'auth-msg error';
+        return;
+      }
+      var accounts = getAccounts();
+      if (accounts.some(function (a) { return a.username === username; })) {
+        registerMsg.textContent = 'Tên đăng nhập đã tồn tại, chọn tên khác nhé.';
+        registerMsg.className = 'auth-msg error';
+        return;
+      }
+      accounts.push({ username: username, password: password });
+      saveAccounts(accounts);
+      setCurrentUser(username);
+      renderAuthArea();
+      closeModal();
+    });
+
+    renderAuthArea();
+  })();
+</script>
+
+</body>
+</html>
