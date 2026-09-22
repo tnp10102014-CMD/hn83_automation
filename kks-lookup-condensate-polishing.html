@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tra cứu mã KKS — Condensate Polishing Plant</title>
+<style>
+:root{
+  --bg:#0d1117;
+  --bg-panel:#141a22;
+  --bg-panel-2:#1a212b;
+  --line:#26303c;
+  --text:#e6edf3;
+  --text-dim:#8b98a5;
+  --accent:#ff8a3d;
+  --accent-dim:#c9662a;
+  --ok:#3fb950;
+  --warn:#d29922;
+  --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f5f6f8;
+    --bg-panel:#ffffff;
+    --bg-panel-2:#eef0f3;
+    --line:#dde2e8;
+    --text:#161b22;
+    --text-dim:#5b6572;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1117; --bg-panel:#141a22; --bg-panel-2:#1a212b; --line:#26303c; --text:#e6edf3; --text-dim:#8b98a5;
+}
+html{ scroll-padding-top: env(safe-area-inset-top, 0px); height:100%; }
+*{ box-sizing:border-box; }
+body{
+  margin:0; min-height:100%;
+  background:var(--bg); color:var(--text);
+  font-family:var(--sans);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size:28px 28px;
+  background-attachment:fixed;
+}
+.wrap{ max-width:820px; margin:0 auto; padding:28px 18px 60px; }
+
+header{ margin-bottom:22px; }
+.eyebrow{
+  font-family:var(--mono); font-size:12px; color:var(--accent);
+  letter-spacing:0.02em; margin:0 0 6px;
+}
+h1{ font-size:clamp(22px,5vw,30px); line-height:1.25; margin:0 0 8px; font-weight:650; }
+.sub{ color:var(--text-dim); font-size:14px; line-height:1.5; max-width:64ch; }
+.doc-meta{
+  margin-top:14px; padding:10px 14px; background:var(--bg-panel);
+  border:1px solid var(--line); border-radius:8px;
+  font-family:var(--mono); font-size:12.5px; color:var(--text-dim);
+  display:flex; flex-wrap:wrap; gap:4px 18px;
+}
+.doc-meta b{ color:var(--text); font-weight:600; }
+
+.search-panel{
+  position:sticky; top:calc(env(safe-area-inset-top,0px) + 10px);
+  background:var(--bg-panel);
+  border:1px solid var(--line); border-radius:10px;
+  padding:14px; margin:22px 0 18px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  z-index:5;
+}
+.search-row{ display:flex; gap:8px; align-items:center; }
+.search-row svg{ flex:0 0 auto; color:var(--text-dim); }
+#q{
+  flex:1; background:transparent; border:none; outline:none;
+  color:var(--text); font-family:var(--mono); font-size:16px;
+  letter-spacing:0.02em; padding:8px 2px;
+}
+#q::placeholder{ color:var(--text-dim); }
+.clear-btn{
+  border:1px solid var(--line); background:var(--bg-panel-2); color:var(--text-dim);
+  border-radius:6px; padding:6px 10px; font-size:12px; font-family:var(--sans);
+  cursor:pointer; display:none;
+}
+.clear-btn:hover{ color:var(--text); border-color:var(--accent-dim); }
+.hint{ margin-top:8px; font-size:12px; color:var(--text-dim); }
+.hint code{ font-family:var(--mono); background:var(--bg-panel-2); padding:1px 5px; border-radius:4px; }
+
+.status-line{
+  display:flex; justify-content:space-between; align-items:baseline;
+  font-size:12.5px; color:var(--text-dim); margin:0 2px 10px; font-family:var(--mono);
+}
+.status-line .n{ color:var(--accent); font-weight:600; }
+
+.results{ display:flex; flex-direction:column; gap:8px; }
+.group{
+  background:var(--bg-panel); border:1px solid var(--line); border-radius:10px;
+  padding:12px 14px;
+}
+.group.exact{ border-color:var(--accent-dim); box-shadow:0 0 0 1px rgba(255,138,61,0.15) inset; }
+.group.fuzzy{ border-color:#3a4a5a; }
+.g-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:6px; }
+.g-code{ font-family:var(--mono); font-size:15px; font-weight:600; letter-spacing:0.02em; }
+.g-tag{
+  font-family:var(--mono); font-size:10.5px; padding:2px 7px; border-radius:20px;
+  border:1px solid var(--line); color:var(--text-dim); white-space:nowrap;
+}
+.g-tag.exact{ color:var(--accent); border-color:var(--accent-dim); }
+.g-tag.fuzzy{ color:var(--warn); border-color:#5a4a20; }
+.g-tag.partial{ color:var(--text-dim); }
+
+.fuzzy-toggle{
+  text-align:center; padding:16px;
+}
+.fuzzy-toggle button{
+  font-family:var(--sans); font-size:13px; color:var(--warn);
+  background:var(--bg-panel); border:1px dashed #5a4a20; border-radius:8px;
+  padding:10px 16px; cursor:pointer;
+}
+.fuzzy-toggle button:hover{ background:var(--bg-panel-2); }
+.fuzzy-toggle p{ margin:8px 0 0; font-size:11.5px; color:var(--text-dim); }
+.g-pages{ display:flex; flex-wrap:wrap; gap:6px; }
+.page-pill{
+  font-family:var(--mono); font-size:12px; color:var(--text);
+  background:var(--bg-panel-2); border:1px solid var(--line);
+  padding:3px 9px; border-radius:6px;
+}
+.page-pill b{ color:var(--accent); font-weight:600; }
+
+.empty{
+  text-align:center; padding:50px 20px; color:var(--text-dim); font-size:13.5px; line-height:1.7;
+}
+.empty b{ color:var(--text); }
+
+.idle{
+  text-align:center; padding:36px 16px; color:var(--text-dim); font-size:13px; line-height:1.8;
+}
+.idle .examples{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:14px; }
+.ex-btn{
+  font-family:var(--mono); font-size:12px; background:var(--bg-panel);
+  border:1px solid var(--line); color:var(--text); padding:6px 11px;
+  border-radius:20px; cursor:pointer;
+}
+.ex-btn:hover{ border-color:var(--accent-dim); color:var(--accent); }
+
+footer{
+  margin-top:36px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--text-dim); line-height:1.7;
+}
+footer b{ color:var(--text-dim); }
+
+::selection{ background:rgba(255,138,61,0.3); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">TRA CỨU MÃ KKS</p>
+    <h1>Chỉ mục tra cứu mã KKS theo trang bản vẽ</h1>
+    <p class="sub">Nhập một phần hoặc toàn bộ mã KKS / cable tag để tìm trang chứa mã đó trong bản vẽ Schematic and Wiring Diagram cho hệ Condensate Polishing Plant, Song Hau 1.</p>
+    <div class="doc-meta">
+      <span><b>Tài liệu:</b> SH1‑DHI‑P0LD‑I‑M01‑DSD‑5401.pdf</span>
+      <span><b>Số trang:</b> 267</span>
+      <span><b>Mã đã lập chỉ mục:</b> __TOKEN_COUNT__</span>
+    </div>
+  </header>
+
+  <div class="search-panel">
+    <div class="search-row">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="q" type="text" inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Nhập mã KKS, vd. P1LDF10-CH001">
+      <button class="clear-btn" id="clearBtn">Xóa</button>
+    </div>
+    <p class="hint">Mặc định chỉ hiện kết quả khớp chính xác hoặc chứa đúng từ khóa (không phân biệt hoa/thường, tự chuẩn hóa <code>O↔0</code>, <code>I↔1</code>). Nếu không ra kết quả, có thể bấm xem thêm các mã gần giống — phòng trường hợp OCR đọc sai 1 vài ký tự.</p>
+  </div>
+
+  <div id="statusLine" class="status-line" style="display:none;">
+    <span>Kết quả cho <span class="n" id="statusQuery"></span></span>
+    <span id="statusCount"></span>
+  </div>
+
+  <div id="results" class="results"></div>
+
+  <div id="idleState" class="idle">
+    Gõ vào ô tìm kiếm phía trên để bắt đầu tra cứu.
+    <div class="examples" id="exampleBtns"></div>
+  </div>
+
+  <footer>
+    <b>Ghi chú:</b> Mã KKS/cable tag được trích xuất bằng OCR từ hình quét từng trang (bản vẽ gốc là file scan, không có lớp văn bản), nên có thể xảy ra sai lệch ký tự — luôn đối chiếu lại trang gốc trong file PDF trước khi thi công/đấu nối. Số trang tham chiếu theo thứ tự trang trong file PDF gốc (267 trang).
+  </footer>
+</div>
+
+<script id="kks-data" type="application/json">{"source":"SH1-DHI-P0LD-I-M01-DSD-5401.pdf","title":"Schematic and Wiring Diagram for Condensate Polishing Plant - Song Hau 1","total_pages":267,"pages":{"1":["6OOMW"],"3":["DS0-540"],"5":["DHI-POLD-I-MO1-0S0-54","HI-DHI-POLD-I-MO1-050-540","I-MO1"],"6":["I-MO1-080-54","OMSVANTEYZ0Y","S-OH-ROP-WOR-OSO-S40R","SHI-OH-POW-IWO-ASO-B40","SHI-OU-ROW-HWOR-ASA-O4O","WOOMSYR7Y"],"7":["AAICONRAN-IVOR-OSO-SEO1","HI-DHI-POLD-I-M01-0SD-54","SHI-PARPOWD-I-WOR-O50","SICONRUS-RWOR-IS-01","SIRCON-ROU-RVOR-OSO-S01","SITCOHROTN-TWOR-OSN-4OR","STCON-ROUS-RVOR-OS0-S01","SWCONCRENCRWOI-PS0-0"],"8":["1-DSD-54","6B0OMW","H1-BHI-POLD","HI-DHI-POLD-I-MO1--DSD-840"],"9":["120X297","6BOOMW"],"10":["2FEEDE","600MW","DLC-S4"],"11":["25Y-4","600MW","IRID5Y-4","LCP-30F","LCPH30F","LOP-32F","LOP-S2F"],"12":["10-CH","6OOMW","CHO04","LC-54","LCP-32F","LE-5401","LO-54","LOP-32F"],"13":["600MW","CN2402","LC9-52F","LCP-32F","LCP-52F","LCP-S2F","LCPH32F","LON24CL","LON26CL","LOP-32F","LOP11A8","LOP12CF","LOP20CL","LOPT1CF","LOR21CL","LOTI1A"],"14":["10-GH","1CP-30F","600MW","CP-32F","DHI-0L9","I-MO1-DSD","LCP-32F","LCPH52F","LDP10-GHO01","LDP10-GHOO4","LOP10-GH"],"15":["6OOMW","CL104","CN104-1","DBD-54","DLC-54","I-M01"],"16":["321-1CHOO-OAAO"],"17":["1CHOO"],"18":["1CHOO"],"19":["60OMW"],"20":["1CHOO-OAAO"],"21":["1CHOO-OAAO","600MW","P2407"],"22":["1CHOO-OAAO","600MW","P2407"],"23":["1CHOO-OAAO","60OMW","LOP10-CHO"],"24":["1CHOO-OAAO","LOP10-CH"],"25":["321-1CHOO-OAAO","6OOMW"],"26":["10-CH","1CHOO-OAAO","6OOMW"],"27":["1CHOO-OAAO","1ILAM","600MW"],"28":["10-CH","2CB00MW","LOP10-CHO04"],"29":["1CHOO-OAAO","6OOMW","LOP10-CHOO4"],"30":["0-CHOO","1CHOO-OAAO","LOP10-GHOO4","S50515"],"31":["10-CH","1CHOO-OAAO","6O0MW"],"32":["1CHOO-OAAO","600MW","P2407"],"33":["1CHOO","60OMW"],"34":["321-1CHOO-OAAO","600MW","P2407"],"35":["1CHOO-OAAO","600MW","P2407"],"36":["1CHOO-OAAO","3LOCK","600MW","P240T"],"37":["321-1CHOO-OAAQ","P2407"],"38":["1CHOO-OAAO","P2407"],"39":["1CHOO","600MW"],"40":["322-SGHOO-0A80","60OMW","IZOFR2I"],"41":["322-5GHOO","60OMW","ISEFIS7","IZSFIZ4","OO1FOO2"],"42":["LOEL0","ORIFOR2","R2OFI2I"],"43":["5GHOO-OABO","6OOMW","LDP1G","POLDP10"],"44":["322-SGHOO-0A80","B0OMW"],"45":["322-SGHOO-0A80","6OOMW","CHO04","LBPT0","POLOP1O"],"46":["5GHOO-OABO","600MW","OOROO2","ORRFO22"],"47":["322-SGHOO-0A80","6OOMW","F2TSFATSFE","ORIFOR2","ORSFO7S"],"48":["322-SGHOO-0A80","6OOMW","ISSFIS4","OA7FOVA"],"49":["322-5GHOO","60OMW"],"50":["6CL501","7TFO1-OABO","CLO01","LON25CL","LON26CL501","LONT3CL","POLON24CL","POLOR2"],"51":["1AR08","6OOMW","ABOA2A7","LOPISCFOO1","LOPSOCFOO1","PCLDP11CF","POLDT1"],"52":["60OMW","7TFO1"],"53":["331-7TFO1-OABO","600MW","LOP12CQ001","LOPI2C0002","LOPS1A","LOPS2AP007","LOR20","POLDP13","POLDR11A"],"54":["31-7TFO1","60OMW","LDPO1GSO001"],"55":["60OMW","7TFO1"],"56":["31-7TFO1","60OMW"],"57":["331-7PFO1","600MW","LON26CT","LON2ACTC","LON2SCT"],"58":["600MW","7SFOO","LORI1A"],"59":["60OMW","B1F01-OABO","LON25CT001","N2407","P1LDFTOAAO81","PILDF10C","POLDN26CTI"],"60":["332-8TFO1-OABO","60OMW","ABOA2A7","LOF10AA","P2409","P2LDF"],"61":["6OOMW","LCP-37F","LCP-3TF-A","LEP-31F","LEP-3TR","LOP-3T","NP40T","OLDN154405","OLDN16AA05","OLDN25AA05","OLDN26AA051","OLDR20A4051","OLDR20AA052","S1F-AX"],"62":["2OLDR20AA051","6OOMW","ABOA2A7","OLDN15AAC5","OLDN16AA051","OLDN26AA05","OLDR20AA052","POLDN25AA05"],"63":["6OOMW","LCP-S1F-A","LEP-3I","LEP-3TF-A","LOP-3I","N2407","OLDP11A4A055","OLDP11AA051","OLDP11AA053","POLDP11AA052","POLDP11AA054","TSE27"],"64":["600OMW","ABOA2A7","LCP-S1F-A","LEP-3I","LEP-3T","LEP-3TFHA","OLDP11AA404","SOLDP17AA401"],"65":["1AA052","600MW","7AA404","ABOA2A7","OLDP1","OLDP11AA053","OLDP11AA403","OLDP11AA406","OLDP17AA054","OLDP17AA055","POLDP11AA0517","POLDP11AA401","POLDP11AA501"],"66":["6OOMW","CP-371","LEP-31","LEP-31FHA","LOP-3","LOP-31","OLDP12A4A306","OLDP12AA051","OLDP12AA052","OLDP12AA053","POLDP12AA054"],"67":["600OMW","LEP-31","LOP-3","LOP-31","OLDP12AA403","OLDP12AA404","OLDP12AA501","POLDP12AA405"],"68":["600MW","OLDP12AA052","OLDP12AA053","OLDP12AA054","OLDP12AA403","OLDP12AA404","POLDP12AA401","POLDP12AA501","SOLDP12A440"],"69":["3AA052","6OOMW","LEP-3","LEP-31","LEP-31FHA","LOP-31","LOP-3T","OLDP134A055","OLDP13AA051","OLDP13AA053","OLDP13AA054"],"70":["31F-AX","3AA404","600MW","ATO00CTCT","EOHOE4","LEP-37","LEP-3IF-A","LEP-3T","LOR-31F","N2401","OLDP1"],"71":["3AA406","OLDP134A053","OLDP13AA051","OLDP13AA055","OLDP13AA50","OLDP1SAA40","SAA306","SAA404","ZAA052"],"72":["2LDF50AA051","600MW","CP-34","LDF50AA05","LEP-31","LEP-31FHA","LOP-31","N2407","OLDP404450","POLDP55AA051"],"73":["6OOMW","LEP-3","LEP-31","LEP-3TF-A"],"74":["1LDBI0-CH","60OMW","LOF43CQ002","PILDF43CQ001"],"75":["2LDF50AA054","600MW","LDF50AA05","OLDN10AA051","OLDN20AA051","OLDP40AA501","OLDP50AA051","OLDP50AA107","OLDP55AA05"],"76":["1CLO80","3LOCK","600MW","LDP10-CH","POLDP10CLOBC","POLDT1","SOET8L"],"77":["0LDP20CLO80","1CLO80","3LOCK","600OMW","LDP10-CH","OLDP1"],"78":["3CL501","ABOA2A7","B0OMW","LDP10-CH","OLDN1","OLDN15CL50","OLDN16CL50"],"79":["600MW","DHI-0L9","I-06O","I-MO1-DSD","LDP10-CH","OLDN24CL50","OLDN26CL501","OLDN2SCL50"],"80":["60OMW","CP24-08","LOP10-GH","OLDR21CL001"],"81":["600MW","ABOA2A7","DHI-0L9","I-MO1-DSD","LDP10-CH","OLDNSOCFO0S","OLDNSOCFOO3","OLDPSOCFO01","RO90T"],"82":["1CF001","2CF00","60OMW","LDP10-CH","OLDP1"],"83":["1A4082","600MW","A-1EL","LDP10-CH"],"84":["60OMW","ABOA2A7","LOP10","OLDP1","S6LD2"],"85":["600OMW","ABOA2A7","CN303","LDP10","LDP10-GHOOE","POLDP12CQ00","POLDP13CQ001"],"86":["600MW","LOP10","POLDR20CQ00"],"87":["1APOOT","600MW","ABOA2A7","LOP10","OLDP524P001","OLDR12AP001","YM-20MA"],"88":["6OOMW","OLDPO16S007","OLDPO1GS00","OLDPO1GS001"],"89":["60OMW"],"90":["60OMW"],"91":["60OMW"],"92":["20RMA","6OOMW","LDP10-GH","OLDN25CTO01","OLDNZ6CTOO","TKK-1"],"93":["600OMW","DHI-P0L9-I-MO1-DSD-S4I","LDP10-CH","OLDT11CTO07","SLOND4CTO0","SOLOPRZCT0O1"],"94":["0LOR1","600OMW","OLDR11APO"],"95":["0LOR1","20LDR12AP0","6O0OMW"],"96":["600MW","LDF10CTOO","LOF10CP002","LOP10-CHOOE","O58INH","P2LDF10AA081","PILDF10AA081"],"97":["2FEEJE","3LOCK","600OMW","DH-OLD-I-O1-ESD-54","LCP-30F","LCP-32F","LCP-37F","LOP-3F","SH1-DHI-POLD-I-M01-DLC-54"],"98":["6OOMW","AC230V","IR125Y","IRT25Y-4","LCP-32F","LCPH32F","LOP-32F"],"99":["6OOMW","LCP-32F","LDF40C","LDF40CC","LDF42","LDFA3COC","LO2-32F","LOFA3CQQ02","ORSFOR7","TLOF41C0"],"100":["1LDB10","6OOMW","DHI-0L9","DLC-54","DLC-5402","GHOO1","I-MO1-DSD","L0P-32F","LC-5400","LCP-30F","LCP-32F","LDF10-GH","LEP-S2F","LO-54","LOB11","LOF10-GH","LOF10-GH904","LOP32F"],"101":["1LDB12CF","6OOMW","CRLTI8","LCP-32F","LDF12CF","LDF40CT502","LDS10CLO8","LEP-32F","LOBI1CF","LOF10C","LOFI3","LOP-32F","LOR2ICLO01","OCPOO1"],"102":["DHI-0L9","I-MO1-DSD","LCP-30F","LCP-32F","LCP32F","LDB10-GHO01","LOB11","LOF10-GH","LOF10-GHO04","LOP-39F"],"103":["B0OMW","CN104","DHI-POLD-I-M0","DHI-POLO-I-M01-DLC-54"],"104":["321-1CHOO-OAAO","600MW"],"105":["1CHOO-OAAO","600MW"],"106":["1CHOO-OAAO","2CB00MW"],"107":["6B00MW"],"108":["1CHOO-OAAO","6OOMW","P2407"],"109":["1CHOO-OAAO","6OOMW","ABOA2A7","LOB11-CHO01","P2407"],"110":["1CHOO-OAAO","6OOMW","LOF10-CH"],"111":["1CHOO-OAAO","600MW","ABOA2A7","LOF10-CHOO","P2407","PILDF1O"],"112":["1CHOO-OAAO","ABOA2A7","LOF10-CH00","P2407"],"113":["321-1CHOO-OAAO","ABOA2A7","LOF1O-CHO03","P2407"],"114":["1CHOO-OAAO","60OMW","P2407"],"115":["0-CHO04","1CHOO","2XG00MW"],"116":["0-CHO04","321-1CHOO-OAAQ","600MW"],"117":["1CHOO-OAAO","600MW","P2407"],"118":["1CHOO","6OOMW","P2407"],"119":["1CHOO-OAAO"],"120":["1CHOO-OAAO"],"121":["322-5GHOO-OABO","6OOMW"],"122":["0000S","5GHOO-04B0","600MW"],"123":["322-5GHOO"],"124":["322-SGHOO-0A80","6OOMW","LDF10"],"125":["5CHOO-OABO"],"126":["322-SGHOO-0A80","F2TSFATSFE","LDF10"],"127":["322-SGHOO-0A80","GHO04","GHOO4","LDF10"],"128":["322-SGHOO-0A80","600MW","GHO04","LDF19"],"129":["600MW","LOTTFOR2","ORIFOR2","OSRFOS2","SGHOO-0A8O"],"130":["5GHOO","600MW","ORFOR2","OS7FOSS","OSIFOS2"],"131":["600MW","TLOR21CL","TTFO1"],"132":["1CFOO","331-7TFO1-OABO","600MW","ABOA2A7","LOBI2CFOO1","LOFI2"],"133":["6OOMW","7TFO1-OABO","LOFI2CFO01"],"134":["2AA0T","600MW","7TFO1","ABOA2A7","LDFA1CO","LOFANCQ004"],"135":["1LOF42CQ0","31-7TFO1","LDF32ANO0","LOF21AP001","LOF31A","LOF42","LOF43CQ","P1LDF22A"],"136":["331-7TFO1-OABO","60OMW","LOF1OAA"],"137":["331-7PFO1-OABO","600MW","ABOA2A7","LOF31A","LOF324","LOF32A","LOF32ANO01","N2401"],"138":["31-7PFO1","60OMW","N240T"],"139":["6OOMW","7SFO0","LOF21A","LOF224","LOF324NCO1","LOF32A","LOFS1A"],"140":["60OMW","7SFOO-OABO"],"141":["60OMW","81FO1","LOB1OAA08","N2401"],"142":["1AAN053","1AKO5","4LDB1","AA054","EFILTER-1","LCP-S1F-A","LDB11AA051","LDB11AA052","LEP-31","LEP-3T","LEP-3TF-A","LEP3T","N2401"],"143":["1AA056","1AA058","6OOMW","LEP-31F-A","LEP-3T","LOP-3","P1LDB11AA05"],"144":["1AA052","1LDB1","1LDB11AA051","1LDB11AA056","6OOMW","EFILTER-1","LDB11AA055","P1LDB1","PILDB11AA053"],"145":["1LDB12AA053","2AK05","31F-AX","DB12AA054","EFILTER-2","LCP-3IF-A","LDB12AA051","LEP-31F-A","LEP-3T","LOP-3TF","P1LDB12AA059"],"146":["2AA056","6OOMW","EFILTER-2","LDB12AN058","LEP-3IF-A","LEP-3TF-A","LOP-31","N2401-1"],"147":["1LDB1","2AA058","60OMW","EFILTE-2","EFILTER-2","LDB12AA051","LDB12AA052","LDB12AA055","LDB12AA056","P1LDB1","P1LDB12A4053","SEFILTER-2"],"148":["1AA053","1AM055","1LOF10","31F-AX","AA052","LCP-3IF-A","LEP-31F-A","LEP-3T","LOP-3TF","LSHR-1","LSHR-7"],"149":["1AA502","1AA504","1LOF10-CH","6OOMW","LEP-3IF","LEP-3TF-A","LOP-3","LSHR-1","N2407","P1LDF11AA5C"],"150":["1AA052","1AA0S1","600MW","AASO4","ILDF1","PILDF1"],"151":["1LDF10-GH","31F-AX","LCP-3IF-A","LEP-31F-A","LEP-3T","LOF12AM055","LOP-3TF","LSHR-2"],"152":["1LOF10-CH","24A056","24A504","6OOMW","LEP-31","LEP-3T","LEP-3TF-A","LOP-3T","LSHR-2","P1LDF12AA5","PLSHR-2","TRAP-2"],"153":["2AA052","LDF12AA051","LSHR-2","PALDF12A4053","PLSHR-2","TLDF1"],"154":["1LOFIO-CH","20CO1401I","31F-AX","3AA05","3AA052","3AA054","3AA055","3AAOS3","LCP-3IF-A","LEP-3T","LEP-S1F-A","LOP-3TF","LSHR-3","PLSHR-3"],"155":["1LOF10","6O0OMW","CN2401-1","LDF13AA502","LEP-31F-A","LEP-3TF","LEP3T","LOP-3","LSHR-3","P1LDF13AA5C"],"156":["1LDF13AA054","3AA051","3AA052","60OMW","PILDF13AA053"],"157":["1LOF10-CHOO4","31F-AX","LCP-3IF-A","LDF21AA05","LDF22AA05","LDF30AA05","LDF30AA404","LEP-31F-A","LEP-3T","LOP-3TF"],"158":["1LDP54AM402","1LOF10-CHOO4","31F-AX","600MW","LCP-3IF-A","LDF20AA401","LEP-3T","LEP-S1F-A","LOP-3TF","LOPS4AM40"],"159":["1LDF21AA051","1LOPS4AR402","LDF22AA051","LDF30AA051","LDF60AA051","LDPS4A4401"],"160":["1LDB11CP080","1LDB12CP080","3LOCK","60OMW","DHI-0L9","EFILTER-2","I-MO1-DSD","LDB10-CH","PLSHR-1"],"161":["13CPO080","1LDF12CP08","3LOCK","6OOMW","DFSOCP08","G7-05","LDFS0CPO8","LOB10-GH"],"162":["ABOA2A7","B0OMW","LD810-CH","LDB10CLO80","PILDF40CT502"],"163":["1LDR21CLO01","ABOA2A7","B0OMW","LD810-CH","PILDB10CPO01"],"164":["600MW","ABOA2A7","EFILTER-2","I-05BL","I-06O","LOBI10-CH","LOFIOCP00","P1LDB12CP001","PILDB11CP001"],"165":["600MW","ILDF11CP002","LDB10-CH","LDF12C","LOF11CP00","LSHR-1","PLSHR-2"],"166":["1LDF12","1LDF13CP002","600MW","I-1DBL","LDB10-CH","LDF13CPO04","PLSHR-3"],"167":["10CFOO","1CFO0","1LDB12CFO01","20RMA","6OOMW","DHI-0L9","EFILTER-2","I-MO1-DSD","LDB10-CH"],"168":["600MW","ABOA2A7","I-1DBL","I-I2E","ILDF13CFOO","LDF12CF001","LOF11CFOO1","LORI10-CH","LSHR-1"],"169":["1LDB10-GH","600MW","DHI-0L9","I-MO1-DSD","LDF40CQ002","PILDF40CQ001"],"170":["6OOMW","CN303","DHI-0L9","F40C0004","I-MO1-DSD","LDFAOCQO03"],"171":["60OMW","ABOA2A7","CN305","LDF40CQ006","LDFAOCQO05"],"172":["60OMW","ABOA2A7","LOF41CQ002","PILDF41CQ001"],"173":["1LDR10-GH","60OMW","DHI-0L9","I-MO1-DSD","INL-2","LDF42CQ002","PALDF42CQ001"],"174":["1LDB1G-GH","1LOF37ANO01","6OOMW","BLWR-1","DHI-0L9","I-MO1-DSD","LDF21AP00","LDF224PO0","LDF32ANQ0","TEE20MMA"],"175":["6OOMW","LDB10A408","PTLDF1OAAO8"],"176":["6OOMW","LA---PA------4","LDB10-GH","LDF21APOO1","LDF27APOO1"],"177":["600MW","DE3TANOGT","LDB10-CH","LDF22AP00","LDF22AP001"],"178":["1LDFS1ANO01","1LDFS1ANOO1","600MW","ABOA2A7","DFS1ANC","DHI-0L9","I-MO1-DSD","LD810-CH"],"179":["600MW","ABOA2A7","BLWR-1","BLWR-2","DHI-0L9","I-MO1-DSD","LD810-CH","LDFS24N001","LDFS2AN00","S1ANOO1"],"180":["600MW","ABOA2A7","BLWR-2","DHI-0L9","I-MO1-DSD","LD810-CH","LDF32AN001","LDF32ANO01","LOF32ANO01"],"181":["1LDFO1CS001","IS20MA","LDB10-CH","LDFO1GS00"],"182":["600OMW","AIET266","DH-20L-FND","LCP-32F","LOP-39F","SH1-DHI-POLD-I-M01-DLC-54"],"183":["60OMW","AC230V","IR125Y","IRT25Y-4","LCP-32F","LCPH32F","LOP-32F","LOPH30F"],"184":["2LDF4","2LDF40CC","2LDF4ZZ","6OOMW","LCP-32F","LDF40C","LDFA3CQC","LDOF41CQ","LO2-32F","LOF43CQ002","ORSFOR7"],"185":["0LDF10-CH","10-GHOO","2LDB1-GH","6OOMW","DH-P0L9-IM01-DSD-54","DLC-54","DLC-5402","L0P-32F","LC-5400","LCP-30F","LCP-32F","LDF10-GH","LEP-S2F","LO-54","LOF10-GH","LOF10-GH904","LOP32F"],"186":["2LDFAOCT","6OOMW","CP118","LCP-32F","LCP32F","LDR21CLO01","LEP-32F","LOB120F","LOB1OCP001","LOFI0C","LOFI2CR","LOP-32F","P-119","PLOB106L","SLDF50CPO8"],"187":["2LDB10-GHOO1","DHI-0L9","I-MO1-DSD","LCP-30F","LCP-32F","LCP32F","LOB11","LOF10-CH","LOF1O-GH","LOFIO-CHOO4","LOP-39F"],"188":["DHI-POLO-I-M01-DLC-54","DRD-54","NI04-1"],"189":["321-1CHOO-OAAO","600MW"],"190":["1CHOO-OAAO","600MW"],"191":["1CHOO-OAAO","60OMW","S50515"],"193":["1CHOO-OAAO","LOB11-CH","P2407"],"194":["1CHOO-OAAO","6OOMW","CHOO1","LOB11","P2407","SEPOI6"],"195":["1CHOO-OAAO","6OOMW","LDF0-CH"],"196":["1CHOO-OAAO","600MW","ABOA2A7","LDF10-GHOO"],"197":["10-CHO02","1CHOO-OAAO","3LOCK","P2407"],"198":["2LDF10-CHO03","321-1CHOO-OAAO","6OOMW","P2407"],"199":["1CHOO-OAAO","60OMW","P2407","P2LDF10"],"200":["1CHOO-OAAO","LOFIO-CHOO4"],"201":["0-CHO04","1CHOO","600MW"],"202":["1CHOO-OAAO","6OOMW","P2407"],"203":["1CHOO","6OOMW","P2407"],"204":["1CHOO-OAAO"],"205":["1CHOO-OAAO"],"206":["322-SCHOO-OABO","6BOOMW","IZOFI2I","OS2FOSS"],"207":["5GHOO-0AB0","B0OMW","S01O0S"],"208":["322-SGHOO-0A80","600MW","I01-D"],"209":["322-SGHOO-CABO","60OMW","LOFI9"],"210":["2LDF1O","5GHOO-OABO","600MW"],"211":["322-SGHOO-0A80","LDF10"],"212":["322-SGHOO-0A80","LOFI0","OH004","UOFI0"],"213":["322-SGHOO-0A80","60OMW","GHO04","LDF19"],"214":["60OMW","AIALEI7JE","LOTTFOR2","OSEFO4O","SGHOO-0A8O"],"215":["322-S5CHOO-OABO","60OMW","AIALEI7JE","OVIFOR2"],"216":["600MW","71FO1-OABO"],"217":["10F00","6OOMW","7TFO1","LOBI2CF001","LOFI2","P2LDFIOCR"],"218":["6OOMW","7TFO1-OABO","LOFI2CFO0","P2LDF13CF"],"219":["2AA0T","2LOFMOCOO","600MW","7TFO1","ABOA2A7","LOFANCQ004"],"220":["2LDF32AN00","7TFO1","FA2CQ0","LDF2IAP001","LOF3IA","LOFA2CQ","LOFA3CQ","P2LDF224"],"221":["331-7TFO1-OABO","60OMW","LDB10AA","LOF1OAA"],"222":["331-7PFO1-OABO","ABOA2A7","DLOF324","LOF10CTOO1","LOF324","LOF32AN001","N2407","OLOF31A"],"223":["331-7PFO1-OABO","60OMW","N240T"],"224":["6OOMW","7SFOO-OABD","LDF21A","LDF324","LOF21A","LOF22AP001","LOF31A","LOF324NO01","LOFS1A"],"225":["60OMW","7SFOO-OABO"],"226":["10AA08","81F01","B0OMW","LDB1OAA08","N240T"],"227":["1AA051","1AA052","1AKO5","1ANO53","2LDB1","9LDB1","AA054","EFILTER-1","LCP-S1F-A","LEP-31","LEP-3T","LEP-3TF-A","LEP3T","N2401"],"228":["1AA056","1AN058","LEP-31F-A","LEP-3T","LOP-3","NP40T","P2LDB11AA05","PLDB1","S4CKWASH"],"229":["1AA058","1AAO56","1AAOSE","2LD31","2LDB1","2LDB11AA051","2LDB11AA052","60OMW","EFILTER-1","M4053","P2LDB1","P2LDB11AA0S"],"230":["2AAKO5","31F-AX","9LDB12AN053","EFILTER-2","LCP-3IF-A","LDB12AA051","LDB12AA054","LEP-31F-A","LEP-3T","LOP-3TF","P2LDB"],"231":["2AA056","2AA058","2LDB124A05","6OOMW","DLDB1","EFILTER-2","LEP-3IF-A","LEP-3TF-A","LOP-31","N2401-1"],"232":["2AA056","2AA058","2AA0S2","2LDB1","2LDB12AA05","2LDB12AA054","2LDB12AA05E","60OMW","EFILTE-2","EFILTER-2","P2LDB12AA05","P2LDB12AA0S3","SEFILTER-2"],"233":["1AA05","1AA055","1AAO52","1AAOS3","2LDF1","2LDFT1AA054","31F-AX","LCP-3IF-A","LEP-31F-A","LEP-3T","LOP-3TF","LSHR-1","LSHR-7"],"234":["1AA056","1AA502","1AA504","2LDF1","2LOF1","6OOMW","LEP-3IF","LEP-3TF-A","LOP-3","P2LDF11AA5"],"235":["1AA054","2LDF1","600MW","AA0S1","P2LDF11AA053"],"236":["2AA053","2AN054","2LDF10","2LDF12AA055","2LDF12AK052","31F-AX","LCP-3IF-A","LEP-31F-A","LEP-3T","LOP-3TF","LSHR-2","OLDF12AA054"],"237":["24A056","2AA504","2DLDF","2LIFIO-CH","2LOF1","6OOMW","LEP-31","LEP-3T","LEP-3TF-A","LOP-3T","LSHR-2","PLSHR-2","POLDF12AA5C","TRAP-2"],"238":["2LDF12AA054","LSHR-2","P2LDF12AA053"],"239":["2LDF1","2LDF10","2LOF1","31F-AX","3AA05","3AA052","3AA053","3AA055","LCP-3IF-A","LEP-3T","LEP-S1F-A","LOP-3TF","LSHR-3","OLDF1","PLSHR-3","SAA054","SCTT4OTT"],"240":["2LDF1","2LDF10","3AA056","3AA504","600OMW","LDF13AM502","LEP-31F-A","LEP-3TF","LEP3T","LOP-3","LSHR-3","POLDF1SAA5"],"241":["2LDF13AA054","600MW","9LDF13AA051","LSHR-3","OLDF1","P2LDF1344053"],"242":["1AA05","2LDF10","2LDF22AA05","2LDF30AA05","2LDFEOAANS","31F-AX","GHOO4","LCP-3IF-A","LEP-31F-A","LEP-3T","LOP-3TF","OLDF2"],"243":["1AA05","2LDF10-GHOO4","2LDPS4AM40","2LOP54AM402","31F-AX","54AK05","6OOMW","7LDF20AA40","9LDFS","LCP-3IF-A","LEP-3T","LEP-S1F-A","LOP-3TF"],"244":["2LDF21AK051","2LDFBOAAOS","2LDP5AAAAO2","2LDPS4AAAO","600MW","OLDF22AA051","OLDF30AA05"],"245":["2LDB11CPO80","2LDB12CP080","3LOCK","60OMW","EFILTER-2","LDB10-CH","T2047"],"246":["13CPO080","2LDF12CP08","3LOCK","6OOMW","LOB10-GH"],"247":["0CLO80","2LD81","3LOCK","600MW","FO2AF--4","LDB10-CH","P2LDFAOCTSOZ"],"248":["9LDR21CLO01","ABOA2A7","B0OMW","LD810-CH","LDF10CP004","P2LDB10CP001"],"249":["2LDFIOCPO02","600MW","ABOA2A7","EFILTER-2","I-06O","LD810-CH","P2LDB12CP001","PALDB17CPO01"],"250":["2LDF11CPOG2","600MW","ALDF11CPO0T","LDB10-CH","LSHR-1","OLDF12CP","PLSHR-2"],"251":["2LDF13CPO02","I-1DBL","LD810-CH","OLDF13CP00","PLDF12CP002","PLSHR-3"],"252":["1CFOO","2CF004","2LDB1","2LDFIOCFOO","ABOA2A7","B0OMW","DHI-0L9","EFILTER-2","FANO2","I-MO1-DSD","LD810-CH"],"253":["2LDF11CFO01","2LDF1SCFOO","6OOMW","DHI-0L9","FA-03","I-1DBL","I-I2E","I-MO1-DSD","LDB10-CH","LDF12CF001","LSHR-7"],"254":["2LDF40CQ002","3H1-DHI-POL9","6B0OMW","I-MO1-DSD","P2LDF40CQ001"],"255":["2LDF40CQ004","60OMW","CN303","LDFANCQO03"],"256":["2LDFA0CQ006","6OOMW","DHI-0L9","I-MO1-DSD","LDFAOCQO0S"],"257":["2LDF41CQ002","60OMW","LE8INK","P2LDF410Q001"],"258":["3H1-DHI-POL9","6B0OMW","CN309","I-MO1-DSD","INL-2","P2LDF42CQ001"],"259":["60OMW","DLOF43CQ002","P2LDF43CQ001"],"260":["2LDF21AP00","2LDF22AP00","2LDF3","2LDF32ANO0","ANOO1","BLWR-1","DHI-0L9","I-MO1-DSD","LDB10-CH"],"261":["2LDB10AA08","6OOMW","POLDFIOAA08"],"262":["2LDF10CTOO1","2LDF21AP001","6OOMW","C1090","C1103","LDB10-GH"],"263":["2LDF22AP00","2LDFS1ANOO1","6OOMW","LDB10-CH","OLDF22AP001"],"264":["2LDF31ANO01","2LDFS1ANOO1","BLWR-1","DHI-0L9","I-MO1-DSD","L0810-CH","LDF31ANO01","T0706"],"265":["2LDF31ANGO1","600MW","BLWR-1","BLWR-2","DH-P0L9-IM01-DSD-54","LDB10-CH","LDF32AN001"],"266":["2LDFS2ANO01","2LOF32ANO01","BLWR-2","DHI-0L9","I-MO1-DSD","LDB10-CH","LDF32AN001"],"267":["2LDFO","GS001","LDB10-CH"]}}</script>
+<script>
+const DATA = JSON.parse(document.getElementById('kks-data').textContent);
+
+function normalize(s){
+  return s.toUpperCase().replace(/[^A-Z0-9]/g, '').replace(/O/g,'0').replace(/I/g,'1');
+}
+
+// Levenshtein edit distance (handles inserted/missing/substituted characters —
+// common OCR noise like an extra stray digit, e.g. AA451 -> AA4451)
+function editDistance(a, b){
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  let prev = new Array(n+1);
+  let cur = new Array(n+1);
+  for (let j=0;j<=n;j++) prev[j] = j;
+  for (let i=1;i<=m;i++){
+    cur[0] = i;
+    const ac = a.charCodeAt(i-1);
+    for (let j=1;j<=n;j++){
+      const cost = ac === b.charCodeAt(j-1) ? 0 : 1;
+      cur[j] = Math.min(
+        prev[j] + 1,      // deletion
+        cur[j-1] + 1,     // insertion
+        prev[j-1] + cost  // substitution
+      );
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[n];
+}
+
+// Build flat list: {raw, norm, page}, deduped by (norm,page) to keep entries lean
+const seenKey = new Set();
+const ENTRIES = [];
+for (const page in DATA.pages){
+  for (const raw of DATA.pages[page]){
+    const norm = normalize(raw);
+    if (!norm) continue;
+    const key = norm + '|' + page;
+    if (seenKey.has(key)) continue;
+    seenKey.add(key);
+    ENTRIES.push({raw, norm, page: parseInt(page,10)});
+  }
+}
+
+const totalTokenSpan = document.querySelector('.doc-meta');
+const qInput = document.getElementById('q');
+const clearBtn = document.getElementById('clearBtn');
+const resultsEl = document.getElementById('results');
+const idleEl = document.getElementById('idleState');
+const statusLine = document.getElementById('statusLine');
+const statusQuery = document.getElementById('statusQuery');
+const statusCount = document.getElementById('statusCount');
+const exampleBtns = document.getElementById('exampleBtns');
+
+// pick a few real example codes for the idle state
+const sampleRaws = Array.from(new Set(ENTRIES.map(e=>e.raw))).filter(t => /CG083$/.test(t) || /^P[012]/.test(t));
+const examples = [];
+const seen = new Set();
+for (const t of sampleRaws){
+  const key = t.slice(0,4);
+  if (!seen.has(key) && examples.length < 4){ seen.add(key); examples.push(t); }
+}
+if (examples.length === 0){
+  Array.from(new Set(ENTRIES.map(e=>e.raw))).slice(0,4).forEach(t=>examples.push(t));
+}
+examples.forEach(ex=>{
+  const b = document.createElement('button');
+  b.className = 'ex-btn';
+  b.textContent = ex;
+  b.onclick = () => { qInput.value = ex; runSearch(); qInput.focus(); };
+  exampleBtns.appendChild(b);
+});
+
+function runSearch(){
+  const raw = qInput.value.trim();
+  clearBtn.style.display = raw ? 'inline-block' : 'none';
+
+  if (!raw){
+    resultsEl.innerHTML = '';
+    statusLine.style.display = 'none';
+    idleEl.style.display = 'block';
+    return;
+  }
+  idleEl.style.display = 'none';
+
+  const nq = normalize(raw);
+  if (!nq){
+    resultsEl.innerHTML = '';
+    statusLine.style.display = 'none';
+    return;
+  }
+
+  // Fuzzy edit-distance budget: scales with query length so short queries
+  // (which the person is more likely to be typing partially) stay strict,
+  // while long full-code queries tolerate 1-2 stray/missing OCR characters.
+  const maxDist = nq.length < 6 ? 0 : (nq.length < 10 ? 1 : 2);
+
+  // group matches by normalized code
+  // tier: 0 = exact, 1 = fuzzy (close edit distance, hidden by default), 2 = substring
+  const groups = new Map(); // norm -> {raws:Set, pages:Set, tier, dist}
+  for (const e of ENTRIES){
+    let tier = null, dist = null;
+
+    if (e.norm === nq){
+      tier = 0; dist = 0;
+    } else if (e.norm.includes(nq) || nq.includes(e.norm)){
+      tier = 2; dist = Math.abs(e.norm.length - nq.length);
+    } else if (Math.abs(e.norm.length - nq.length) <= maxDist){
+      const d = editDistance(e.norm, nq);
+      if (d <= maxDist){ tier = 1; dist = d; }
+    }
+
+    if (tier !== null){
+      if (!groups.has(e.norm)) groups.set(e.norm, {raws:new Set(), pages:new Set(), tier:9, dist:99});
+      const g = groups.get(e.norm);
+      g.raws.add(e.raw);
+      g.pages.add(e.page);
+      if (tier < g.tier || (tier === g.tier && dist < g.dist)){ g.tier = tier; g.dist = dist; }
+    }
+  }
+
+  const allGroups = Array.from(groups.entries()).map(([norm,g])=>({norm, ...g}));
+  allGroups.sort((a,b)=>{
+    if (a.tier !== b.tier) return a.tier - b.tier;
+    if (a.dist !== b.dist) return a.dist - b.dist;
+    return Math.abs(a.norm.length - nq.length) - Math.abs(b.norm.length - nq.length);
+  });
+
+  // Default view: exact + substring matches only (tier 0, 2). Fuzzy (tier 1)
+  // is withheld by default and only offered as an opt-in, since it is a guess
+  // rather than a confirmed reading of the drawing.
+  const shownGroups = allGroups.filter(g => g.tier !== 1);
+  const fuzzyGroups = allGroups.filter(g => g.tier === 1);
+  LAST_FUZZY = fuzzyGroups;
+  LAST_QUERY = raw;
+
+  statusLine.style.display = 'flex';
+  statusQuery.textContent = '"' + raw + '"';
+
+  const tierLabel = { 0:'KHỚP CHÍNH XÁC', 2:'CHỨA TỪ KHÓA' };
+  const tierClass = { 0:'exact', 2:'partial' };
+
+  function renderGroup(g){
+    const div = document.createElement('div');
+    div.className = 'group ' + (tierClass[g.tier] || 'fuzzy');
+    const pages = Array.from(g.pages).sort((a,b)=>a-b);
+    const raws = Array.from(g.raws);
+    const label = g.tier === 1 ? `GẦN ĐÚNG (lệch ${g.dist} ký tự)` : tierLabel[g.tier];
+    div.innerHTML = `
+      <div class="g-head">
+        <span class="g-code">${raws[0]}${raws.length>1 ? ' <span style="color:var(--text-dim);font-weight:400;font-size:12px">(+'+(raws.length-1)+' biến thể OCR)</span>' : ''}</span>
+        <span class="g-tag ${tierClass[g.tier] || 'fuzzy'}">${label}</span>
+      </div>
+      <div class="g-pages">${pages.map(p=>`<span class="page-pill">Trang <b>${p}</b></span>`).join('')}</div>
+    `;
+    return div;
+  }
+
+  resultsEl.innerHTML = '';
+
+  if (shownGroups.length === 0){
+    statusCount.textContent = '0 kết quả';
+    resultsEl.innerHTML = '<div class="empty"><b>Không tìm thấy mã khớp chính xác.</b><br>Kiểm tra lại mã bạn nhập, hoặc bấm nút bên dưới để xem thêm các mã gần giống (có thể do OCR đọc sai 1 vài ký tự).</div>';
+  } else {
+    const totalPages = new Set(shownGroups.flatMap(g=>Array.from(g.pages))).size;
+    statusCount.textContent = shownGroups.length + ' mã · ' + totalPages + ' trang';
+    for (const g of shownGroups.slice(0,150)){
+      resultsEl.appendChild(renderGroup(g));
+    }
+    if (shownGroups.length > 150){
+      const more = document.createElement('div');
+      more.className = 'empty';
+      more.textContent = `Còn ${shownGroups.length - 150} kết quả khác — hãy nhập từ khóa cụ thể hơn để thu hẹp.`;
+      resultsEl.appendChild(more);
+    }
+  }
+
+  if (fuzzyGroups.length > 0){
+    const box = document.createElement('div');
+    box.className = 'fuzzy-toggle';
+    const btn = document.createElement('button');
+    btn.textContent = `Xem thêm ${fuzzyGroups.length} kết quả gần đúng (nghi ngờ lỗi OCR)`;
+    btn.onclick = () => {
+      box.remove();
+      const heading = document.createElement('p');
+      heading.className = 'hint';
+      heading.style.margin = '4px 2px 8px';
+      heading.textContent = 'Các mã dưới đây gần giống từ khóa nhưng lệch 1-2 ký tự — có thể do OCR đọc sai, hãy đối chiếu lại trang gốc trước khi dùng:';
+      resultsEl.appendChild(heading);
+      for (const g of fuzzyGroups.slice(0,80)){
+        resultsEl.appendChild(renderGroup(g));
+      }
+    };
+    box.appendChild(btn);
+    resultsEl.appendChild(box);
+  }
+}
+
+let LAST_FUZZY = [];
+let LAST_QUERY = '';
+
+qInput.addEventListener('input', runSearch);
+clearBtn.addEventListener('click', ()=>{ qInput.value=''; runSearch(); qInput.focus(); });
+
+document.querySelector('.doc-meta').innerHTML = document.querySelector('.doc-meta').innerHTML.replace('__TOKEN_COUNT__', ENTRIES.length.toLocaleString('vi-VN'));
+</script>
+</body>
+</html>
