@@ -428,7 +428,7 @@
         </div>
       </div>
       <div class="nav-item">
-        <button class="nav-trigger" type="button" aria-expanded="false" aria-controls="KKSDropdown">
+        <button class="nav-trigger" type="button" id="kksTrigger" aria-expanded="false" aria-controls="KKSDropdown">
           Search KKS System <span class="caret">▾</span>
         </button>
         <div class="dropdown" id="KKSDropdown">
@@ -802,6 +802,21 @@
     renderAuthArea();
   })();
 </script>
-
+  <script>
+  document.querySelector('nav').addEventListener('click', function (e) {
+    var trigger = e.target.closest('#kksTrigger');
+    if (!trigger) return;
+    var user = null, accounts = [];
+    try { user = localStorage.getItem('hn83_current_user'); } catch (err) {}
+    try { accounts = JSON.parse(localStorage.getItem('hn83_accounts')) || []; } catch (err) {}
+    var loggedIn = !!(user && accounts.some(function (a) { return a.username === user; }));
+    if (!loggedIn) {
+      e.preventDefault();
+      e.stopPropagation();
+      var loginBtn = document.querySelector('#authArea .header-cta');
+      if (loginBtn) loginBtn.click();
+    }
+  }, true);
+</script>
 </body>
 </html>
