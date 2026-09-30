@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thi trắc nghiệm — Tổ trưởng, Tổ phó, Trưởng kíp Tổ Tự động</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #142621;
+    --panel-dark: #0E2A24;
+    --panel-dark-2: #16362E;
+    --paper: #EDEFEA;
+    --paper-2: #FFFFFF;
+    --line: #CBD1C8;
+    --steel: #5C6B64;
+    --amber: #E8A33D;
+    --amber-deep: #C97F1F;
+    --blue: #3E7C9A;
+    --pass: #3F7D5C;
+    --pass-soft: #E4F1E8;
+    --fail: #AF4B36;
+    --fail-soft: #F7E7E1;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 20px 60px; }
+  h1, h2, h3 { font-weight: 700; line-height: 1.2; margin: 0; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- Home button ---------- */
+  .home-btn {
+    position: fixed; top: 16px; left: 16px; z-index: 999;
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--panel-dark); color: #FFFFFF; text-decoration: none;
+    font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    border: none;
+  }
+  .home-btn:hover { background: var(--panel-dark-2); }
+
+  header.top {
+    background: var(--panel-dark);
+    color: #FFFFFF;
+    padding: 60px 20px 34px;
+    text-align: center;
+    border-bottom: 3px solid var(--amber);
+  }
+  header.top .eyebrow { color: var(--amber); font-weight: 600; font-size: 0.88rem; margin-bottom: 10px; }
+  header.top h1 { font-size: clamp(1.5rem, 3.4vw, 2rem); max-width: 30ch; margin: 0 auto; }
+  header.top p { color: #C7D3CC; margin-top: 12px; font-size: 0.95rem; }
+
+  .card {
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    padding: 28px 26px;
+    margin-top: -24px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ---------- Login screen ---------- */
+  #loginScreen .field { margin-bottom: 18px; }
+  #loginScreen label { display: block; font-size: 0.86rem; font-weight: 600; color: var(--steel); margin-bottom: 6px; }
+  #loginScreen input, #loginScreen select {
+    width: 100%; padding: 11px 13px; font-family: inherit; font-size: 0.98rem;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+  }
+  #loginScreen input:focus, #loginScreen select:focus { outline: 2px solid var(--blue); outline-offset: 1px; }
+  .btn {
+    display: inline-block; padding: 13px 24px; font-weight: 600; font-size: 0.95rem;
+    border: 2px solid transparent; background: var(--amber); color: var(--panel-dark);
+    width: 100%; text-align: center;
+  }
+  .btn:hover { background: var(--amber-deep); }
+  .btn-secondary { background: transparent; border-color: var(--line); color: var(--ink); }
+  .btn-secondary:hover { border-color: var(--amber); }
+  .form-msg { font-size: 0.86rem; min-height: 1.2em; margin-top: 4px; color: var(--fail); }
+  .level-desc { font-size: 0.82rem; color: var(--steel); margin-top: 6px; }
+
+  /* ---------- Exam screen ---------- */
+  #examScreen { display: none; }
+  .exam-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.86rem; color: var(--steel); margin-bottom: 18px; flex-wrap: wrap; gap: 8px;
+  }
+  .exam-meta strong { color: var(--ink); }
+  .progress-track { height: 6px; background: var(--paper); border: 1px solid var(--line); margin-bottom: 24px; }
+  .progress-fill { height: 100%; background: var(--amber); transition: width 0.2s ease; }
+
+  .q-tag { color: var(--blue); font-weight: 600; font-size: 0.86rem; margin-bottom: 8px; }
+  .q-text { font-size: 1.08rem; font-weight: 600; margin-bottom: 20px; }
+  .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+  .option {
+    display: flex; align-items: flex-start; gap: 12px;
+    border: 1px solid var(--line); padding: 13px 16px; cursor: pointer;
+    background: var(--paper-2);
+  }
+  .option:hover { border-color: var(--amber); }
+  .option.selected { border-color: var(--blue); background: #EAF1F4; }
+  .option input { margin-top: 3px; accent-color: var(--blue); flex-shrink: 0; }
+  .option span.key { font-weight: 700; text-transform: uppercase; margin-right: 4px; }
+
+  .nav-row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 28px; }
+  .nav-row .btn, .nav-row button { flex: 1; }
+
+  .q-dots { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
+  .q-dot {
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.76rem; font-weight: 600; border: 1px solid var(--line); background: var(--paper-2);
+    color: var(--steel); cursor: pointer;
+  }
+  .q-dot.answered { background: var(--panel-dark-2); color: #FFFFFF; border-color: var(--panel-dark-2); }
+  .q-dot.current { outline: 2px solid var(--amber); outline-offset: 1px; }
+
+  /* ---------- Results screen ---------- */
+  #resultsScreen { display: none; }
+  .result-banner {
+    text-align: center; padding: 30px 20px; margin-bottom: 24px;
+  }
+  .result-banner.pass { background: var(--pass-soft); border: 1px solid var(--pass); }
+  .result-banner.fail { background: var(--fail-soft); border: 1px solid var(--fail); }
+  .result-banner .verdict { font-size: 1.7rem; font-weight: 700; }
+  .result-banner.pass .verdict { color: var(--pass); }
+  .result-banner.fail .verdict { color: var(--fail); }
+  .result-banner .sub { margin-top: 6px; color: var(--steel); font-size: 0.95rem; }
+
+  .stat-row { display: flex; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-bottom: 28px; }
+  .stat-box { flex: 1; background: var(--paper-2); text-align: center; padding: 18px 10px; }
+  .stat-box .num { font-size: 1.6rem; font-weight: 700; }
+  .stat-box .label { font-size: 0.78rem; color: var(--steel); margin-top: 4px; }
+  .stat-box.correct .num { color: var(--pass); }
+  .stat-box.wrong .num { color: var(--fail); }
+
+  .review-item { border-bottom: 1px solid var(--line); padding: 16px 0; }
+  .review-item:last-child { border-bottom: none; }
+  .review-item .q-text { font-size: 0.98rem; margin-bottom: 10px; }
+  .review-row { font-size: 0.88rem; margin-bottom: 4px; }
+  .review-row .tag { font-weight: 700; margin-right: 6px; }
+  .review-row.your-wrong .tag { color: var(--fail); }
+  .review-row.correct-answer .tag { color: var(--pass); }
+
+  .result-actions { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+  .result-actions > * { flex: 1; min-width: 160px; }
+
+  @media (max-width: 600px) {
+    .card { padding: 22px 18px; }
+    .nav-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<a class="home-btn" href="index.html" title="Về trang chủ">⌂</a>
+
+<header class="top">
+  <div class="eyebrow">Ôn thi trắc nghiệm nội bộ</div>
+  <h1>Đề thi Tổ trưởng, Tổ phó, Trưởng kíp — Tổ Tự động</h1>
+  <p>Đăng nhập họ tên và mật khẩu để bắt đầu làm bài.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card" id="loginScreen">
+    <h2 style="margin-bottom: 20px;">Đăng nhập làm bài</h2>
+    <div class="field">
+      <label for="candName">Họ và tên</label>
+      <input type="text" id="candName" autocomplete="name" />
+    </div>
+    <div class="field">
+      <label for="candPass">Mật khẩu</label>
+      <input type="password" id="candPass" autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label for="candLevel">Chọn bậc thi</label>
+      <select id="candLevel"></select>
+      <div class="level-desc" id="levelDesc"></div>
+    </div>
+    <div class="form-msg" id="loginMsg"></div>
+    <button class="btn" id="startBtn" type="button">Bắt đầu làm bài</button>
+  </div>
+
+  <div class="card" id="examScreen">
+    <div class="exam-meta">
+      <span>Thí sinh: <strong id="metaName"></strong></span>
+      <span>Câu <strong id="metaCurrent"></strong>/<span id="metaTotal"></span></span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="q-tag" id="qTag"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="qOptions"></div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" id="prevBtn" type="button">← Câu trước</button>
+      <button class="btn btn-secondary" id="nextBtn" type="button">Câu sau →</button>
+    </div>
+
+    <div class="q-dots" id="qDots"></div>
+    <button class="btn" id="submitBtn" type="button" style="margin-top: 10px;">Nộp bài</button>
+  </div>
+
+  <div class="card" id="resultsScreen">
+    <div class="result-banner" id="resultBanner">
+      <div class="verdict" id="resultVerdict"></div>
+      <div class="sub" id="resultSub"></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box correct"><div class="num" id="statCorrect"></div><div class="label">Câu đúng</div></div>
+      <div class="stat-box wrong"><div class="num" id="statWrong"></div><div class="label">Câu sai</div></div>
+      <div class="stat-box"><div class="num" id="statPercent"></div><div class="label">Tỷ lệ đúng</div></div>
+    </div>
+    <h3 style="margin-bottom: 14px;">Xem lại các câu sai</h3>
+    <div id="reviewList"></div>
+    <div class="result-actions">
+      <button class="btn btn-secondary" id="retakeBtn" type="button">Làm lại</button>
+      <a class="btn" href="index.html" style="text-align:center;">Về trang chủ</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  var QUESTIONS = [{"stt": "1", "question": "Phần mềm giao diện người máy (HMI) dành cho vận hành viên vận hành và giám sát nhà máy trong Centum VP được gọi là gì?", "a": "Exaquantum", "b": "HIS (Human Interface Station)", "c": "System View", "d": "PRM (Plant Resource Manager)", "correct": "b", "level": "1"}, {"stt": "2", "question": "Dòng bộ điều khiển (Controller) nào sau đây thường được sử dụng phổ biến trong các dự án Centum VP R6 nhờ tính năng chuyển đổi module nóng và độ tin cậy cao?", "a": "FCU (Field Control Unit) như AFV30D hoặc AFV40D", "b": "YFX-100", "c": "FA-M3", "d": "Stardom FCN", "correct": "a", "level": "1"}, {"stt": "3", "question": "Trước khi tiến hành bất kỳ quy trình hiệu chuẩn nào trên máy cấp liệu gravimetric Merrick 496, bước chuẩn bị cơ bản và quan trọng nhất đối với băng tải là gì?", "a": "Chạy máy ở tốc độ tối đa và giữ nguyên lượng than trên băng tải để tính khối lượng nền.", "b": "Cô lập cửa nhận than, cho băng tải chạy xả sạch hoàn toàn lượng than cũ, vệ sinh sạch bụi bám trên các con lăn cảm biến (Weigh idlers) và kiểm tra độ căng của băng.", "c": "Tháo rời hoàn toàn cảm biến tốc độ (Tachometer) ra khỏi trục chủ động để tránh nhiễu tín hiệu.", "d": "Tăng áp suất khí nén làm kín (Sealing air) lên mức tối đa để nâng băng tải lên.", "correct": "b", "level": "1"}, {"stt": "4", "question": "Trong quy trình hiệu chuẩn tiêu chuẩn cho các hệ thống cân băng định lượng (như dòng máy Merrick 496), thứ tự thực hiện giữa Zero Calibration (hiệu chuẩn không tải) và Span Calibration (hiệu chuẩn tầm đo/quả cân) phải tuân theo quy tắc nào và tại sao?", "a": "Phải thực hiện Span Calibration trước để xác định độ nhạy của cảm biến lực (Loadcell), sau đó mới chạy Zero Calibration để bù trừ sai số cơ khí.", "b": "Bắt buộc phải thực hiện Zero Calibration trước để xác định chính xác khối lượng nền (Tare Weight), sau đó mới tiến hành Span Calibration.", "c": "Có thể thực hiện bất kỳ bước nào trước cũng được vì bộ vi xử lý của bộ điều khiển Merrick sẽ tự động đồng bộ hóa hai giá trị này cùng một lúc khi kết thúc.", "d": "Chỉ cần thực hiện một trong hai bước tùy theo tình trạng thực tế của nhà máy, bước còn lại hệ thống sẽ tự động tính toán dựa trên dữ liệu lịch sử vận hành.", "correct": "b", "level": "1"}, {"stt": "5", "question": "Để đảm bảo tính sẵn sàng cao (High Availability) cho các trạm biến áp truyền tải 220kV - 500kV, SICAM PAS V8.14 hỗ trợ cơ chế dự phòng máy chủ (Server Redundancy) theo nguyên lý nào?", "a": "Chạy song song độc lập và không đồng bộ trạng thái (Dual Standalone).", "b": "Dự phòng nóng kiểu Hot-Standby (Một máy chủ Active và một máy chủ Standby đồng bộ dữ liệu thời gian thực qua mạng), tự động chuyển mạch khi máy chính lỗi.", "c": "Cơ chế RAID 5 bằng phần mềm giữa hai máy tính.", "d": "Bắt buộc phải sử dụng thêm phần cứng bộ điều khiển Simatic S7-400H để giám sát lỗi máy tính.", "correct": "b", "level": "1"}, {"stt": "6", "question": "Đối với các dòng module Analog Input phổ biến của hệ ET200M (ví dụ card SM 331 8x12 bit mã hiệu 6ES7331-7KF02-0AB0), khi kỹ sư muốn chuyển đổi dải đo của một kênh từ đo điện áp (0-10V) sang đo dòng điện (4-20mA), thao tác bắt buộc nào về mặt phần cứng cần phải thực hiện?", "a": "Chỉ cần thay sợi cáp tín hiệu mới, module sẽ tự động nhận diện loại tín hiệu.", "b": "Phải rút module ra khỏi đế, tháo các khối vuông cơ học gạt dải đo (Measuring Range Modules) ở bên hông card và xoay về đúng ký tự quy định (A, B, C hoặc D); đồng thời cấu hình đồng bộ trong phần mềm.", "c": "Sử dụng mỏ hàn để hàn lại các chân chíp điện tử phía sau bo mạch.", "d": "Gạt công tắc DIP switch nằm ở mặt hiển thị phía trước của bộ IM 153.", "correct": "b", "level": "1"}, {"stt": "7", "question": "Khi một cảm biến áp suất truyền tín hiệu 4-20mA về card AI của ET200M, giá trị số (Digital value) tương ứng mà thanh ghi của PLC nhận được nằm trong dải tiêu chuẩn từ 0 đến 27648. Nếu dây tín hiệu cảm biến bị đứt đột ngột, giá trị số này sẽ thay đổi như thế nào và phần mềm sẽ báo trạng thái gì?", "a": "Giá trị số lập tức nhảy lên mức tối đa là 32767 và giữ nguyên.", "b": "Giá trị số rơi về đúng 0 và không xuất hiện cảnh báo lỗi nào.", "c": "Giá trị số sẽ rơi xuống vùng giá trị âm sâu (dưới -4864) chạm mức lỗi xuống dải (Underflow) hoặc nhảy lên mức lỗi tràn dải (Overflow / giá trị 32767) tùy thuộc vào cấu hình; đồng thời nếu bật tính năng Diagnostics, PLC sẽ báo lỗi đứt mạch (Wire break).", "d": "Card AI sẽ tự động ngắt nguồn tổng của toàn bộ trạm ET200M để bảo vệ hệ thống.", "correct": "c", "level": "1"}, {"stt": "8", "question": "Trong công tác đấu nối và bảo dưỡng thiết bị trường vào cụm AI SM 331 của ET200M, sự khác biệt cốt lõi về mặt nguồn nuôi tín hiệu giữa cấu hình cảm biến 2 dây và cảm biến 4 dây là gì?", "a": "Cảm biến 2 dây lấy nguồn nuôi 24VDC trực tiếp từ hai chân tín hiệu của card AI phát ra; còn cảm biến 4 dây sử dụng một nguồn điện độc lập bên ngoài để nuôi thiết bị và chỉ truyền tín hiệu dòng thuần túy về card AI.", "b": "Cảm biến 2 dây sử dụng dòng điện xoay chiều 220 VAC, cảm biến 4 dây sử dụng nguồn một chiều 24VDC.", "c": "Card AI của ET200M không hỗ trợ cảm biến 2 dây, bắt buộc phải dùng bộ chuyển đổi trung gian.", "d": "Cảm biến 4 dây truyền tín hiệu nhanh gấp đôi cảm biến 2 dây.", "correct": "a", "level": "1"}, {"stt": "9", "question": "Trong hệ thống TIA Portal của Siemens, thông số F-Address (Fail-safe Address) của các module I/O an toàn (như card DI/DO Fail-safe của trạm ET200SP) đóng vai trò gì trong giao thức Profisafe?", "a": "Là một định danh an toàn duy nhất (gồm F-Source Address và F-Destination Address) để đảm bảo dữ liệu từ F-CPU truyền đến đúng chính xác module an toàn mục tiêu, ngăn ngừa lỗi trùng lặp dữ liệu mạng.", "b": "Là địa chỉ IP tĩnh dùng để truy cập Internet của trạm.", "c": "Là mã bản quyền (License key) phải mua từ Siemens để kích hoạt tính năng an toàn.", "d": "Dùng để khai báo tọa độ vị trí vật lý của tủ điện trên bản đồ nhà máy.", "correct": "a", "level": "1"}, {"stt": "10", "question": "Trên các đầu nối mạng Profibus (Profibus Connector) chuẩn của Siemens luôn có một công tắc gạt bật/tắt điện trở đầu cuối (Terminator). Kỹ sư bảo dưỡng bắt buộc phải BẬT (ON) công tắc này ở những vị trí\nnào trên đoạn mạng (Segment)?", "a": "Bật ON ở tất cả các đầu giắc cắm Profibus của mọi trạm trong mạng.", "b": "Chỉ bật ON ở trạm Master (PLC trung tâm), tất cả các trạm Slave gạt sang OFF.", "c": "Chỉ bật ON tại hai điểm đầu và cuối vật lý của đoạn mạng (Segment); tất cả các trạm nằm ở giữa đoạn mạng phải gạt sang OFF.", "d": "Tắt hoàn toàn (OFF) ở tất cả các trạm và chỉ bật khi mạng bị chập chờn.", "correct": "c", "level": "1"}, {"stt": "11", "question": "Trong công cụ lập trình đồ họa điều khiển của Centum VP, 'Control Drawing' là nơi kỹ sư liên kết các khối chức năng. Một Control Drawing tiêu chuẩn thường chứa tối đa bao nhiêu khối chức năng (Function Blocks)?", "a": "500 khối", "b": "Không giới hạn, tùy thuộc vào bộ nhớ máy tính", "c": "99 khối", "d": "10 khối", "correct": "c", "level": "2"}, {"stt": "12", "question": "Phiên bản Centum VP R6.04 hỗ trợ chính thức hệ điều hành nào sau đây cho các trạm HIS và ENG máy tính?", "a": "Red Hat Enterprise Linux 8", "b": "Windows XP Professional SP3", "c": "Windows 10 Enterprise LTSC (64-bit) và Windows Server 2016", "d": "Windows 7 SP1 (32-bit)", "correct": "c", "level": "2"}, {"stt": "13", "question": "Khi cấu hình mạng Profibus trong phần mềm của Siemens (STEP 7 hoặc TIA Portal), để hệ thống có thể hiểu và giao tiếp được với một thiết bị của hãng khác (ví dụ: biến tần của Danfoss hoặc ABB) đóng vai trò làm trạm Profibus Slave, kỹ sư bắt buộc phải sử dụng tệp tin định nghĩa nào?", "a": "Tập tin GSD (General Station Description - tệp mô tả trạm tổng quát do hãng sản xuất thiết bị cung cấp).", "b": "Tập tin bản vẽ AutoCAD .DWG của thiết bị.", "c": "Tập tin mã nguồn .TXT chứa chương trình viết bằng ngôn ngữ C++.", "d": "Tập tin hình ảnh .JPEG chụp mặt trước của thiết bị.", "correct": "a", "level": "2"}, {"stt": "14", "question": "Trong SICAM PAS V8.14, nếu kỹ sư muốn lập trình các hàm logic khóa chéo (Interlocking) phức tạp hoặc tự động hóa chuỗi thao tác thiết bị trong trạm, hệ thống tích hợp sẵn công cụ phát triển nào theo tiêu\nchuẩn công nghiệp?", "a": "STEP 7 V5.6 tiêu chuẩn.", "b": "TIA Portal V18.", "c": "SICAM Wizard Logic Code.", "d": "SICAM PLC / Logic Editor (dựa trên nền tảng lập trình mã nguồn mở CoDeSys hoặc tiêu chuẩn IEC 61131-3).", "correct": "d", "level": "2"}, {"stt": "15", "question": "Khi xem catalogue phần cứng của một card Analog Input PLC S7-1500, bạn thấy thông số kỹ thuật ghi: \"Resolution: 16 bits\". Thông số số bit này ảnh hưởng trực tiếp thế nào đến chất lượng phép đo ADC (Analog Digital Converter)?", "a": "Nó quyết định số lượng mức thang điểm chia nhỏ của dải đo (với 16 bit là 2^16 =\n65536 mức), số bit càng cao thì khoảng cách giữa các bước nhảy điện áp (Quantization\nerror - sai số lượng tử) càng nhỏ, giúp phép đo càng mịn và chính xác.", "b": "Nó quyết định dải điện áp tối đa card có thể chịu được là 16VDC.", "c": "Nó cho biết card này chỉ có thể kết nối tối đa được với 16 cảm biến cùng lúc.", "d": "Nó biểu thị thời gian xử lý của một phép đo kéo dài đúng 16 giây.", "correct": "a", "level": "2"}, {"stt": "16", "question": "Bộ phân tích khí Fuji Electric ZKJ sử dụng phương pháp / nguyên lý nào để đo nồng độ các thành phần khí ô nhiễm như NO, SO2, CO, CO2?", "a": "Phương pháp điện hóa (Electrochemical cell)", "b": "Phương pháp hóa phát quang (Chemiluminescence)", "c": "Phương pháp hấp thụ hồng ngoại không tán sắc nguồn đơn - chùm tia kép (Single-source, double-beam NDIR)", "d": "Phương pháp sắc ký khí (Gas Chromatography).", "correct": "c", "level": "2"}, {"stt": "17", "question": "Yếu tố nào sau đây là HOÀN TOÀN KHÔNG ĐƯỢC PHÉP (Unallowable) có mặt trong dòng khí mẫu trước khi đi vào cổng nạp (Gas Inlet) của bộ phân tích ZKJ để tránh làm hỏng buồng gương và đầu dò hồng ngoại?", "a": "Khí có nhiệt độ từ 0 đến 50°C.", "b": "Bụi mịn với nồng độ nhỏ hơn 100 μg/Nm³ (kích thước hạt ≤ 1 μm).", "c": "Hơi ẩm dạng sương / Giọt nước ngưng tụ (Mist).", "d": "Khí nền chứa hàm lượng N2 (Nitơ) cao.", "correct": "c", "level": "2"}, {"stt": "18", "question": "Để đảm bảo dữ liệu an toàn (ví dụ: tín hiệu từ nút nhấn dừng khẩn cấp E-Stop) không bị sai lệch khi truyền qua mạng, giao thức Profisafe đóng gói dữ liệu thường (Process Data) cùng với một phần mở rộng gọi là Safety Trailer. Phần mở rộng này chứa các thành phần nào?", "a": "Địa chỉ IP và địa chỉ MAC của thiết bị nhận.", "b": "Mã hóa mật khẩu bảo mật (Password Encryption) chống hacker.", "c": "Bộ đếm số thứ tự gói tin (Consecutive Number), Thời gian giám sát (Watchdog), Địa chỉ an toàn (F-Address) và Mã kiểm tra lỗi CRC (Cyclic Redundancy Check).", "d": "Tên thiết bị (Device Name) dạng text.", "correct": "c", "level": "2"}, {"stt": "19", "question": "Khi mạng truyền thông gặp sự cố (ví dụ: đứt cáp mạng Profinet tạm thời) và gói tin Profisafe không thể đến trạm nhận trong khoảng thời gian giám sát cấu hình trước F-WD-Time (Fail-safe Watchdog Time),\nhệ thống sẽ xử lý nguyên lý như thế nào?", "a": "Thiết bị nhận sẽ lấy giá trị dữ liệu cuối cùng hợp lệ để chạy tiếp và bỏ qua lỗi.", "b": "Bộ PLC trung tâm sẽ lập tức tự khởi động lại (Reboot).", "c": "Hệ thống chuyển sang sử dụng mạng Wifi dự phòng.", "d": "Trạm nhận sẽ lập tức kích hoạt trạng thái an toàn mặc định (Passivation / Safe State), ngắt toàn bộ ngõ ra an toàn (về bằng 0) để dừng máy chủ động, đồng thời F-CPU sẽ báo lỗi chẩn đoán truyền thông.", "correct": "d", "level": "2"}, {"stt": "20", "question": "Bộ điều khiển AFV30D kết nối với các node mở rộng chứa card Input/Output ngoại vi (như các node ANB10D hoặc ANR10D) thông qua giao thức mạng truyền thông bus nào của Yokogawa?", "a": "Mạng ESB Bus (hoặc Optical ESB Bus để truyền khoảng cách xa) kết nối các node I/O theo kiến trúc F-RIO (Field network I/O).", "b": "Dây cáp mạng Internet LAN thông thường bấm đầu RJ45.", "c": "Đường truyền không dây Bluetooth công nghiệp.", "d": "Cáp kết nối chuẩn RS-232 nối tiếp cổ điển.", "correct": "a", "level": "2"}, {"stt": "21", "question": "Khi cấu hình khối chức năng PID điều khiển (khối PID), thông số 'Action Direction' được đặt là 'Reverse' (Đảo nghịch) có ý nghĩa gì?", "a": "Khi giá trị đo PV tăng, đầu ra MV của khối PID sẽ tăng theo", "b": "Khi giá trị đo PV tăng lớn hơn giá trị đặt SP, đầu ra MV của khối PID sẽ giảm xuống", "c": "Tín hiệu phản hồi được đảo ngược cực tính điện áp từ 4-20mA thành 20-4mA", "d": "Khối PID sẽ chạy lùi thời gian tính toán", "correct": "b", "level": "3"}, {"stt": "22", "question": "Thuật ngữ 'Global Switch' (gọi tắt là các biến %g) trong Centum VP được sử dụng nhằm mục đích gì?", "a": "Để đổi tên biến hiển thị trên màn hình HIS", "b": "Để khóa quyền vận hành của vận hành viên từ xa", "c": "Để chia sẻ các biến trạng thái, dữ liệu chung giữa các bộ điều khiển FCS khác nhau thông qua mạng Vnet/IP", "d": "Để cấu hình địa chỉ IP cho card mạng của máy tính", "correct": "c", "level": "3"}, {"stt": "23", "question": "Khi tiến hành bảo dưỡng định kỳ và thay thế một card ngõ ra số (DO - Digital Output) bị hỏng trên trạm ET200M không hỗ trợ tính năng rút nóng, quy trình an toàn nào sau đây là đúng kỹ thuật?", "a": "Dùng tua-vít cạy trực tiếp card ra khi tủ điện đang vận hành để tiết kiệm thời gian.", "b": "Cô lập nguồn điện cấp cho trạm (gồm nguồn 24VDC của cụm IM và nguồn nuôi ngõ ra), tháo thanh panel đấu dây trước, vặn vít cố định rồi rút card hỏng ra; sau đó lắp card mới theo trình tự ngược lại.", "c": "Chuyển PLC trung tâm sang chế độ STOP, tiến hành thay card và không cần tắt nguồn trạm ET200M.", "d": "Bắt buộc phải cài đặt lại toàn bộ hệ điều hành (Firmware) của bộ PLC trung tâm sau khi thay card.", "correct": "b", "level": "3"}, {"stt": "24", "question": "Để chạy được giao thức Profisafe từ các thiết bị trường (nhấn nút dừng khẩn, cảm biến hàng rào quang) về bộ điều khiển trung tâm, cấu trúc phần mềm và phần cứng phía PLC Siemens yêu cầu điều kiện gì?", "a": "Phải sử dụng bộ xử lý dòng F-CPU (ví dụ CPU 1515F-2 PN) và các đoạn mã logic an toàn phải được viết trong một khối chương trình an toàn riêng (Safety Program / F-Blocks), chạy song song có kiểm soát với chương trình điều khiển thông thường.", "b": "Có thể dùng bất kỳ dòng CPU tiêu chuẩn nào, chỉ cần cài thêm driver bằng phần nạp ngoài.", "c": "Chương trình an toàn phải được viết hoàn toàn bằng ngôn ngữ C++ để tăng tốc xử lý.", "d": "Hệ thống bắt buộc phải kết nối liên tục trực tiếp với máy chủ đám mây (Cloud) của Siemens\nđể kiểm tra tính hợp lệ của logic.", "correct": "a", "level": "3"}, {"stt": "25", "question": "Khi cấu hình kết nối dự phòng trực tiếp giữa một màn hình SIMATIC Comfort Panel và trạm PLC kép S7-400H trong phần mềm TIA Portal (không dùng phần mềm trung gian), phương thức nào sau đây thường được sử dụng để HMI tự động chuyển đổi giao tiếp khi một CPU bị lỗi?", "a": "Sử dụng tính năng \"H-Connection\" được tích hợp sẵn trong cấu hình Connection của phần cứng Comfort Panel.", "b": "Cấu hình một kết nối S7 connection duy nhất trỏ đến IP ảo (Virtual IP) của trạm S7-400H.", "c": "Cấu hình hai kết nối (Connection_1 và Connection_2) độc lập đến 2 CPU, sau đó sử dụng các lệnh script hoặc chức năng 'ChangeConnection' khi hệ thống báo mất kết nối.", "d": "Kích hoạt tính năng \"Web server redundancy\" trên cả hai CPU S7-400H và kết nối HMI qua trình duyệt web.", "correct": "c", "level": "3"}, {"stt": "26", "question": "Trong kịch bản chuyển đổi kết nối dự phòng phần mềm trên HMI bằng hàm 'ChangeConnection', lập trình viên cần sử dụng thông tin nào từ PLC S7-400H để làm điều kiện kích hoạt chuyển đổi kết nối một cách tin cậy nhất?", "a": "Giám sát chu kỳ quét (Cycle time) của CPU master.", "b": "Sử dụng bit trạng thái kết nối (được kích hoạt bởi hiện tượng đổi Master/Reserve trong OB72) hoặc trạng thái 'Lifebit' (Invert liên tục) của từng kết nối kết hợp với sự kiện lỗi kết nối của HMI.", "c": "Kiểm tra nhiệt độ vận hành của tủ chứa CPU S7-400H.", "d": "Dựa vào tín hiệu nút nhấn vật lý (Hard-wired) từ người vận hành ấn trên màn hình khi thấy mất dữ liệu.", "correct": "b", "level": "3"}, {"stt": "27", "question": "Trong hệ thống S7-400H, tại sao cấu hình \"Named Connection\" lại là giải pháp tối ưu và được khuyến nghị nhất khi kết nối với trạm WinCC qua mạng Industrial Ethernet?", "a": "Vì Named Connection tăng tốc độ chu kỳ quét (Cycle time) của các khối hàm OB trong PLC lên gấp đôi.", "b": "Vì Named Connection cho phép WinCC tự động chuyển đổi kênh truyền thông (Switchover) giữa CPU Master và CPU Standby ở tầng driver mà không cần viết script code trên WinCC.", "c": "Vì Named Connection bắt buộc phải sử dụng cáp truyền thông quang (Fiber Optic) chuyên dụng chứ không chạy được trên cáp đồng Standard Ethernet.", "d": "Vì Named Connection giúp mã hóa toàn bộ dữ liệu truyền thông để chống lại các cuộc tấn công mạng bên ngoài.", "correct": "b", "level": "3"}, {"stt": "28", "question": "Về mặt cấu tạo phần cứng, bộ điều khiển Ovation OCR1100 bao gồm các thành phần cơ bản nào và cơ chế kết nối nguồn/mạng của nó được thiết kế như thế nào để đảm bảo tính sẵn sàng cao (High Availability)?", "a": "Chỉ gồm một bo mạch xử lý duy nhất, sử dụng một nguồn cấp độc lập và kết nối mạng qua một cổng Ethernet đơn để tối ưu hóa tốc độ truyền dữ liệu.", "b": "Bao gồm module xử lý (Processor module) gắn trên một đế cắm (Base Unit), hỗ trợ hai nguồn cấp công suất độc lập (Dual redundant power) và hai cổng mạng nội bộ Ovation (Redundant network ports).", "c": "sưa", "d": "Được cấu tạo từ các vi mạch analog thế hệ cũ, sử dụng cáp đồng trục (Coaxial cable) để chia sẻ dữ liệu chung với máy tính vận hành.", "correct": "b", "level": "3"}, {"stt": "29", "question": "Sau khi cắm một module xử lý OCR1100 mới (mới tinh từ kho) vào đế cắm để thay thế cho module cũ bị hỏng, bước tiếp theo nào là bắt buộc để module mới này có thể đồng bộ dữ liệu và trở lại làm nhiệm vụ dự phòng (Backup) cho bộ xử lý đang chạy?", "a": "Không cần làm gì cả, module mới tự động có sẵn toàn bộ chương trình điều khiển của nhà máy trong bộ nhớ Flash từ khi sản xuất.", "b": "Sử dụng công cụ quản lý cấu hình trên máy trạm kỹ thuật (Ovation Developer Studio) để thực hiện việc nạp lại phần mềm hệ thống (Clear/Load/Flash Firmware nếu cần) và tải chương trình ứng dụng xuống (Download) cho module mới, sau đó chuyển trạng thái của nó sang Backup.", "c": "Sử dụng một thẻ nhớ SD thông thường sao chép dữ liệu từ máy tính cá nhân rồi cắm vào cổng USB trên mặt máy OCR1100.", "d": "Nhấn giữ nút Reset trên cả hai module xử lý cùng một lúc trong 30 giây để chúng tự sao chép dữ liệu qua lại.", "correct": "b", "level": "3"}, {"stt": "30", "question": "Trong bộ điều khiển Ovation OCR1100, mục đích cốt lõi của tính năng bám sát (Tracking Mode) – ví dụ như cấu hình cho các khối hàm điều khiển PID hoặc định hướng đầu ra (Output Tracking) – là gì?", "a": "Để tăng tốc độ truyền thông mạng giữa bộ điều khiển OCR1100 và các máy trạm vận hành (HMI) lên mức tối đa.", "b": "Để ép buộc giá trị đầu ra điều khiển (Output) hoặc giá trị đặt (Setpoint) luôn tự động bám theo một tín hiệu thực tế được chỉ định, nhằm đảm bảo quá trình chuyển đổi giữa các chế độ (như từ Thủ công - Manual sang Tự động - Auto) diễn ra mượt mà, không bị giật cục hay thay đổi đột ngột (Bumpless Transfer).", "c": "Để tự động ngắt nguồn cấp của module I/O khi phát hiện có sự cố ngắn mạch dưới thiết bị trường.", "d": "Để đồng bộ hóa thời gian thực (Real-time clock) của OCR1100 với đồng hồ vệ tinh GPS của nhà máy.", "correct": "b", "level": "3"}, {"stt": "31", "question": "Yokogawa nổi tiếng thế giới về độ tin cậy nhờ kiến trúc độc quyền \"Pair & Spare\" áp dụng trên dòng card xử lý của AFV30D. Nguyên lý hoạt động của cơ chế này là gì?", "a": "Hệ thống sẽ luân phiên tắt một CPU sau mỗi 24 giờ để làm mát phần cứng.", "b": "Mỗi bo mạch CPU thực chất chứa 2 bộ vi xử lý (Microprocessor) chạy song song thực hiện tính toán cùng một thuật toán logic. Kết quả của hai bộ xử lý này liên tục được so sánh chéo bằng phần cứng (Comparator). Nếu phát hiện bất kỳ sự sai lệch bit nào giữa cặp đôi này, bo mạch CPU đó sẽ tự coi là lỗi và lập tức bàn giao quyền điều khiển sang bo mạch CPU dự phòng\nbên cạnh một cách an toàn mà không gây ra sai số logic.", "c": "Một CPU sẽ xử lý toán học cho các van, CPU còn lại xử lý cho các động cơ.", "d": "Khi một CPU bị cháy, CPU còn lại sẽ tự động nhân bản cấu trúc phần cứng bằng công nghệ in\n3D.", "correct": "b", "level": "4"}, {"stt": "32", "question": "Để đảm bảo tính sẵn sàng tối cao cho nhà máy, mạng Vnet/IP bắt buộc phải cấu hình dự phòng nóng bằng hai đường truyền độc lập, thường gọi là Bus 1 và Bus 2. Nguyên lý vận hành của cấu trúc này là gì?", "a": "Bus 1 truyền dữ liệu từ FCS lên HIS, còn Bus 2 truyền dữ liệu ngược lại từ HIS xuống FCS.", "b": "Bus 2 ở trạng thái tắt hoàn toàn và chỉ bật lên sau khi Bus 1 bị đứt dây khoảng 10 giây.", "c": "Cả hai đường Bus 1 và Bus 2 hoạt động song song và độc lập về mặt vật lý (tách biệt Switch và cáp); dữ liệu điều khiển thời gian thực được truyền đồng thời qua cả hai đường, nếu một đường bị lỗi, đường còn lại lập tức duy trì dữ liệu mà không làm mất bất kỳ gói tin nào.", "d": "Bus 1 dành cho thiết bị của Yokogawa, Bus 2 chỉ dùng để kết nối với thiết bị của hãng khác.", "correct": "c", "level": "4"}, {"stt": "33", "question": "Một mạng Profibus-DP kết nối giữa CPU S7-300 và 5 trạm ET 200M thường xuyên bị mất kết nối ngẫu nhiên (chớp đèn BF - Bus Fault). Khi kiểm tra bằng máy đo sóng (Oscilloscope), kỹ sư thấy dạng sóng tín hiệu RS-485 bị méo dạng và xuất hiện các xung đỉnh điện áp dội ngược lại (Signal Reflection). Nguyên nhân phổ biến nhất gây ra hiện tượng nhiễu này là gì?", "a": "Do khoảng cách chiều dài cáp Profibus quá ngắn (dưới 1 mét) giữa các trạm.", "b": "Do không bật hoặc bật sai vị trí công tắc trở đầu cuối (Termination Resistor) ở hai đầu mút vật lý của đoạn mạng Profibus.", "c": "Do sử dụng nguồn cấp 24VDC loại không cách ly cho CPU.", "d": "Do tốc độ truyền (Baud rate) của mạng đang đặt ở mức thấp nhất (9.6 Kbps).", "correct": "b", "level": "4"}, {"stt": "34", "question": "Để giảm thiểu tối đa hiện tượng nhiễu cảm ứng điện từ (EMI) từ các tủ điện động lực, biến tần (VFD) công suất lớn sang tuyến cáp truyền thông Profibus chạy dọc nhà máy, biện pháp thi công nào sau đây là SAI quy chuẩn kỹ thuật của Siemens?", "a": "Nối vỏ bọc chống nhiễu (Shield) của cáp Profibus vào hệ thống tiếp địa (Grounding/Earthing) tại các điểm kẹp cáp đầu vào tủ điện.", "b": "Đi chung cáp Profibus vào cùng một máng cáp (Cable tray) một cách song song và bó chặt cùng với cáp nguồn động lực 380VAC của biến tần để tiết kiệm không gian máng cáp.", "c": "Đảm bảo khoảng cách ly tối thiểu (ví dụ: 20cm) giữa máng cáp truyền thông Profibus và máng cáp động lực khi đi song song.", "d": "Sử dụng các giắc cắm Profibus chuẩn của Siemens có vỏ kim loại để đảm bảo lớp Shield chống nhiễu được tiếp xúc liên tục từ cáp vào vỏ thiết bị.", "correct": "b", "level": "4"}, {"stt": "35", "question": "Hệ thống ProSafe-RS của Yokogawa đạt chứng chỉ an toàn cấp độ SIL3 (Safety Integrity Level 3) nhờ vào kiến trúc phần cứng cốt lõi nào dưới đây để phát hiện lỗi và đảm bảo an toàn?", "a": "Kiến trúc TMR (Triple Modular Redundancy) sử dụng 3 CPU chạy song song và bỏ phiếu theo số đông 2-out-of-3 (2oo3).", "b": "Kiến trúc \"Vora\" (Single Modular) chỉ dùng 1 CPU duy nhất và dựa hoàn toàn vào phần mềm chẩn đoán bên ngoài.", "c": "Kiến trúc VMR (Versatile Modular Redundancy) dựa trên công nghệ \"Pair & Spare\" (Mỗi bộ xử lý gồm một cặp CPU chạy song song để tự đối chiếu chẩn đoán lẫn nhau - Dual Redundant 1oo2D).", "d": "Kiến trúc chuyển đổi dự phòng Master/Standby thông thường giống như các hệ thống PLC điều khiển cơ bản (DCS/BPCS).", "correct": "c", "level": "4"}, {"stt": "36", "question": "Để lập trình, cấu hình và thực hiện kiểm tra (Simulation) các chiến lược logic an toàn cho hệ thống ProSafe-RS, kỹ sư phần mềm bắt buộc phải sử dụng công cụ chuyên dụng nào của Yokogawa?", "a": "Centum VP Engineering Station (System View).", "b": "ProSafe-RS Engineering Station chạy phần mềm \"Seng\" (Safety Engineering Tool).", "c": "Microsoft Visual Studio kết hợp thư viện C++.", "d": "Phần mềm cấu hình PLC thông thường như TIA Portal hoặc RSLogix 5000.", "correct": "b", "level": "4"}, {"stt": "37", "question": "Nguyên lý kích hoạt cốt lõi của chức năng bảo vệ Power Load Unbalance (PLU) trong bộ điều khiển tua-bin của Emerson (Ovation) dựa trên sự chênh lệch (Mismatch) giữa hai thông số đo lường nào dưới đây?", "a": "Chênh lệch giữa lưu lượng nước cấp vào lò hơi (Feedwater Flow) và lưu lượng hơi chính (Main Steam Flow).", "b": "Chênh lệch giữa Công suất điện đầu ra của máy phát (Generator Electrical Power) và Công suất cơ học của tua-bin (thường được đại diện bằng Áp suất hơi tầng đầu/áp suất buồng - Turbine Impulse/Stage Pressure).", "c": "Chênh lệch giữa Tốc độ quay thực tế của trục tua-bin (Rotor Speed) và Giá trị đặt tốc độ (Speed Setpoint).", "d": "Chênh lệch giữa Nhiệt độ vỏ tua-bin (Casing Temperature) và Nhiệt độ hơi quá nhiệt (Superheated Steam Temperature).", "correct": "b", "level": "4"}, {"stt": "38", "question": "Khi điều kiện logic của mạch bảo vệ Power Load Unbalance (PLU) bị thỏa mãn (ví dụ: công suất điện sụt giảm > 40% trong thời gian cực ngắn trong khi áp suất hơi vẫn cao), bộ điều khiển Ovation sẽ lập tức phát lệnh điều khiển khẩn cấp nào đến hệ thống van tua-bin để ngăn chặn thảm họa vượt tốc?", "a": "Đóng từ từ van điều chỉnh hơi (Governor/Control Valves) trong vòng 30 giây để giảm công suất nhà máy một cách tuần tự.", "b": "Kích hoạt đóng mở luân phiên các van xả đáy lò hơi để giảm áp suất hệ thống một cách gián tiếp.", "c": "Phát lệnh đóng nhanh cấp tốc (Fast-close) các van điều chỉnh hơi chính (Intercept Valves / Governor Valves) thông qua các van điện từ (Solenoid) tác động nhanh trên bộ thủy lực (EHC) để triệt tiêu năng lượng hơi vào tua-bin, đồng thời có thể mở van bypass tua-bin.", "d": "Khóa chặt các van dừng khẩn cấp (Main Stop Valves) vĩnh viễn và bắt buộc phải Trip (dừng hoàn toàn) lò hơi ngay lập tức.", "correct": "c", "level": "4"}, {"stt": "39", "question": "Khi lập trình cấu trúc địa chỉ gián tiếp qua thanh ghi (Register-indirect addressing) trên PLC S7-400H bằng ngôn ngữ STL, đoạn mã dưới đây thực hiện hành động gì?\nL   P#2.0          // Tải giá trị con trỏ vào thanh ghi ACCU 1.\nLAR1               // Chuyển giá trị con trỏ vào thanh ghi địa chỉ 1 (AR1).\nL   IW [AR1, P#4.0] // Thực hiện tải dữ liệu từ đâu?", "a": "Tải giá trị của ô nhớ Word đầu vào IW 2 vào thanh ghi ACCU 1.", "b": "Tải giá trị của ô nhớ Word đầu vào IW 4 vào thanh ghi ACCU 1.", "c": "Tải giá trị của ô nhớ Word đầu vào IW 6 vào thanh ghi ACCU 1.", "d": "Báo lỗi cú pháp (Syntax Error) vì không được phép cộng thêm độ lệch (Offset) P#4.0 vào thanh ghi AR1.", "correct": "c", "level": "4"}, {"stt": "40", "question": "Khi một CPU bị lỗi trong hệ thống S7-400H đã được sửa chữa hoặc thay thế và khởi động lại, quá trình đồng bộ hóa tự động để đưa hệ thống về trạng thái dự phòng kép (Redundant mode) diễn ra gồm hai giai đoạn cốt lõi là Link-up (Kết nối) và Update (Cập nhật). Nhận định nào sau đây mô tả đúng nhất về nguyên lý hoạt động của các giai đoạn này?", "a": "Trong giai đoạn Link-up, CPU Master sẽ dừng quét chương trình (STOP) để sao chép toàn bộ bộ nhớ sang CPU mới, sau đó cả hai cùng khởi động lại ở giai đoạn Update.", "b": "Giai đoạn Link-up thực hiện kiểm tra cấu hình phần cứng; giai đoạn Update sẽ xóa sạch bộ nhớ của CPU Master để cả hai CPU cùng nạp lại chương trình từ thẻ nhớ Flash.", "c": "Trong giai đoạn Link-up, CPU Master vẫn chạy và nội dung bộ nhớ dynamic (RAM) được sao chép sang CPU dự phòng. Đến giai đoạn Update, CPU Master sẽ tạm dừng thực thi chương trình trong một khoảng thời gian rất ngắn (Delay time) để đồng bộ nốt phần dữ liệu thay đổi cuối cùng và các thanh ghi hệ thống, đảm bảo quá trình chuyển sang Redundant không làm gián đoạn công nghệ.", "d": "Hai giai đoạn này chỉ thực hiện đồng bộ các cổng truyền thông Profibus/Profinet, còn dữ liệu của các khối hàm FB/FC và biến temporary (TEMP) thì không được đồng bộ.", "correct": "c", "level": "4"}, {"stt": "41", "question": "Trong hệ thống CENTUM VP, địa chỉ IP của một thiết bị tham gia vào mạng Vnet/IP (ví dụ bộ điều khiển FCS hoặc máy tính HIS) được Yokogawa tự động phân bổ theo một quy tắc nghiêm ngặt dựa trên cấu trúc nào?", "a": "Dựa vào số hiệu vùng Domain number và số hiệu trạm Station number được cấu hình trong dự án (System View).", "b": "Sử dụng một máy chủ cấp phát địa chỉ động DHCP ngẫu nhiên giống mạng Internet gia đình.", "c": "Kỹ sư có thể tự ý điền bất kỳ dải IP nào họ thích mà không cần tuân theo quy luật nào.", "d": "Địa chỉ IP được cố định sẵn từ nhà máy của Yokogawa tại Nhật Bản và không thể thay đổi.", "correct": "a", "level": "5"}, {"stt": "42", "question": "Trong quá trình bảo dưỡng trạm vận hành (HIS) sử dụng card giao tiếp mạng Vnet/IP chuyên dụng mã hiệu VI702 (PCI Express Card cắm trong cây máy tính), bạn phát hiện trên phần mềm báo lỗi mất kết nối một đường mạng (ví dụ Bus 1 báo lỗi), đèn LED trên card nháy đỏ. Quy trình kiểm tra xử lý lỗi nào sau đây là chuẩn kỹ thuật?", "a": "Tiến hành cài đặt lại hệ điều hành Windows của máy tính ngay lập tức.", "b": "Kiểm tra lại các đầu bấm cáp mạng RJ45, đo kiểm tra thông tuyến đường cáp từ card về\nSwitch 1, hoặc kiểm tra cấu hình cổng trên Vnet/IP Switch; nếu card hỏng, tiến hành thay card mới và cấu hình lại gạt switch định danh trạm (Station ID switch) trên thân card VI702 mới cho đúng với trạm cũ trước khi cắm máy.", "c": "Tháo card ra và cắm sang một máy tính văn phòng thông thường để dùng thay card mạng internet.", "d": "Đổ nước cất vào để làm mát các linh kiện trên card VI702.", "correct": "b", "level": "5"}, {"stt": "43", "question": "Trong một kiến trúc mạng Vnet/IP quy mô lớn của hệ thống CENTUM VP (gồm nhiều phân khu nhà máy khác nhau), vị trí gán và vai trò cốt lõi của Switch Layer 2 và Switch Layer 3 được Yokogawa quy định như thế nào?", "a": "L2 Switch dùng để kết nối internet ra ngoài, L3 Switch chỉ dùng để cắm các bộ nguồn.", "b": "L2 Switch đóng vai trò làm Switch truy cập (Access Switch) kết nối trực tiếp các thiết bị đầu cuối như FCS, HIS trong cùng một vùng (Domain); trong khi L3 Switch đóng vai trò làm Switch cốt lõi (Core Switch) thực hiện định tuyến dữ liệu (Routing) liên kết giữa các Domain khác nhau hoặc kết nối mạng\nDCS với mạng văn phòng.", "c": "L2 Switch có tốc độ truyền dữ liệu nhanh gấp đôi so với L3 Switch.", "d": "L2 Switch chuyên truyền tín hiệu không dây, L3 Switch chuyên truyền tín hiệu cáp quang.", "correct": "b", "level": "5"}, {"stt": "44", "question": "Trong các dòng van servo điều khiển hướng và lưu lượng của Bosch Rexroth (ví dụ: dòng 4WS2EM), thành phần phần cứng nào đóng vai trò là tầng tiền khuếch đại (Pilot stage) để chuyển đổi tín hiệu điện điều khiển thành áp suất thủy lực nhằm dịch chuyển con trượt chính (Main spool)?", "a": "Hệ thống ống vòi - tấm chắn (Nozzle-flapper system) hoặc động cơ lực mô-men xoắn (Torque motor) tác động trực tiếp vào con trượt chính.", "b": "Động cơ bước (Stepper motor) kết hợp với trục vít bánh răng hành tinh.", "c": "Hệ thống ống phun (Jet pipe) hoặc ống vòi - tấm chắn (Nozzle-flapper) được điều khiển bởi động cơ mô-men xoắn (Torque motor).", "d": "Nam châm điện tuyến tính hành trình dài (Proportional solenoid) tác động lực cơ học trực tiếp thông qua thanh đẩy.", "correct": "c", "level": "5"}, {"stt": "45", "question": "Module điều khiển định vị van RVP (Valve Positioner) của hệ thống Ovation thực hiện chức năng cốt lõi nào để điều khiển các van điều khiển tuyến tính kích thước lớn sử dụng cảm biến phản hồi vị trí LVDT?", "a": "Nó chỉ đóng vai trò như một bộ chuyển đổi giao thức mạng truyền thông giữa bộ điều khiển OCR1100 và mạng không dây của thiết bị trường.", "b": "Nó cấp nguồn kích thích xoay chiều (AC Excitation), nhận tín hiệu điện áp phản hồi từ cảm biến LVDT, tự thực hiện thuật toán điều khiển vòng kín (PID) ngay trên module và xuất dòng điện lệnh (mA) đến cuộn dây (Coil của Servo) của van thủy lực (Actuator).", "c": "Nó đo trực tiếp nhiệt độ của cuộn dây điện từ trên van để đưa ra cảnh báo quá nhiệt về máy chủ OS Server.", "d": "Nó thay thế hoàn toàn chức năng của bộ nguồn 24VDC tổng của tủ DCS để cấp nguồn cho toàn bộ các thiết bị đo lưu lượng dòng chảy.", "correct": "b", "level": "5"}, {"stt": "46", "question": "Hiện tượng \"Integral Windup\" là một bài toán lỗi rất kinh điển đối với bộ điều khiển PI trong thực tế vận hành nhà máy. Hiện tượng này xảy ra trong kịch bản nào dưới đây?", "a": "Khi có sai số lớn kéo dài (ví dụ: van đã mở tối đa 100% nhưng PV vẫn chưa đạt SP), khiến thành phần I liên tục cộng dồn và đẩy đầu ra tính toán lý thuyết lên rất lớn vượt quá giới hạn vật lý của thiết bị.", "b": "Khi tín hiệu đầu vào PV bị mất hoàn toàn do đứt dây cáp truyền thông của cảm biến.", "c": "Khi hệ số khuếch đại Tỷ lệ (Kp) vô tình bị cấu hình bằng 0.", "d": "Khi chu kỳ quét (Scan time) của bộ điều khiển được cấu hình chạy quá nhanh (dưới 10 msec).", "correct": "a", "level": "5"}, {"stt": "47", "question": "Để khắc phục hiện tượng \"Integral Windup\" nêu trên, các hệ thống điều khiển công nghiệp (như DCS Centum VP hay các dòng PLC) thường tự động áp dụng cơ chế nào?", "a": "Tự động reset bộ điều khiển về chế độ Manual mỗi khi có báo động xuất hiện.", "b": "Áp dụng cơ chế Anti-windup (ngừng tích phân khi đầu ra MV đạt giới hạn vật lý cao/thấp hoặc sử dụng mạch hồi tiếp vòng ngoài - External Reset Feedback).", "c": "Đặt một bộ lọc thông thấp (Low-pass filter) ngay trước khối tích phân để chặn tín hiệu lớn.", "d": "Tự động tăng giá trị thời gian tích phân Ti lên vô hạn khi van mở 100%.", "correct": "b", "level": "5"}, {"stt": "48", "question": "Một trong những sức mạnh tuyệt đối của STL mà các ngôn ngữ đồ họa như LAD hay FBD rất khó thực hiện là khả năng lập trình địa chỉ gián tiếp (Pointer) thông qua các thanh ghi địa chỉ AR1 và AR2. Đoạn mã dưới đây thực hiện hành động bảo dưỡng/truy xuất dữ liệu nào?\nStructured Text\nL P#M 10.0 // Nạp con trỏ địa chỉ M10.0\nLAR1 // Chuyển giá trị con trỏ vào thanh ghi địa chỉ 1 (AR1)\nA [AR1, P#0.2] // Thực hiện lệnh toán hạng AND với địa chỉ gián tiếp\n= Q 0.0", "a": "Kiểm tra trạng thái của bit M10.0.", "b": "Kiểm tra trạng thái của bit M0.2.", "c": "Báo lỗi phần cứng hệ thống.", "d": "Kiểm tra trạng thái của bit M10.2 (Địa chỉ gốc M10.0 cộng thêm khoảng lệch Offset là 0.2).", "correct": "d", "level": "5"}, {"stt": "49", "question": "Đối với các đối tượng có đặc tính thay đổi siêu nhanh và có nhiều chao nhiễu tự nhiên như Điều khiển lưu lượng dòng chảy (Flow Control), cấu hình thông số PI nào sau đây thường được các kỹ sư ưu tiên lựa chọn?", "a": "Hệ số tỷ lệ Kp cực cao kết hợp với thời gian tích phân Ti cực dài (hành động I yếu).", "b": "Chỉ sử dụng thành phần I đơn lẻ, tắt hoàn toàn thành phần P (Kp= 0).", "c": "Bắt buộc phải thêm thành phần Vi phân (Derivative - D) để tạo thành bộ PID phản ứng nhanh.", "d": "Hệ số tỷ lệ Kp thấp (Gain nhỏ) kết hợp với thời gian tích phân Ti ngắn (hành động I mạnh).", "correct": "d", "level": "5"}, {"stt": "50", "question": "Trong hệ thống DCS Ovation, khi cấu hình 2 module RVP ở chế độ dự phòng để điều khiển 1 van gắn Servo cuộn dây kép (Dual-coil) và 2 cảm biến LVDT độc lập, cơ chế quản lý lệnh xuất dòng điều khiển (Output) và xử lý dự phòng (Failover) diễn ra như thế nào để đảm bảo van không bị dao động vị trí khi một module RVP gặp sự cố phần cứng?", "a": "Cả hai module RVP (Chính và Dự phòng) cùng hoạt động đồng thời ở chế độ chia tải (Load-sharing), mỗi module nhận tín hiệu feedback từ 01 LVDT tương ứng và xuất 50% dòng điện lệnh (mA) vào 01 cuộn coil tương ứng của Servo. Khi một module bị lỗi, module còn lại lập tức tự động tăng dòng ra lên gấp đôi 100% để bù lại lực từ trường bị mất mà không làm thay đổi vị trí van.", "b": "Chỉ có duy nhất một module RVP (Active) xuất $100\\%$ dòng lệnh vào cả 2 cuộn coil của Servo và đọc cả 2 LVDT; module còn lại (Backup) hoàn toàn bị ngắt điện để tránh xung đột từ trường, chỉ khi module Active hỏng thì rơ-le trung gian mới cấp điện cho module Backup khởi động lại từ đầu.", "c": "Hệ thống luôn cô lập 1 LVDT và 1 cuộn coil làm dự phòng nguội; khi module RVP chính hỏng, hệ thống DCS phải dừng thuật toán điều khiển trong 5 giây để kỹ sư vận hành ra ngoài thực địa chuyển mạch van bằng tay sang cuộn coil thứ hai.", "d": "Hai module RVP xuất hai mức dòng điện ngược pha nhau (+20 mA và -20 mA) vào hai cuộn coil để triệt tiêu lực từ trường của nhau ở trạng thái cân bằng; khi van cần dịch chuyển thì một module sẽ tự ngắt dòng.", "correct": "a", "level": "5"}, {"stt": "51", "question": "Trong phần mềm Step 7, hàm SCALE (FC105) của Siemens được sử dụng để chuyển đổi một giá trị nguyên (INT) từ module analog đầu vào thành một giá trị thực (REAL) theo thang đo vật lý. Nếu chân đầu vào BIPOLAR được đặt thành FALSE (kiểu Unipolar - đơn cực), dải giá trị số nguyên đầu vào (chân IN) định mức được quy định trong khoảng nào?", "a": "0 đến 32767", "b": "-27648 đến 27648", "c": "0 đến 27648 ", "d": "4 mA đến 20mA", "correct": "c", "level": "6"}, {"stt": "52", "question": "Hàm UNSCALE (FC106) thực hiện quá trình ngược lại với hàm SCALE (chuyển đổi giá trị thực REAL từ logic chương trình thành giá trị nguyên INT để xuất ra module analog Output). Trong quá trình xử lý, nếu giá trị thực ở đầu vào IN vượt quá giới hạn cao quy định tại chân HI_LIM, ngõ ra báo lỗi (RET_VAL) và ngõ ra số nguyên (OUT) sẽ xử lý như thế nào?", "a": "RET_VAL trả về W#16#0000 và ngõ ra OUT tiếp tục tăng tuyến tính vượt qua mức 27648.", "b": "RET_VAL trả về W#16#0008 và ngõ ra OUT ngay lập tức về 0 để bảo vệ thiết bị.", "c": "RET_VAL trả về W#16#0008 và ngõ ra OUT sẽ bị giới hạn (kẹp) ở giá trị tương ứng với HI_LIM.", "d": "RET_VAL trả về W#16#FFFF và PLC sẽ bị dừng đột ngột (chuyển sang chế độ STOP).", "correct": "c", "level": "6"}, {"stt": "53", "question": "Trong hệ thống DCS Centum VP, mạng điều khiển Vnet/IP là mạng thời gian thực (Real-time) kết nối các bộ điều khiển FCS và trạm vận hành HIS. Khi cấu hình truyền thông dữ liệu trực tiếp (ví dụ: liên kết các thẻ bài - Tag Link) giữa FCS0101 (Domain 1) và FCS0201 (Domain 2), thành phần phần cứng/phần mềm nào đóng vai trò bắt buộc để định tuyến và chuyển tiếp các gói tin Vnet/IP giữa hai miền này?", "a": "Sử dụng một cáp Ethernet Cat6 thông thường nối trực tiếp giữa hai cổng BUS của hai FCS.", "b": "Các bộ định tuyến Layer 3 (Layer 3 Routers) hoặc Switch Layer 3 được cấu hình tính năng Vnet/IP Router để kết nối các mạch vòng (Domain) Vnet/IP lại với nhau.", "c": "Khối hàm truyền thông SND_B và RCV_B chạy trong môi trường SEBOL.", "d": "Hệ thống bắt buộc phải đi qua một máy chủ trung gian OPC Server của Yokogawa làm cầu nối.", "correct": "b", "level": "6"}, {"stt": "54", "question": "Khi lập trình trong phần mềm System View (Centum VP), để khối logic trong FCS0101 (Domain 1) có thể đọc được giá trị biến số thực .PV của một khối tính toán nằm trong FCS0201 (Domain 2), kỹ sư cấu hình cần phải thực hiện thao tác khai báo nào sau đây để tối ưu hóa hiệu suất mạng và đảm bảo tính đúng đắn của dữ liệu?", "a": "Trong FCS0101, chỉ cần gọi trực tiếp địa chỉ dạng con trỏ \\\\FCS0201\\Tag_Name.PV vào chân Input của khối mà không cần thiết lập gì thêm trong System View.", "b": "Trong thư mục cấu hình của Dự án (Project), tại mục \"Common\" hoặc cấu hình \"Communication\", phải thiết lập mối quan hệ liên thông mạng giữa hai Domain (Inter-Domain Definition). Đồng thời tại FCS nhận, sử dụng khai báo tham chiếu Tag định dạng Domain_No.FCS_No.Tag_Name.Block_Parameter (Ví dụ: 02.01.FIC100.PV).", "c": "Phải tạo một khối dữ liệu trung gian dạng Global Message Buffer trong máy HIS thì hai FCS mới thấy được nhau.", "d": "Thay đổi thủ công địa chỉ IP của hai FCS về cùng một dải Subnet duy nhất để đánh lừa hệ thống.", "correct": "b", "level": "6"}, {"stt": "55", "question": "Khi một dự án WinCC (WinCC Project) đang được mở và vận hành ở chế độ Runtime trên máy tính, hệ thống sẽ tự động tạo ra một file khóa trạng thái có tên Open.ick (hoặc tệp ghi nhận khóa dự án tương tự) nằm trong thư mục gốc của dự án đó. Khẳng định nào sau đây phản ánh ĐÚNG vai trò của file này và cách xử lý sự cố liên quan trong thực tế?", "a": "File này chứa toàn bộ mã nguồn bảo mật của các thẻ bài (Tag) và chỉ xuất hiện khi dự án bị lỗi kết nối với PLC.", "b": "File này là một tệp sao lưu (Backup) tự động; nếu dự án bị sập nguồn đột ngột, kỹ sư chỉ cần đổi đuôi file này thành .Mcp để khôi phục lại đồ thị giao diện.", "c": "File này đóng vai trò là một tệp khóa (Lock File) báo hiệu dự án đang được mở. Nếu WinCC bị tắt đột ngột (treo máy, sập nguồn) và file này không tự động xóa, nó sẽ ngăn cản người dùng mở lại hoặc chỉnh sửa dự án ở lần tiếp theo; kỹ sư cần tắt hết tiến trình ngầm và xóa file này thủ công để giải phóng dự án.", "d": "File này là tệp cấu hình bản quyền (License) của Siemens; nếu xóa file này, WinCC sẽ lập tức chuyển sang chế độ chạy thử nghiệm (Demo Mode) trong 1 giờ.", "correct": "c", "level": "6"}, {"stt": "56", "question": "Cảm biến LVDT là loại cảm biến vị trí tuyến tính được sử dụng phổ biến trên các van điều khiển tuabin hệ thống Ovation nhờ độ bền và độ chính xác cao. Khẳng định nào sau đây phản ánh ĐÚNG về nguyên lý cấp nguồn kích thích và xử lý tín hiệu phản hồi giữa Valve Positioner của Ovation và cảm biến LVDT?", "a": "Card Ovation cấp nguồn dòng điện một chiều định mức 4-20 mA (DC Excitation) vào cuộn sơ cấp, cảm biến trả về điện áp một chiều 0-10VDC tuyến tính theo vị trí thanh lõi.", "b": "Valve Positioner cấp một nguồn điện áp xoay chiều tần số cao (AC Excitation - ví dụ 3 kHz vào cuộn sơ cấp; khi thanh lõi di chuyển, nó làm thay đổi độ cảm ứng điện từ sang hai cuộn thứ cấp, Valve Positioner sẽ tiến hành giải điều chế (Demodulation) hiệu điện áp này để xác định vị trí van.", "c": "Cảm biến LVDT tự phát ra tín hiệu xung số (Digital Pulse) dựa trên hiệu ứng Hall và gửi về card Ovation thông qua giao thức truyền thông HART kỹ thuật số.", "d": "Hai cuộn dây thứ cấp của LVDT được đấu nối song song cùng pha để triệt tiêu toàn bộ điện áp cảm ứng khi van di chuyển về vị trí an toàn (0%).", "correct": "b", "level": "6"}, {"stt": "57", "question": "Cấu tạo phần cứng cơ bản bên trong của một cảm biến vị trí tuyến tính LVDT (Linear Variable Differential Transformer) tiêu chuẩn bao gồm những thành phần cốt lõi nào?", "a": "Một cuộn dây sơ cấp (Primary Coil) ở trung tâm, hai cuộn dây thứ cấp (Secondary Coils) đối xứng hai bên được quấn trên một ống trụ rỗng cách điện, và một thanh lõi sắt từ (Ferromagnetic Core) di động xuyên dọc bên trong lòng ống.", "b": "Một nam châm vĩnh cửu cố định, một tấm màng rung silicon tích hợp vi mạch bán dẫn Piezoelectric, và một thanh đẩy bằng nhựa cách điện.", "c": "Ba cuộn dây độc lập quấn đan xen đồng trục với nhau và một cảm biến quang học hồng ngoại gắn ở đầu thanh lõi để đo khoảng cách chớp tắt.", "d": "Một mạch cầu điện trở Wheatstone gắn trực tiếp lên thân ty van và một bộ chuyển đổi tín hiệu dòng điện 4-20mA tích hợp sẵn bên trong thanh lõi chuyển động.", "correct": "a", "level": "6"}, {"stt": "58", "question": "Khi cấu hình bộ Datalogger ADAM-3600 (sử dụng phần mềm EdgeLink) để tự động truyền dữ liệu đo đạc định kỳ về máy chủ (Server) của Sở TN&MT theo các quy định hiện hành về quan trắc môi trường, bộ ADAM-3600 đóng vai trò gì trong kiến trúc mạng FTP và dữ liệu được đóng gói theo định dạng mặc định nào?", "a": "ADAM-3600 đóng vai trò là một FTP Server chủ động mở cổng; dữ liệu lưu trữ nội bộ được đóng gói và nén dưới dạng file .ZIP bảo mật trước khi truyền đi.", "b": "ADAM-3600 đóng vai trò là một FTP Client chủ động kết nối và đẩy file lên máy chủ; dữ liệu đo đạc được định dạng cấu trúc dạng tệp văn bản phẳng .TXT chứa các thông số ngăn cách bằng dấu phẩy hoặc khoảng trắng.", "c": "ADAM-3600 đóng vai trò là một máy chủ trung gian FTP Proxy; dữ liệu được biên dịch trực tiếp sang định dạng bảng tính mã hóa .XLSX.", "d": "ADAM-3600 chỉ chạy giao thức truyền file bằng lệnh kết nối ngang hàng P2P; dữ liệu bắt buộc phải định dạng dưới dạng cấu trúc tệp .JSON của hệ điều hành Linux.", "correct": "b", "level": "6"}, {"stt": "59", "question": "Một trong những tính năng cốt lõi của ADAM-3600 khi thực hiện truyền file qua FTP là cơ chế đảm bảo an toàn dữ liệu khi xảy ra sự cố gián đoạn đường truyền (ví dụ: mất kết nối mạng 3G/4G hoặc đứt cáp Internet). Khi ADAM-3600 không thể kết nối tới FTP Server của đối tác, quá trình lưu trữ và truyền lại dữ liệu sẽ diễn ra như thế nào?", "a": "ADAM-3600 sẽ ngay lập tức kích hoạt lệnh dừng thu thập dữ liệu từ các cảm biến hiện trường cho đến khi mạng Internet được phục hồi để tránh làm tràn bộ nhớ RAM.", "b": "Thiết bị sẽ tự động chuyển hướng, ghi đè dữ liệu trực tiếp vào phân vùng Rom Bootloader của hệ điều hành Linux, chấp nhận rủi ro lỗi phần cứng (corrupt firmware).", "c": "ADAM-3600 tiếp tục thu thập dữ liệu bình thường và lưu tạm các file .TXT vào bộ nhớ đệm cục bộ (bộ nhớ trong 1GB hoặc thẻ nhớ mở rộng MicroSD); khi mạng phục hồi, tính năng tự động truyền lại (Resend/Store-and-Forward) sẽ đẩy toàn bộ các file còn thiếu trong bộ đệm lên FTP Server.", "d": "ADAM-3600 sẽ gửi lệnh điều khiển ngắt nguồn (Reset) toàn bộ các module I/O mở rộng nhằm báo hiệu cho kỹ sư trạm đến xử lý thủ công bằng cổng USB.", "correct": "c", "level": "6"}, {"stt": "60", "question": "Trong quá trình bảo trì và hiệu chỉnh hệ thống an toàn ProSafe-RS của Yokogawa, kỹ sư phát hiện trạng thái báo lỗi \"Database Mismatch\" xuất hiện giữa trạm kỹ thuật SENG (Safety Engineering PC) và bộ điều khiển an toàn SCS (Safety Control Station). Khẳng định nào sau đây phản ánh ĐÚNG nguyên nhân cốt lõi của lỗi này và quy trình chuẩn để khắc phục theo tài liệu kỹ thuật của Yokogawa?", "a": "Lỗi xảy ra do cáp mạng cáp quang kết nối dự phòng giữa hai CPU của trạm SCS bị đứt; cần phải thay thế card truyền thông vật lý trên rack trung tâm.", "b": "Lỗi xảy ra do phân vùng RAM chứa logic chạy trực tuyến của SCS bị tràn dữ liệu; kỹ sư bắt buộc phải gạt công tắc vật lý trên CPU sang vị trí STOP rồi RUN lại.", "c": "Lỗi xảy ra do có sự sai lệch giữa cơ sở dữ liệu gốc (Master Database) lưu trên SENG và dữ liệu đang chạy thực tế trên SCS (do kỹ sư chỉnh sửa code nhưng chưa nạp, hoặc nạp lỗi); cần sử dụng công cụ \"Project Comparing Tool / Equalization\" để đối chiếu và tiến hành thực hiện lệnh Online Load (Download) đồng bộ lại dữ liệu.", "d": "Lỗi xảy ra do phiên bản bản quyền phần mềm (License) trên trạm SENG bị hết hạn; cần liên hệ với Yokogawa để xin lại file key kích hoạt mới.", "correct": "c", "level": "6"}, {"stt": "61", "question": "Khi cấu hình truyền thông Modbus TCP/IP cho hệ thống S7-400H làm Modbus Server (Slave) để giao tiếp với một hệ thống DCS bên ngoài (Modbus Client) qua 2 card mạng CP443-1 độc lập, thư viện hàm chuẩn nào của Siemens thường được sử dụng và số lượng kết nối TCP (Connection) tối thiểu cần khai báo trong NetPro để đảm bảo tính dự phòng hoàn toàn là bao nhiêu?", "a": "Sử dụng thư viện MB_CP343_1 và cấu hình 1 kết nối TCP duy nhất dùng chung IP VIP (Virtual IP).", "b": "Sử dụng thư viện MB_RED_CL hoặc MB_RED_SV và cấu hình tối thiểu 4 kết nối TCP trong NetPro (mỗi CPU kết nối đến cả 2 card mạng hoặc hệ thống dự phòng của Client).", "c": "Sử dụng thư viện Standard FB64 (TSEND) và không cần cấu hình kết nối trong NetPro.", "d": "Sử dụng thư viện MB_SERVER (trong TIA Portal) và cấu hình 2 kết nối TCP chuyển mạch tự động.", "correct": "b", "level": "7"}, {"stt": "62", "question": "Trong khối hàm quản lý Modbus TCP Redundant dành cho S7-400H, các tham số cấu hình vùng nhớ dữ liệu (Data Mapping) như Holding Registers (4xxxx) hay Input Registers (3xxxx) được định nghĩa thông qua một Khối dữ liệu gọi là Data DB. Nếu bạn muốn cấu hình cho Modbus Client đọc dữ liệu từ địa chỉ Modbus 40001 đến 40100 trực tiếp từ một DB có số hiệu là DB10 trong S7-400H, bạn phải khai báo tham số trong cấu trúc mảng (ví dụ: S7_DATA) của Modbus như thế nào?", "a": "Khai báo kiểu dữ liệu là BYTE, bắt đầu từ DB10.DBB0 và độ dài là 100.", "b": "Khai báo số hiệu DB là 10, kiểu dữ liệu tương ứng là Holding Register, địa chỉ bắt đầu (Start Address) là 1 và số lượng Word (Data length) là 100.", "c": "Khai báo địa chỉ con trỏ dạng pointer P#DB10.DBX0.0 WORD 100 trực tiếp vào chân DATA_TYPE của hàm.", "d": "Khai báo vùng nhớ là MW0 đến MW200 vì Modbus S7-400H không hỗ trợ đọc trực tiếp từ DB.", "correct": "b", "level": "7"}, {"stt": "63", "question": "Khối hàm hệ thống SFB14 (GET) được sử dụng để đọc dữ liệu từ một CPU đối tác (Partner) trong kết nối S7 Connection. Khẳng định nào sau đây là ĐÚNG về đặc tính hoạt động và yêu cầu cấu hình của khối hàm này?", "a": "SFB14 bắt buộc phải được gọi và lập trình đồng thời ở cả hai phía: CPU gửi và CPU nhận dữ liệu.", "b": "SFB14 là khối hàm truyền thông một phía (Unilateral/One-sided). Nó chỉ cần được gọi và lập trình ở CPU chủ động đọc dữ liệu; CPU đối tác chỉ cần cấu hình kết nối trong NetPro mà không cần viết bất kỳ đoạn code nào.", "c": "Khối SFB14 thực hiện quét dữ liệu liên tục theo chu kỳ quét vòng (Scan time) của CPU bất kể chân kích hoạt REQ có thay đổi trạng thái hay không.", "d": "Vùng nhớ dữ liệu chứa nội dung đọc về (chân RD_1) bắt buộc phải có kích thước và kiểu dữ liệu hoàn toàn trùng khớp với vùng nhớ nguồn (chân ADDR_1) ở dạng cấu trúc mảng ARRAY OF BYTE.", "correct": "b", "level": "7"}, {"stt": "64", "question": "Khối hàm hệ thống SFB13 (BRCV) được sử dụng để nhận các khối dữ liệu lớn được gửi từ khối SFB12 (BSEND) của CPU đối tác. Khi chân kích hoạt EN_R (Enable Receive) được đặt lên mức 1, khối SFB13 sẽ kiểm soát và báo nhận dữ liệu thông qua các chân trạng thái như thế nào?", "a": "Chân DONE sẽ lên mức 1 trong vòng 1 chu kỳ ngay khi có yêu cầu gửi từ đối tác, bất kể dữ liệu đã về đủ hay chưa.", "b": "Hệ thống sẽ ở trạng thái chờ; khi toàn bộ gói dữ liệu từ SFB12 được truyền về đầy đủ và không có lỗi, chân NDR (New Data Received) sẽ lên mức 1 trong đúng một chu kỳ quét (Scan cycle) để báo hiệu có dữ liệu mới.", "c": "Nếu kích thước vùng đệm nhận (chân RD_1) nhỏ hơn kích thước gói dữ liệu gửi đi từ SFB12, SFB13 sẽ tự động cắt ngắn dữ liệu và chân ERROR vẫn báo bằng 0.", "d": "Chân BUSY sẽ luôn luôn bằng 1 nếu chân EN_R bằng 1, bất kể có gói tin nào đang được truyền hay không.", "correct": "b", "level": "7"}, {"stt": "65", "question": "Khi một CPU dự phòng (Standby) được cắm vào Slot hoặc được khởi động lại trong khi CPU còn lại (Master) đang chạy online điều khiển nhà máy, quá trình đồng bộ hóa toàn diện dữ liệu giữa 2 CPU của bộ điều khiển AFV30D diễn ra theo các bước/giai đoạn cốt lõi nào?", "a": "CPU Standby tự đọc cấu hình từ thẻ nhớ SD => Tự kiểm tra phần cứng => Kích hoạt chế độ Dual-run ngay lập tức mà không cần kết nối với CPU Master.", "b": "Giai đoạn Sao chép tĩnh (Static Copy - sao chép cơ sở dữ liệu cấu hình, Database) => Giai đoạn Sao chép động (Dynamic Copy - cập nhật các trạng thái logic thời gian thực, dữ liệu I/O, Timer) => Đồng bộ hóa song song (Equalization/Dual-run). ", "c": "Giai đoạn Chuyển mạch thử nghiệm (Test Swap) => Giai đoạn Đọc ngược dữ liệu từ HIS (Upload from HIS) => Giai đoạn Chốt dữ liệu (Lock-up).", "d": "CPU Master dừng quét 3 giây để đóng băng dữ liệu => Copy toàn bộ bộ nhớ RAM sang CPU Standby qua cáp quang => CPU Master hoạt động trở lại.", "correct": "b", "level": "7"}, {"stt": "66", "question": "Trong chế độ vận hành bình thường Dual-run của bộ điều khiển AFV30D, để đảm bảo cả 2 CPU luôn có dữ liệu hoàn toàn đồng nhất tại mọi thời điểm và sẵn sàng cho việc chuyển mạch \"Bumpless\", bước đồng bộ hóa dữ liệu động được thực hiện vào thời điểm nào trong mỗi chu kỳ quét (Scan Cycle)?", "a": "Cuối mỗi giờ làm việc, CPU Master sẽ gửi một gói tin tổng hợp tất cả dữ liệu thay đổi sang CPU Standby thông qua mạng Vnet/IP.", "b": "Ngay khi có lệnh thay đổi giá trị cài đặt (SP) hoặc trạng thái từ người vận hành trên giao diện HIS gửi xuống.", "c": "Tại một thời điểm cố định được thiết lập sẵn trong mỗi chu kỳ quét điều khiển (ví dụ: ngay sau bước thực thi xong toán tử logic/chương trình tính toán và trước bước cập nhật dữ liệu xuất ra module Output - Output Update).", "d": "Bước đồng bộ chỉ xảy ra khi hệ thống phát hiện có sự chênh lệch dữ liệu quá 5% giữa hai CPU thông qua mạch so sánh phần cứng (Comparator).", "correct": "c", "level": "7"}, {"stt": "67", "question": "Trong quá trình sử dụng chức năng Download Firmware từ cửa sổ cấu hình của hệ thống Ovation 3.6.0 sang một module I/O, tiến trình bất ngờ bị gián đoạn và báo lỗi (ví dụ: do nhiễu truyền thông hoặc lỗi cáp nội bộ tủ). Lúc này, đèn LED trạng thái trên mặt module chuyển sang nhấp nháy liên tục hoặc báo lỗi phần cứng, dữ liệu của các kênh I/O thuộc module đó trên phần mềm báo trạng thái Invalid/Bad. Thao tác xử lý nào sau đây tuân thủ đúng quy trình kỹ thuật của Emerson?", "a": "Ngay lập tức thực hiện lệnh Clear Node trên bộ điều khiển Controller để reset lại toàn bộ cấu hình mạng I/O.", "b": "Tiến hành gỡ module ra khỏi Baseplate, cắm sang một Slot khác trống trên tủ để hệ thống tự động nhận diện lại từ đầu (Plug and Play).", "c": "Giữ nguyên vị trí module, kiểm tra lại kết nối mạng, sau đó thực hiện lại lệnh Download Firmware từ phần mềm Controller Diagnostics để nạp lại đầy đủ image bộ nhớ cho module.", "d": "Chấp nhận lỗi và tiến hành thay thế module mới, vì module bị ngắt quãng khi đang nạp Flash firmware sẽ bị hỏng hoàn toàn chip ROM và không thể cứu vãn bằng phần mềm.", "correct": "c", "level": "7"}, {"stt": "68", "question": "Hệ thống DCS Ovation 3.6.0 của Emerson sử dụng một cơ sở dữ liệu quan hệ trung tâm nằm trên trạm Database Server để quản lý toàn bộ cấu hình hệ thống. Khi một kỹ sư tạo mới một Tag (ví dụ: biến Analog Input) trên phần mềm Ovation Developer Studio, dữ liệu này được lưu trữ đầu tiên ở đâu và cần thực hiện thao tác nào để bộ điều khiển (Controller) chính thức nhận diện và thực thi Tag đó?", "a": "Dữ liệu được lưu trực tiếp vào bộ nhớ RAM của Controller; hệ thống tự động đồng bộ theo thời gian thực mà không cần thao tác gì thêm.", "b": "Dữ liệu được lưu vào Master Database trên Server; kỹ sư bắt buộc phải thực hiện lệnh \"Load\" (hoặc Download) cấu hình từ Developer Studio xuống Controller tương ứng.", "c": "Dữ liệu được lưu dưới dạng file phẳng (.TXT) trên trạm Operator Station (HIS); cần thực hiện lệnh Reboot trạm vận hành.", "d": "Dữ liệu được lưu vào phân vùng Snapshot Database trên Switch mạng; cần kích hoạt tính năng Clear Node trên Switch.", "correct": "b", "level": "7"}, {"stt": "69", "question": "Trong quá trình vận hành hệ thống Ovation 3.6.0, khi người vận hành hoặc kỹ sư thay đổi một thông số động trực tuyến (ví dụ: tinh chỉnh hệ số PID Gain, thay đổi ngưỡng cảnh báo High Alarm Limit của một Tag từ trạm Operator Station). Để tránh việc các giá trị tinh chỉnh này bị ghi đè và mất đi khi nạp lại cấu hình từ Server, hệ thống Ovation sử dụng cơ chế nào để đồng bộ ngược dữ liệu từ bộ điều khiển (Controller Runtime) về cơ sở dữ liệu gốc (Master Database)?", "a": "Hệ thống yêu cầu kỹ sư phải mở phần mềm Ovation Control Builder, nhập tay lại các giá trị đó và tiến hành biên dịch (Compile) lại toàn bộ dự án.", "b": "Các giá trị mới chỉ thay đổi tạm thời trên bộ nhớ RAM của Controller và sẽ tự động biến mất, quay về giá trị mặc định ban đầu sau mỗi chu kỳ 24 giờ.", "c": "Hệ thống thực hiện quá trình Reconcile (Database Reconciliation) thông qua các dịch vụ chạy nền để tự động hoặc cho phép kỹ sư cập nhật ngược các giá trị thay đổi từ Runtime Memory của Controller về lưu trữ cố định trong Master Database.", "d": "Giá trị mới được lưu thẳng vào một file cấu hình phẳng (.TXT) tạm thời trên trạm Operator Station chứ không liên quan đến cấu trúc cơ sở dữ liệu của Server.", "correct": "c", "level": "7"}, {"stt": "70", "question": "Trong chương trình điều khiển của PLC S7-400H, khối tổ chức chính OB1 (Main Program Cycle) thực hiện gọi một khối hàm FC1 để xử lý logic. Khẳng định nào sau đây là ĐÚNG về cơ chế cấp phát bộ nhớ và quản lý dữ liệu của khối FC1 này khi được gọi trong chu kỳ quét?", "a": "Khối FC1 không có khối dữ liệu nền (Instance DB) riêng. Mọi dữ liệu tạm thời khai báo trong phần TEMP của FC1 sẽ bị xóa hoặc không đảm bảo tính toàn vẹn sau khi khối này kết thúc thực thi và thoát ra ngoài OB1.", "b": "Khối FC1 sẽ tự động tạo ra một Instance DB tương ứng khi được OB1 gọi để lưu trữ dữ liệu tĩnh của các tham số IN, OUT và STAT.", "c": "Các biến khai báo trong vùng nhớ TEMP của FC1 sẽ giữ nguyên giá trị của chu kỳ quét trước đó cho đến khi OB1 gọi lại nó ở chu kỳ kế tiếp.", "d": "Khi hệ thống S7-400H thực hiện chuyển mạch dự phòng (Failover) từ CPU Master sang CPU Standby, toàn bộ vùng nhớ TEMP của FC1 sẽ được đồng bộ tức thời qua cáp quang kết nối.", "correct": "a", "level": "7"}];
+  var LEVELS = [{"level": 1, "count": 10, "label": "Bậc 1 (10 câu, từ câu 1 đến câu 10)"}, {"level": 2, "count": 20, "label": "Bậc 2 (20 câu, từ câu 1 đến câu 20)"}, {"level": 3, "count": 30, "label": "Bậc 3 (30 câu, từ câu 1 đến câu 30)"}, {"level": 4, "count": 40, "label": "Bậc 4 (40 câu, từ câu 1 đến câu 40)"}, {"level": 5, "count": 50, "label": "Bậc 5 (50 câu, từ câu 1 đến câu 50)"}, {"level": 6, "count": 60, "label": "Bậc 6 (60 câu, từ câu 1 đến câu 60)"}, {"level": 7, "count": 70, "label": "Bậc 7 (70 câu, từ câu 1 đến câu 70)"}];
+  var PASS_THRESHOLD_PERCENT = 80; // Ngưỡng đạt mặc định — sửa số này nếu công ty quy định khác
+
+  var STORAGE_KEY = 'quiz_candidates_v1';
+
+  var state = {
+    name: '',
+    level: null,
+    pool: [],       // questions in scope for chosen level
+    answers: {},    // index -> selected key (a/b/c/d)
+    current: 0
+  };
+
+  // ---------- populate level select ----------
+  var levelSelect = document.getElementById('candLevel');
+  var levelDesc = document.getElementById('levelDesc');
+  LEVELS.forEach(function (lv) {
+    var opt = document.createElement('option');
+    opt.value = lv.level;
+    opt.textContent = 'Bậc ' + lv.level + ' (' + lv.count + ' câu)';
+    levelSelect.appendChild(opt);
+  });
+  function updateLevelDesc() {
+    var lv = LEVELS.find(function (l) { return String(l.level) === levelSelect.value; });
+    levelDesc.textContent = lv ? lv.label : '';
+  }
+  levelSelect.addEventListener('change', updateLevelDesc);
+  updateLevelDesc();
+
+  // ---------- storage helpers ----------
+  function getCandidates() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch (e) { return []; }
+  }
+  function saveCandidates(list) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  }
+  function recordAttempt(record) {
+    var list = getCandidates();
+    list.push(record);
+    saveCandidates(list);
+  }
+
+  function escapeHtml(str) {
+    var d = document.createElement('div');
+    d.textContent = str == null ? '' : String(str);
+    return d.innerHTML;
+  }
+
+  // ---------- login ----------
+  document.getElementById('startBtn').addEventListener('click', function () {
+    var name = document.getElementById('candName').value.trim();
+    var pass = document.getElementById('candPass').value;
+    var msg = document.getElementById('loginMsg');
+    if (!name || !pass) {
+      msg.textContent = 'Vui lòng nhập đủ họ tên và mật khẩu.';
+      return;
+    }
+    msg.textContent = '';
+    state.name = name;
+    state.level = Number(levelSelect.value);
+    var lv = LEVELS.find(function (l) { return l.level === state.level; });
+    var count = lv ? lv.count : QUESTIONS.length;
+    state.pool = QUESTIONS.slice(0, count);
+    state.answers = {};
+    state.current = 0;
+
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('examScreen').style.display = 'block';
+    document.getElementById('metaName').textContent = name;
+    document.getElementById('metaTotal').textContent = state.pool.length;
+    buildDots();
+    renderQuestion();
+  });
+
+  // ---------- exam rendering ----------
+  function buildDots() {
+    var dots = document.getElementById('qDots');
+    dots.innerHTML = '';
+    state.pool.forEach(function (q, idx) {
+      var d = document.createElement('div');
+      d.className = 'q-dot';
+      d.textContent = idx + 1;
+      d.dataset.idx = idx;
+      d.addEventListener('click', function () {
+        state.current = idx;
+        renderQuestion();
+      });
+      dots.appendChild(d);
+    });
+  }
+
+  function renderQuestion() {
+    var idx = state.current;
+    var q = state.pool[idx];
+    document.getElementById('metaCurrent').textContent = idx + 1;
+    document.getElementById('progressFill').style.width = (((idx + 1) / state.pool.length) * 100) + '%';
+    document.getElementById('qTag').textContent = 'Bậc ' + q.level + ' · Câu ' + (idx + 1) + ' / ' + state.pool.length;
+    document.getElementById('qText').textContent = q.question;
+
+    var optsWrap = document.getElementById('qOptions');
+    optsWrap.innerHTML = '';
+    ['a', 'b', 'c', 'd'].forEach(function (key) {
+      var label = document.createElement('label');
+      label.className = 'option' + (state.answers[idx] === key ? ' selected' : '');
+      var input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'opt';
+      input.value = key;
+      input.checked = state.answers[idx] === key;
+      input.addEventListener('change', function () {
+        state.answers[idx] = key;
+        renderQuestion();
+        updateDots();
+      });
+      var span = document.createElement('span');
+      span.innerHTML = '<span class="key">' + key + '.</span> ' + escapeHtml(q[key]);
+      label.appendChild(input);
+      label.appendChild(span);
+      optsWrap.appendChild(label);
+    });
+
+    document.getElementById('prevBtn').disabled = idx === 0;
+    document.getElementById('nextBtn').disabled = idx === state.pool.length - 1;
+    updateDots();
+  }
+
+  function updateDots() {
+    var dots = document.getElementById('qDots').children;
+    for (var i = 0; i < dots.length; i++) {
+      dots[i].classList.toggle('answered', state.answers[i] !== undefined);
+      dots[i].classList.toggle('current', i === state.current);
+    }
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', function () {
+    if (state.current > 0) { state.current--; renderQuestion(); }
+  });
+  document.getElementById('nextBtn').addEventListener('click', function () {
+    if (state.current < state.pool.length - 1) { state.current++; renderQuestion(); }
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', function () {
+    var unanswered = state.pool.length - Object.keys(state.answers).length;
+    if (unanswered > 0) {
+      var ok = confirm('Bạn còn ' + unanswered + ' câu chưa trả lời. Những câu đó sẽ tính là sai. Nộp bài luôn?');
+      if (!ok) return;
+    }
+    gradeAndShow();
+  });
+
+  // ---------- grading ----------
+  function gradeAndShow() {
+    var correctCount = 0;
+    var wrongList = [];
+    state.pool.forEach(function (q, idx) {
+      var picked = state.answers[idx];
+      if (picked === q.correct) {
+        correctCount++;
+      } else {
+        wrongList.push({ idx: idx, q: q, picked: picked || null });
+      }
+    });
+    var total = state.pool.length;
+    var wrongCount = total - correctCount;
+    var percent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+    var passed = percent >= PASS_THRESHOLD_PERCENT;
+
+    document.getElementById('examScreen').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'block';
+
+    var banner = document.getElementById('resultBanner');
+    banner.className = 'result-banner ' + (passed ? 'pass' : 'fail');
+    document.getElementById('resultVerdict').textContent = passed ? 'ĐẠT' : 'KHÔNG ĐẠT';
+    document.getElementById('resultSub').textContent =
+      state.name + ' — Bậc ' + state.level + ' — ' + correctCount + '/' + total + ' câu đúng (' + percent + '%). Ngưỡng đạt: ' + PASS_THRESHOLD_PERCENT + '%.';
+
+    document.getElementById('statCorrect').textContent = correctCount;
+    document.getElementById('statWrong').textContent = wrongCount;
+    document.getElementById('statPercent').textContent = percent + '%';
+
+    var reviewList = document.getElementById('reviewList');
+    reviewList.innerHTML = '';
+    if (wrongList.length === 0) {
+      var p = document.createElement('p');
+      p.style.color = 'var(--steel)';
+      p.textContent = 'Không có câu nào sai — làm đúng hết!';
+      reviewList.appendChild(p);
+    } else {
+      wrongList.forEach(function (item) {
+        var div = document.createElement('div');
+        div.className = 'review-item';
+        var yourAnswerText = item.picked ? (item.picked + '. ' + item.q[item.picked]) : '(không trả lời)';
+        var correctAnswerText = item.q.correct + '. ' + item.q[item.q.correct];
+        div.innerHTML =
+          '<div class="q-text">Câu ' + (item.idx + 1) + ': ' + escapeHtml(item.q.question) + '</div>' +
+          '<div class="review-row your-wrong"><span class="tag">Bạn chọn:</span>' + escapeHtml(yourAnswerText) + '</div>' +
+          '<div class="review-row correct-answer"><span class="tag">Đáp án đúng:</span>' + escapeHtml(correctAnswerText) + '</div>';
+        reviewList.appendChild(div);
+      });
+    }
+
+    // store this attempt so it can be reviewed later (per-browser storage)
+    recordAttempt({
+      name: state.name,
+      level: state.level,
+      total: total,
+      correct: correctCount,
+      wrong: wrongCount,
+      percent: percent,
+      passed: passed,
+      timestamp: new Date().toISOString(),
+      wrongQuestions: wrongList.map(function (item) {
+        return { stt: item.q.stt, picked: item.picked, correct: item.q.correct };
+      })
+    });
+  }
+
+  document.getElementById('retakeBtn').addEventListener('click', function () {
+    document.getElementById('resultsScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'block';
+    document.getElementById('candPass').value = '';
+  });
+</script>
+
+</body>
+</html>
