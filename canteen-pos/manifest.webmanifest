@@ -1,0 +1,30 @@
+{
+  "name": "Canteen POS - Bán hàng & quản lý kho canteen trường học",
+  "short_name": "Canteen POS",
+  "description": "Tính tiền nhanh giờ ra chơi, nhập - xuất - tồn kho, nhắc hạn sử dụng cho canteen, tạp hóa trường học",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#2f5d50",
+  "theme_color": "#2f5d50",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
