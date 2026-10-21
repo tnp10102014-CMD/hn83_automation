@@ -127,6 +127,7 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 .auth-card{width:100%;max-width:420px;background:#fff;color:#1d232a;border-radius:14px;padding:0 0 26px;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}
 .auth-card>.hazard{height:10px;margin-bottom:24px}
 .auth-card>*:not(.hazard){margin-left:28px;margin-right:28px}
+.auth-card>.btn.block{display:flex;width:auto}
 .auth-card h1{font-size:36px;margin-top:0;margin-bottom:4px}
 .auth-card .lead{color:#66717d;margin-top:0;margin-bottom:22px}
 .auth-card input,.auth-card textarea{background:#fff;color:#1d232a;border-color:#d5dae0}
@@ -557,7 +558,7 @@ window.addEventListener('pagehide', flush);
    Mỗi thiết bị có "Mã máy" riêng, dùng thử TRIAL_DAYS ngày. Mã kích hoạt là chữ ký số ECDSA P-256
    trên (VL | mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật trong công cụ của nhà cung cấp. */
 const TRIAL_DAYS = 7;
-const VENDOR = { name: 'Trần Hữu Nhật', phone: '', zalo: '' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
 const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "uqMBhT8HA1X37oJb2-rYcJTnQY4PmYtiD4SGPoWZ9Hk", "y": "X0vFhRqyGOeNlzUpTP9lbjEG848NB_v0NDZWw_CTcos"};
 const PLANS = { T7: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
 const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -604,7 +605,8 @@ async function licCheck() {
   if (!LST.active) { ME = null; sessSet(null); closeAllModals(); renderActivation(); return false; }
   return true;
 }
-const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b>${VENDOR.phone ? ' · ĐT ' + esc(VENDOR.phone) : ''}${VENDOR.zalo ? ' · Zalo ' + esc(VENDOR.zalo) : ''} để nhận mã kích hoạt.`;
+const digits = s => String(s).replace(/\D/g, '');
+const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b>${VENDOR.phone ? ` · ĐT <a class="link" href="tel:${digits(VENDOR.phone)}">${esc(VENDOR.phone)}</a>` : ''}${VENDOR.zalo ? ` · Zalo <a class="link" href="https://zalo.me/${digits(VENDOR.zalo)}" target="_blank" rel="noopener">${esc(VENDOR.zalo)}</a>` : ''} để nhận mã kích hoạt.`;
 function copyText(t) {
   const ok = () => toast('Đã sao chép: ' + t.slice(0, 40));
   const fb = () => { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Hãy tự chọn và sao chép', 'err'); } a.remove(); };

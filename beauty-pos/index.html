@@ -553,7 +553,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
    - Mã kích hoạt = chữ ký số ECDSA P-256 trên (mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật
      trong công cụ tạo mã của nhà cung cấp. App chỉ chứa khóa công khai để kiểm tra. */
 const TRIAL_DAYS = 15;
-const VENDOR = { name: 'Trần Hữu Nhật', phone: '', zalo: '' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
 const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "_dmBLgL9p3ZoMWDZx-QKkUjj7Ni7_2bJ50AgVDgf_OY", "y": "4SssgIyxqTVVXkfclNCzYlJlSnrHsZSzKLJlXxeBF1g"};
 const PLANS = { T15: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
 const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -605,7 +605,8 @@ async function licCheck() {
   if (!LST.active) { ME = null; sessSet(null); closeAllModals(); renderActivation(); return false; }
   return true;
 }
-const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b>${VENDOR.phone ? ' · ĐT ' + esc(VENDOR.phone) : ''}${VENDOR.zalo ? ' · Zalo ' + esc(VENDOR.zalo) : ''} để nhận mã kích hoạt.`;
+const digits = s => String(s).replace(/\D/g, '');
+const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b>${VENDOR.phone ? ` · ĐT <a class="link" href="tel:${digits(VENDOR.phone)}">${esc(VENDOR.phone)}</a>` : ''}${VENDOR.zalo ? ` · Zalo <a class="link" href="https://zalo.me/${digits(VENDOR.zalo)}" target="_blank" rel="noopener">${esc(VENDOR.zalo)}</a>` : ''} để nhận mã kích hoạt.`;
 function copyText(t) {
   const ok = () => toast('Đã sao chép: ' + t.slice(0, 40));
   if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback()); else fallback();
