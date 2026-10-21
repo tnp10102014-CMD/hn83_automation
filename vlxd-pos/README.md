@@ -23,6 +23,13 @@ Chạy trên **iPhone, iPad, Android, máy tính bảng, PC Windows / Mac / Linu
 - Sửa thông tin liên hệ hiện trên màn hình hết hạn: hằng số `VENDOR` trong `index.html`.
 - Giới hạn: bảo vệ phía trình duyệt; người rành kỹ thuật có thể sửa mã nguồn công khai. Chặn triệt để cần máy chủ cấp phép.
 
+## Tự động sao lưu (Chrome / Edge trên máy tính)
+- *Cài đặt → Tự động sao lưu → **Chọn thư mục sao lưu*** (ví dụ `E:\Backup_POS`) → bấm **Cho phép** (nên chọn *"Cho phép mỗi lần truy cập"* nếu Chrome hỏi).
+- Mỗi ngày tự ghi 1 file `vlxd-pos_YYYY-MM-DD.json`; trong ngày có dữ liệu mới thì ghi đè lại tối đa mỗi giờ. Tự xóa bản cũ, giữ 7–365 bản gần nhất (mặc định 30).
+- Nhiều app dùng chung một thư mục được (tên file khác nhau). Khôi phục bằng nút *Khôi phục từ file sao lưu*.
+- Mở lại trình duyệt, Chrome có thể hỏi lại quyền: app hỏi khi đăng nhập, hoặc hiện nút **"⚠ Bấm để cho phép sao lưu"** ở góc trên.
+- Không hỗ trợ trên iPhone / iPad / Safari / Firefox → dùng nút *Sao lưu toàn bộ dữ liệu* thủ công.
+
 ## Giao diện
 Phong cách công trường: nền **bản vẽ kỹ thuật (blueprint)** với lưới tọa độ, **cần cẩu tháp** & khung nhà đang xây vẽ line-art, **dải sọc vàng – đen cảnh báo**, khung tên bản vẽ; chữ tiêu đề Barlow Condensed kiểu bảng hiệu công trình; tự đổi giao diện tối.
 

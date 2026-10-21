@@ -104,7 +104,7 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 
 /* ===== Đăng nhập ===== */
 #auth{position:fixed;inset:0;z-index:30;overflow-y:auto}
-.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;isolation:isolate;overflow:hidden;
+.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:1fr auto;isolation:isolate;overflow:hidden;
   background:radial-gradient(ellipse at 15% 20%,#6d2f58 0,transparent 55%),radial-gradient(ellipse at 80% 90%,#7a4a3a 0,transparent 50%),linear-gradient(150deg,#3a1d33,#24111f 70%)}
 .auth .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;z-index:-1;animation:drift 22s ease-in-out infinite alternate}
 .auth .a1{width:520px;height:520px;background:#c46a8a;top:-160px;left:10%}
@@ -140,7 +140,7 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 .auth-foot{margin-top:24px;font-size:12.5px;color:#7a6572;text-align:center}
 .link{color:var(--rose);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:899px){
-  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
   .auth-art{padding:calc(var(--st) + 30px) 24px 10px}
   .auth-art h2{font-size:30px}.brand-lg{margin-bottom:20px}.svcs{margin-top:16px}.svcs span{font-size:12.5px;padding:5px 11px}
   .auth-side{align-items:flex-start;padding-top:22px}
@@ -376,6 +376,24 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 .lic-st b{font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translateX(-50%);background:#3a1d33;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:90vw;animation:tin .2s}
 .toast.err{background:var(--err)}
+/* Bảng tên bản quyền: kính mờ, chữ rose-gold nổi */
+.credit{grid-column:1/-1;display:flex;justify-content:center;padding:0 20px 28px}
+.cr-in{display:flex;align-items:center;gap:16px;padding:14px 28px 14px 16px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1px solid rgba(240,201,180,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 16px 40px rgba(20,5,15,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.cr-c{width:46px;height:46px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font:700 25px/1 var(--serif);color:#3a1d33;
+  background:radial-gradient(circle at 35% 30%,#fff1e4,#e9b3a8 55%,#a8667a);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),0 3px 10px rgba(0,0,0,.35)}
+.cr-t{font:500 15px var(--sans);color:#f5e6ec;letter-spacing:.2px}
+.cr-t b{font:italic 700 24px/1.15 var(--serif);margin-left:4px;letter-spacing:.3px;
+  background:linear-gradient(180deg,#fff4e8 0%,#f6dcc0 40%,#e2a99c 70%,#c07a88 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(40,10,30,.55)) drop-shadow(0 0 12px rgba(246,220,192,.25))}
+.cr-l{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:5px}
+.cr-l a{display:inline-flex;align-items:center;gap:7px;color:#fff;text-decoration:none;font:600 15px var(--sans);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.cr-l a:hover{color:#f6dcc0}
+.cr-l svg{width:17px;height:17px;color:#f0c9b4}
+.ver .cr-s{display:block;margin-top:4px}
+.ver a{color:inherit}
+@media(max-width:899px){.credit{padding:4px 14px 26px}.cr-in{padding:12px 16px 12px 12px;gap:12px}.cr-t b{font-size:21px;display:block;margin:2px 0 0}.cr-l a{font-size:14px}}
 @keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
 .fatal{position:relative;z-index:2;padding:40px 24px;max-width:520px;margin:auto;text-align:center}
 
@@ -411,6 +429,7 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
   <div class="content">
     <header class="topbar">
       <h1 id="vTitle"></h1>
+      <button class="trial hidden" id="bkBtn" data-act="bkGrant"></button>
       <button class="trial hidden" id="trialBtn" data-act="license"></button>
       <span class="net hidden" id="net">● Ngoại tuyến</span>
       <button class="av" id="tbMe" data-act="meMenu" aria-label="Tài khoản"></button>
@@ -541,7 +560,7 @@ async function loadAll() {
   S.settings = { ...d.settings, ...S.settings }; S.seq = { ...d.seq, ...S.seq };
 }
 const dirty = new Set(); let saveT;
-function save(...keys) { keys.forEach(k => dirty.add(k)); clearTimeout(saveT); saveT = setTimeout(flush, 150); }
+function save(...keys) { BK.changed = Date.now(); keys.forEach(k => dirty.add(k)); clearTimeout(saveT); saveT = setTimeout(flush, 150); }
 async function flush() {
   const ks = [...dirty]; dirty.clear();
   try { for (const k of ks) await IDB.set(k, S[k]); } catch (e) { toast('Lỗi lưu dữ liệu: ' + e.message, 'err'); }
@@ -553,7 +572,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
    - Mã kích hoạt = chữ ký số ECDSA P-256 trên (mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật
      trong công cụ tạo mã của nhà cung cấp. App chỉ chứa khóa công khai để kiểm tra. */
 const TRIAL_DAYS = 15;
-const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668', email: 'tnp10102014@gmail.com' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
 const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "_dmBLgL9p3ZoMWDZx-QKkUjj7Ni7_2bJ50AgVDgf_OY", "y": "4SssgIyxqTVVXkfclNCzYlJlSnrHsZSzKLJlXxeBF1g"};
 const PLANS = { T15: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
 const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -660,6 +679,65 @@ function licenseModal() {
 }
 window.addEventListener('pagehide', flush);
 
+/* ================= TỰ ĐỘNG SAO LƯU =================
+   Ghi file sao lưu trực tiếp vào thư mục do người dùng chọn (File System Access API — Chrome/Edge trên máy tính).
+   Mỗi ngày 1 file beauty-pos_YYYY-MM-DD.json; trong ngày có dữ liệu mới thì ghi đè lại tối đa mỗi giờ; giữ N bản gần nhất. */
+const APP_ID = 'beauty-pos';
+const BK = { dir: null, meta: { on: false, keep: 30, last: 0, lastFile: '', err: '' }, changed: 0, busy: false };
+const fsSupported = () => 'showDirectoryPicker' in window;
+const backupJSON = () => JSON.stringify({ app: APP_ID, v: 1, at: Date.now(), data: Object.fromEntries(COLS.map(k => [k, S[k]])) });
+async function bkLoad() { try { BK.dir = (await IDB.get('bkdir')) || null; BK.meta = { ...BK.meta, ...((await IDB.get('bkmeta')) || {}) }; } catch (e) {} }
+const bkSaveMeta = () => IDB.set('bkmeta', BK.meta).catch(() => {});
+async function bkPerm(ask) {
+  if (!BK.dir) return false;
+  const o = { mode: 'readwrite' };
+  try { if ((await BK.dir.queryPermission(o)) === 'granted') return true; if (ask) return (await BK.dir.requestPermission(o)) === 'granted'; } catch (e) {}
+  return false;
+}
+async function bkRun(manual) {
+  if (!BK.dir || BK.busy) return false;
+  BK.busy = true;
+  try {
+    if (!(await bkPerm(manual))) { BK.meta.err = 'perm'; return false; }
+    await flush();
+    const name = `${APP_ID}_${isoDate(Date.now())}.json`;
+    const w = await (await BK.dir.getFileHandle(name, { create: true })).createWritable();
+    await w.write(backupJSON()); await w.close();
+    Object.assign(BK.meta, { last: Date.now(), lastFile: name, err: '' }); BK.changed = 0;
+    const files = [];
+    for await (const [n, h] of BK.dir.entries()) if (h.kind === 'file' && n.startsWith(APP_ID + '_') && n.endsWith('.json')) files.push(n);
+    files.sort();
+    for (const n of files.slice(0, Math.max(0, files.length - (+BK.meta.keep || 30)))) await BK.dir.removeEntry(n);
+    return true;
+  } catch (e) { BK.meta.err = e.message || String(e); return false; }
+  finally { BK.busy = false; await bkSaveMeta(); updBk(); }
+}
+async function bkTick() {
+  if (!ME || !BK.dir || !BK.meta.on) return;
+  const today = isoDate(Date.now()), lastDay = BK.meta.last ? isoDate(BK.meta.last) : '';
+  if (lastDay !== today || (BK.changed > BK.meta.last && Date.now() - BK.meta.last > 3600000)) await bkRun(false);
+}
+function bkAfterLogin() { if (BK.dir && BK.meta.on) bkPerm(true).then(() => setTimeout(bkTick, 1500)); }
+function updBk() {
+  const b = $('#bkBtn'); if (!b) return;
+  const bad = ME && BK.dir && BK.meta.on && BK.meta.err;
+  b.classList.toggle('hidden', !bad);
+  b.textContent = BK.meta.err === 'perm' ? '⚠ Bấm để cho phép sao lưu' : '⚠ Sao lưu lỗi';
+}
+const bkErrTxt = () => BK.meta.err === 'perm' ? 'Chưa được cấp quyền ghi vào thư mục — bấm "Sao lưu ngay" để cho phép.' : BK.meta.err ? 'Lỗi: ' + esc(BK.meta.err) + ' (thư mục bị xóa / đổi tên / ổ đĩa rút ra?) — hãy chọn lại thư mục.' : '';
+function bkCard() {
+  if (!fsSupported()) return `<div class="card"><h3>Tự động sao lưu</h3><div class="warn">Trình duyệt / thiết bị này chưa hỗ trợ ghi file tự động. Hãy dùng <b>Chrome</b> hoặc <b>Edge</b> trên máy tính (Windows / Mac / Linux). Trên điện thoại, dùng nút <b>Sao lưu toàn bộ dữ liệu</b> bên dưới.</div></div>`;
+  const m = BK.meta;
+  return `<div class="card"><h3>Tự động sao lưu</h3>
+    <div class="lic-st">📁<div><b>${BK.dir ? 'Thư mục: ' + esc(BK.dir.name) : 'Chưa chọn thư mục'}</b><br>
+      <small class="muted">${m.last ? `Lần gần nhất: ${ddmmyy(m.last)} ${hhmm(m.last)} · ${esc(m.lastFile)}` : 'Chưa sao lưu lần nào'}</small>
+      ${m.err ? `<br><small class="err-t">${bkErrTxt()}</small>` : ''}</div></div>
+    <label class="check"><input type="checkbox" id="bkOn" ${m.on ? 'checked' : ''} ${BK.dir ? '' : 'disabled'}> Bật tự động sao lưu mỗi ngày (cập nhật lại mỗi giờ nếu có dữ liệu mới)</label>
+    <div class="f"><label>Giữ lại</label><select id="bkKeep">${[7, 14, 30, 60, 90, 180, 365].map(n => `<option value="${n}" ${+m.keep === n ? 'selected' : ''}>${n} bản gần nhất</option>`).join('')}</select></div>
+    <div class="row"><button class="btn rose grow" data-act="bkPick">${BK.dir ? 'Đổi thư mục' : 'Chọn thư mục sao lưu'}</button><button class="btn ghost grow" data-act="bkNow" ${BK.dir ? '' : 'disabled'}>Sao lưu ngay</button></div>
+    <p class="muted" style="font-size:12.5px;margin:10px 0 0">File dạng <b>${APP_ID}_${isoDate(Date.now())}.json</b>, mỗi ngày 1 file. Nhiều app dùng chung một thư mục được (tên file khác nhau). Nên tạo thư mục riêng, ví dụ <b>E:\\Backup_POS</b>. Khôi phục bằng nút <b>Khôi phục từ file sao lưu</b>.</p></div>`;
+}
+
 /* ================= BẢO MẬT ================= */
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 const newSalt = () => hex(crypto.getRandomValues(new Uint8Array(16)));
@@ -690,7 +768,10 @@ function authShell(inner, title) {
       <p>Phần mềm thu ngân, lịch hẹn và quản lý kỹ thuật viên dành cho salon làm đẹp & spa.</p>
       <div class="svcs">${['✂️ Cắt tóc', '💅 Làm nail', '👁️ Nối mi', '💋 Phun xăm', '🧖‍♀️ Chăm sóc da', '💆‍♀️ Massage'].map(x => `<span>${x}</span>`).join('')}</div>
     </section>
-    <section class="auth-side"><form class="auth-card" id="authForm" novalidate>${inner}</form></section></div>`;
+    <section class="auth-side"><form class="auth-card" id="authForm" novalidate>${inner}</form></section>
+    <footer class="credit"><div class="cr-in"><span class="cr-c">©</span><div class="cr-b"><div class="cr-t">Bản quyền thuộc về <b>${esc(VENDOR.name)}</b></div>
+      <div class="cr-l"><a href="tel:${digits(VENDOR.phone)}">${I('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>')}Mobile: ${esc(VENDOR.phone)}</a>
+      <a href="mailto:${esc(VENDOR.email)}">${I('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>')}Email: ${esc(VENDOR.email)}</a></div></div></div></footer></div>`;
   a.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
   return $('#authForm');
 }
@@ -766,7 +847,7 @@ function login(u, resume) {
   ME = u; lastAct = Date.now(); sessSet({ uid: u.id, last: lastAct });
   $('#auth').classList.add('hidden'); $('#auth').innerHTML = '';
   $('#app').classList.remove('hidden');
-  renderShell(); updTrial(); go(resume ? cur : (location.hash.slice(2) || 'pos'));
+  renderShell(); updTrial(); updBk(); bkAfterLogin(); go(resume ? cur : (location.hash.slice(2) || 'pos'));
   if (u.mustChange) changePassword(true); else if (!resume) toast(`Xin chào, ${u.name}!`);
 }
 function logout() { ME = null; sessSet(null); closeAllModals(); flush(); renderLogin(); }
@@ -1414,6 +1495,7 @@ function vSettings() {
       <div class="list">${S.users.map(u => `<button class="li li-u" data-act="editUser" data-id="${u.id}"><span class="av">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><small>@${esc(u.username)}</small></span>
         <span class="tag ${u.role === 'admin' ? 'rose' : 'blue'}">${u.role === 'admin' ? 'Quản lý' : 'Nhân viên'}</span><span class="tag ${u.active ? 'ok' : 'err'}">${u.active ? 'Hoạt động' : 'Đã khóa'}</span></button>`).join('')}</div>
       <p class="muted" style="font-size:12.5px;margin:10px 0 0"><b>Nhân viên</b>: thu ngân, lịch hẹn, khách hàng, xem hóa đơn & bảng giá. <b>Quản lý</b>: toàn quyền, gồm sửa giá, hủy hóa đơn, báo cáo & hoa hồng.</p></div>
+    ${bkCard()}
     <div class="card"><h3>Dữ liệu & sao lưu</h3>
       ${s.demo ? `<div class="warn" style="margin-bottom:12px">Đang có <b>dữ liệu mẫu</b>. Xóa trước khi dùng thật (giữ lại bảng giá dịch vụ).<br><button class="btn sm danger" style="margin-top:8px" data-act="clearDemo">Xóa dữ liệu mẫu</button></div>` : ''}
       <p class="muted" style="font-size:13px;margin-top:0">${S.items.length} dịch vụ/SP · ${S.techs.length} KTV · ${S.customers.length} khách · ${S.orders.length} hóa đơn · ${S.appts.length} lịch hẹn. Dữ liệu lưu trên thiết bị này.</p>
@@ -1425,8 +1507,10 @@ function vSettings() {
       <div><b>Android:</b> Chrome → ⋮ → <b>Cài đặt ứng dụng</b>.</div>
       <div><b>Windows / Mac / Linux:</b> Chrome hoặc Edge → biểu tượng <b>⊕ Cài đặt</b> cuối thanh địa chỉ.</div>
       <div class="muted">Sau khi cài, ứng dụng chạy toàn màn hình và dùng được khi mất mạng.</div></div></div>
-  </div><div class="ver">Beauty POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}</div>`;
+  </div><div class="ver">Beauty POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}<span class="cr-s">© Bản quyền thuộc về <b>${esc(VENDOR.name)}</b> · Mobile: <a href="tel:${digits(VENDOR.phone)}">${esc(VENDOR.phone)}</a> · Email: <a href="mailto:${esc(VENDOR.email)}">${esc(VENDOR.email)}</a></span></div>`;
   const ri = $('#restoreIn'); if (ri) ri.onchange = restore;
+  const bo = $('#bkOn'); if (bo) bo.onchange = e => { BK.meta.on = e.target.checked; if (!BK.meta.on) BK.meta.err = ''; bkSaveMeta(); updBk(); if (BK.meta.on) bkRun(true); };
+  const bkk = $('#bkKeep'); if (bkk) bkk.onchange = e => { BK.meta.keep = +e.target.value; bkSaveMeta(); };
   const ci = $('#catIn'); if (ci) ci.onkeydown = e => { if (e.key === 'Enter') A.addCat(); };
   const rq = $('#sReqTech'); if (rq) rq.onchange = e => { S.settings.requireTech = e.target.checked; save('settings'); };
 }
@@ -1544,7 +1628,17 @@ function seedDemo(admin) {
 /* ================= SỰ KIỆN ================= */
 const A = {
   close: closeModal, go: d => { closeAllModals(); go(d.v); }, lock: () => { closeAllModals(); lockScreen(); }, logout: () => { closeAllModals(); logout(); },
-  meMenu, moreMenu, license: () => licenseModal(), copyDev: () => copyText(LIC.dev), chpw: () => { closeAllModals(); changePassword(false); },
+  meMenu, moreMenu, license: () => licenseModal(),
+  bkPick: async () => {
+    try {
+      const h = await window.showDirectoryPicker({ id: APP_ID + '-backup', mode: 'readwrite', startIn: 'documents' });
+      BK.dir = h; await IDB.set('bkdir', h); BK.meta.on = true; BK.meta.err = '';
+      const ok = await bkRun(true); toast(ok ? `Đã sao lưu vào thư mục "${h.name}"` : 'Chưa ghi được file sao lưu', ok ? '' : 'err'); vSettings();
+    } catch (e) { if (e.name !== 'AbortError') toast('Không chọn được thư mục: ' + e.message, 'err'); }
+  },
+  bkNow: async () => { const ok = await bkRun(true); toast(ok ? 'Đã sao lưu: ' + BK.meta.lastFile : 'Sao lưu chưa thành công', ok ? '' : 'err'); if (cur === 'settings') vSettings(); },
+  bkGrant: async () => { const ok = await bkRun(true); toast(ok ? 'Đã sao lưu: ' + BK.meta.lastFile : 'Sao lưu chưa thành công — kiểm tra trong Cài đặt', ok ? '' : 'err'); },
+ copyDev: () => copyText(LIC.dev), chpw: () => { closeAllModals(); changePassword(false); },
   posCat: d => { posF.cat = d.v; renderCats(); renderGrid(); },
   add: d => addItem(d.id),
   selTk: d => { curTk = d.id; renderStrip(); renderGrid(); renderTicket(); if (window.innerWidth < 900) $('#cartPanel').classList.add('open'); },
@@ -1621,6 +1715,7 @@ setInterval(() => { if (ME && cur === 'pos' && !$$('.modal').length && $('#tkStr
   netUpd();
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
   await licLoad();
+  await bkLoad(); setInterval(bkTick, 5 * 60000);
   if (!(await licCheck())) return;
   setInterval(() => { if (LST && LST.active) licCheck(); }, 10 * 60000);
   if (!S.users.length) return renderSetup();
