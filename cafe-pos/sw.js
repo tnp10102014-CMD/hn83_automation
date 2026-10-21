@@ -1,7 +1,7 @@
 // Service worker: lưu đệm giao diện để app chạy được khi mất mạng.
 // Đổi số phiên bản khi cập nhật file để điện thoại tải bản mới.
-const CACHE = 'cafe-pos-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
+const CACHE = 'cafe-pos-v2';
+const ASSETS = ['./', './index.html', './qrcode.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
