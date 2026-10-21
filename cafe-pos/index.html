@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#3b2418">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cà Phê POS">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<title>Cà Phê POS</title>
+<style>
+:root{
+  --bg:#f6f1eb;--surface:#fff;--surface2:#f1e8de;--text:#2a1d16;--muted:#8a7668;
+  --primary:#6f4e37;--primary2:#8b5e3c;--ink:#fff;--accent:#d98e3a;
+  --busy1:#e98a3c;--busy2:#c8612a;--ok:#2e9e6a;--danger:#d64545;--border:#e8ddd1;
+  --shadow:0 2px 10px rgba(60,35,20,.08);--radius:16px;
+  --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#15100c;--surface:#211913;--surface2:#2c221b;--text:#f3e9df;--muted:#a8968a;
+    --primary:#c8935f;--primary2:#b07b48;--ink:#1a120d;--border:#3a2e25;--shadow:0 2px 10px rgba(0,0,0,.35)}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  display:flex;flex-direction:column;height:100dvh;overflow:hidden;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select,textarea{font:inherit;font-size:16px;color:var(--text);background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:11px 12px;width:100%;outline:none}
+input:focus,select:focus{border-color:var(--primary)}
+.hidden{display:none!important}
+
+/* Header */
+.top{background:linear-gradient(135deg,#3b2418,#6f4e37);color:#fff;padding:calc(var(--st) + 10px) 16px 12px;flex-shrink:0}
+.top h1{margin:0;font-size:19px;letter-spacing:.2px}
+.top .sub{font-size:12.5px;opacity:.8;margin-top:2px}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.clock{font-variant-numeric:tabular-nums;font-size:13px;background:rgba(255,255,255,.15);padding:5px 10px;border-radius:20px}
+
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px calc(20px)}
+.tabbar{display:flex;background:var(--surface);border-top:1px solid var(--border);padding-bottom:var(--sb);flex-shrink:0}
+.tabbar button{flex:1;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;color:var(--muted)}
+.tabbar button.on{color:var(--primary);font-weight:600}
+.tabbar svg{width:24px;height:24px}
+
+/* Common */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:8px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--border);font-size:14px}
+.chip.on{background:var(--primary);color:var(--ink);border-color:var(--primary);font-weight:600}
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px}
+.btn{padding:12px 16px;border-radius:12px;background:var(--surface2);font-weight:600;text-align:center}
+.btn.pri{background:var(--primary);color:var(--ink)}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--border)}
+.btn:active,.tcard:active,.mcard:active{transform:scale(.97)}
+.row{display:flex;gap:10px;align-items:center}
+.grow{flex:1}
+.muted{color:var(--muted)}
+.sec-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:18px 2px 8px}
+label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
+
+/* Tables */
+.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--surface);border-radius:14px;padding:11px 13px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:19px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-top:12px}
+.tcard{position:relative;background:var(--surface);border:1.5px dashed var(--border);border-radius:14px;min-height:92px;
+  padding:9px;display:flex;flex-direction:column;align-items:flex-start;text-align:left;transition:transform .08s}
+.tcard .tnum{font-size:24px;font-weight:800;line-height:1;color:var(--primary);font-variant-numeric:tabular-nums}
+.tcard .tlabel{font-size:12px;color:var(--muted);margin-top:2px}
+.tcard .tfree{margin-top:auto;font-size:12px;color:var(--ok);font-weight:600}
+.tcard.busy{background:linear-gradient(145deg,var(--busy1),var(--busy2));border:0;color:#fff;box-shadow:0 4px 14px rgba(200,97,42,.35)}
+.tcard.busy .tnum,.tcard.busy .tlabel{color:#fff}
+.tcard .tamt{margin-top:auto;font-weight:700;font-size:13.5px;font-variant-numeric:tabular-nums}
+.tcard .ttime{font-size:10.5px;opacity:.9}
+.tcard.wide{grid-column:1/-1;min-height:64px;flex-direction:row;align-items:center;gap:12px;border-style:solid}
+.tcard.wide .tnum{font-size:26px}
+.tcard.wide .tlabel{font-size:15px;font-weight:600;margin:0}
+.tcard.wide .tfree,.tcard.wide .tamt{margin:0 0 0 auto}
+
+/* Order screen */
+.screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;z-index:20;transform:translateX(100%);transition:transform .22s ease}
+.screen.open{transform:none}
+.ohead{background:linear-gradient(135deg,#3b2418,#6f4e37);color:#fff;padding:calc(var(--st) + 8px) 8px 10px;display:flex;align-items:center;gap:6px}
+.ohead h2{margin:0;font-size:19px;flex:1}
+.ohead .ib{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:20px}
+.ohead .ib:active{background:rgba(255,255,255,.15)}
+.otools{padding:10px 12px 6px;display:flex;flex-direction:column;gap:9px;flex-shrink:0}
+.mgrid{flex:1;overflow-y:auto;padding:4px 12px 150px;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;align-content:start}
+.mcard{position:relative;background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:10px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;min-height:112px;transition:transform .08s}
+.mcard .em{font-size:30px;line-height:1.2}
+.mcard .nm{font-size:13.5px;font-weight:600;line-height:1.25}
+.mcard .pr{font-size:12.5px;color:var(--primary);font-weight:700;margin-top:auto}
+.mcard .badge{position:absolute;top:6px;right:6px;background:var(--accent);color:#fff;font-size:12px;font-weight:700;min-width:22px;height:22px;border-radius:11px;display:grid;place-items:center;padding:0 6px}
+.mcard.off{opacity:.4}
+.mcard.off::after{content:"Hết";position:absolute;top:6px;left:6px;font-size:11px;background:var(--danger);color:#fff;padding:1px 6px;border-radius:8px}
+
+.cart{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.15);
+  padding:8px 14px calc(var(--sb) + 12px);display:flex;flex-direction:column;max-height:78%}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--border);margin:0 auto 8px}
+.clines{overflow-y:auto;display:none;margin-bottom:8px}
+.cart.expanded .clines{display:block}
+.line{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--border)}
+.line .lmain{flex:1;min-width:0}
+.line .lname{font-weight:600;font-size:14.5px}
+.line .lsub{font-size:12.5px;color:var(--muted)}
+.line .lsub i{color:var(--accent);font-style:normal}
+.line .lamt{width:74px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;font-size:14px}
+.qty{display:flex;align-items:center;background:var(--surface2);border-radius:10px}
+.qty button{width:34px;height:34px;font-size:19px;font-weight:700;color:var(--primary)}
+.qty b{min-width:20px;text-align:center;font-variant-numeric:tabular-nums}
+.ibtn{width:34px;height:34px;border-radius:10px;background:var(--surface2);font-size:15px}
+.cbar{display:flex;align-items:center;gap:10px}
+.cbar .tot{flex:1}
+.cbar .tot b{font-size:21px;font-variant-numeric:tabular-nums;display:block;line-height:1.1}
+.cbar .tot span{font-size:12.5px;color:var(--muted)}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(20,12,6,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92dvh;overflow-y:auto;border-radius:22px 22px 0 0;padding:16px 16px calc(var(--sb) + 16px);animation:up .2s ease}
+.sheet h3{margin:0 0 6px;font-size:18px}
+@keyframes up{from{transform:translateY(40px);opacity:.6}}
+@keyframes fade{from{opacity:0}}
+.kv{display:flex;justify-content:space-between;padding:6px 0;font-variant-numeric:tabular-nums}
+.kv.big{font-size:22px;font-weight:800;color:var(--primary);border-top:1px dashed var(--border);margin-top:4px;padding-top:10px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px}
+.seg button{flex:1;padding:9px 6px;border-radius:10px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.cashbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.cashbtns button{padding:10px 4px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-weight:600;font-size:14px}
+.qr{display:block;margin:10px auto 0;width:220px;max-width:80%;border-radius:12px;background:#fff}
+.tpick{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:10px}
+.tpick button{padding:12px 0;border-radius:12px;background:var(--surface);border:1px solid var(--border);font-weight:700}
+.tpick button.busy{background:var(--busy1);color:#fff;border-color:var(--busy1)}
+.notechips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+
+/* Menu admin */
+.mrow{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border)}
+.mrow:last-child{border-bottom:0}
+.mrow .em{font-size:24px;width:32px;text-align:center}
+.mrow .nm{flex:1;font-weight:600}
+.mrow .nm small{display:block;color:var(--primary);font-weight:700}
+.sw{position:relative;width:46px;height:28px;border-radius:14px;background:var(--border);flex-shrink:0;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.sw.on{background:var(--ok)}
+.sw.on::after{left:21px}
+
+/* Report */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--surface);border-radius:14px;padding:12px 13px;box-shadow:var(--shadow)}
+.kpi span{font-size:12px;color:var(--muted)}
+.kpi b{display:block;font-size:19px;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi.main{grid-column:1/-1;background:linear-gradient(135deg,#3b2418,#6f4e37);color:#fff}
+.kpi.main span{color:rgba(255,255,255,.8)}
+.kpi.main b{font-size:28px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:130px;padding-top:6px}
+.bars .bc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.bars .b{width:100%;max-width:26px;background:linear-gradient(var(--accent),var(--primary2));border-radius:5px 5px 2px 2px;min-height:2px}
+.bars .bl{font-size:10px;color:var(--muted);margin-top:4px;white-space:nowrap}
+.top5{display:flex;align-items:center;gap:10px;padding:7px 0}
+.top5 .tb{height:8px;border-radius:4px;background:var(--accent);margin-top:4px}
+.bill{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--border);width:100%;text-align:left}
+.tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:7px;background:var(--surface2)}
+.tag.ck{background:#d8ecff;color:#1e5c99}
+.tag.tm{background:#dcf3e6;color:#1d7a4c}
+@media (prefers-color-scheme:dark){.tag.ck{background:#1e3550;color:#9cc8f2}.tag.tm{background:#1d3a2b;color:#8fd9b2}}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 90px);transform:translateX(-50%);background:#2a1d16;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.25);animation:fade .2s}
+
+/* Print */
+#print{display:none}
+@media print{
+  @page{margin:0;size:80mm auto}
+  body{display:block;height:auto;overflow:visible;background:#fff;color:#000}
+  body>*:not(#print){display:none!important}
+  #print{display:block;width:72mm;margin:0 auto;padding:4mm 0;font:12px/1.35 "Courier New",monospace;color:#000}
+  #print .c{text-align:center}
+  #print h2{font-size:16px;margin:0}
+  #print table{width:100%;border-collapse:collapse}
+  #print td{padding:2px 0;vertical-align:top}
+  #print .r{text-align:right}
+  #print hr{border:0;border-top:1px dashed #000;margin:6px 0}
+  #print .t{font-size:15px;font-weight:bold}
+  #print img{width:40mm;display:block;margin:6px auto}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="toprow">
+    <div>
+      <h1 id="shopName">Cà Phê POS</h1>
+      <div class="sub" id="shopSub">Quản lý bàn & tính tiền</div>
+    </div>
+    <div class="clock" id="clock">--:--</div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<nav class="tabbar">
+  <button data-act="tab" data-tab="tables" class="on">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Bàn</button>
+  <button data-act="tab" data-tab="menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9h13v4a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H16"/><path d="M8 2v3M12 2v3"/></svg>Thực đơn</button>
+  <button data-act="tab" data-tab="report">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Báo cáo</button>
+  <button data-act="tab" data-tab="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Cài đặt</button>
+</nav>
+
+<!-- Màn hình gọi món -->
+<section class="screen" id="order">
+  <div class="ohead">
+    <button class="ib" data-act="closeOrder" aria-label="Quay lại">‹</button>
+    <h2 id="oTitle">Bàn</h2>
+    <button class="ib" data-act="tableMenu" aria-label="Tùy chọn">⋯</button>
+  </div>
+  <div class="otools">
+    <input id="oSearch" type="search" placeholder="🔍 Tìm món (gõ không dấu cũng được)…" autocomplete="off">
+    <div class="chips" id="oCats"></div>
+  </div>
+  <div class="mgrid" id="oGrid"></div>
+  <div class="cart" id="cart">
+    <div class="grab" data-act="toggleCart"></div>
+    <div class="clines" id="cLines"></div>
+    <div class="cbar">
+      <div class="tot" data-act="toggleCart"><b id="cTotal">0đ</b><span id="cCount">Chưa có món · chạm để xem</span></div>
+      <button class="btn ghost" data-act="toggleCart" id="cToggle">Xem đơn</button>
+      <button class="btn ok" data-act="pay">Thanh toán</button>
+    </div>
+  </div>
+</section>
+
+<div id="modal" class="modal hidden"><div class="sheet" id="sheet"></div></div>
+<div id="print"></div>
+
+<script>
+'use strict';
+/* ================= DỮ LIỆU ================= */
+const LS_KEY = 'cafe-pos-v1';
+const DEFAULT_CATS = ['Cà phê', 'Trà & Nước', 'Sinh tố & Nước ép', 'Ăn sáng', 'Khác'];
+const DEFAULT_MENU = [
+  ['Cà phê đen', 'Cà phê', 15000, '☕'], ['Cà phê sữa', 'Cà phê', 18000, '☕'],
+  ['Bạc xỉu', 'Cà phê', 22000, '🥛'], ['Cà phê muối', 'Cà phê', 25000, '🧂'],
+  ['Cà phê trứng', 'Cà phê', 30000, '🥚'], ['Cappuccino', 'Cà phê', 35000, '☕'],
+  ['Trà đá', 'Trà & Nước', 3000, '🧊'], ['Trà chanh', 'Trà & Nước', 15000, '🍋'],
+  ['Trà đào cam sả', 'Trà & Nước', 30000, '🍑'], ['Trà sữa', 'Trà & Nước', 25000, '🧋'],
+  ['Nước ngọt', 'Trà & Nước', 15000, '🥤'], ['Nước suối', 'Trà & Nước', 10000, '💧'],
+  ['Sinh tố bơ', 'Sinh tố & Nước ép', 30000, '🥑'], ['Nước cam', 'Sinh tố & Nước ép', 25000, '🍊'],
+  ['Nước ép dưa hấu', 'Sinh tố & Nước ép', 25000, '🍉'],
+  ['Phở bò', 'Ăn sáng', 40000, '🍜'], ['Bún bò', 'Ăn sáng', 40000, '🍲'],
+  ['Hủ tiếu', 'Ăn sáng', 35000, '🍜'], ['Bánh mì ốp la', 'Ăn sáng', 25000, '🍳'],
+  ['Bánh mì thịt', 'Ăn sáng', 20000, '🥖'], ['Xôi gà', 'Ăn sáng', 25000, '🍗'],
+  ['Cơm tấm', 'Ăn sáng', 40000, '🍛'], ['Mì xào bò', 'Ăn sáng', 40000, '🍝'],
+  ['Bánh cuốn', 'Ăn sáng', 30000, '🥟'],
+  ['Hướng dương', 'Khác', 10000, '🌻'], ['Khăn lạnh', 'Khác', 2000, '🧻']
+];
+const QUICK_NOTES = ['Ít đường', 'Nhiều đường', 'Không đường', 'Ít đá', 'Không đá', 'Nóng', 'Mang về', 'Không hành', 'Thêm trứng'];
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function defaultState() {
+  return {
+    settings: { shopName: 'Cà Phê POS', address: '', phone: '', tableCount: 20, footer: 'Cảm ơn quý khách - Hẹn gặp lại!', bankId: '', bankAcc: '', bankName: '' },
+    cats: DEFAULT_CATS.slice(),
+    menu: DEFAULT_MENU.map(([name, cat, price, emoji]) => ({ id: uid() + Math.random().toString(36).slice(2, 4), name, cat, price, emoji, off: false })),
+    tables: {},
+    bills: [],
+    seq: 0
+  };
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) { const s = JSON.parse(raw); const d = defaultState(); return { ...d, ...s, settings: { ...d.settings, ...s.settings } }; }
+  } catch (e) { console.warn(e); }
+  return defaultState();
+}
+let S = load();
+function save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); }
+  catch (e) { toast('⚠️ Không lưu được dữ liệu (bộ nhớ đầy?)'); }
+}
+
+/* ================= TIỆN ÍCH ================= */
+const $ = s => document.querySelector(s);
+const fmt = n => (Math.round(n) || 0).toLocaleString('vi-VN') + 'đ';
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+const subtotal = items => items.reduce((a, l) => a + l.price * l.qty, 0);
+const countQty = items => items.reduce((a, l) => a + l.qty, 0);
+const tableName = k => k === 'mv' ? 'Mang về' : 'Bàn ' + k;
+const pad = n => String(n).padStart(2, '0');
+const hhmm = t => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const ddmm = t => { const d = new Date(t); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear(); };
+const isoDate = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+function elapsed(t) {
+  const m = Math.max(0, Math.floor((Date.now() - t) / 60000));
+  return m < 60 ? m + ' phút' : Math.floor(m / 60) + 'g' + pad(m % 60) + 'p';
+}
+function toast(msg) {
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1800);
+}
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} };
+
+/* ================= TRẠNG THÁI GIAO DIỆN ================= */
+const ui = { tab: 'tables', filter: 'all', table: null, cat: 'all', q: '', cartOpen: false, rpt: 'today', from: isoDate(Date.now()), to: isoDate(Date.now()) };
+let pay = null;
+
+function render() {
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  $('#shopName').textContent = S.settings.shopName || 'Cà Phê POS';
+  $('#shopSub').textContent = S.settings.address || 'Quản lý bàn & tính tiền';
+  ({ tables: renderTables, menu: renderMenuAdmin, report: renderReport, settings: renderSettings })[ui.tab]();
+}
+
+/* ================= SƠ ĐỒ BÀN ================= */
+function tableCard(k) {
+  const t = S.tables[k]; const has = t && t.items.length;
+  const wide = k === 'mv';
+  const num = wide ? '🛍️' : pad(k);
+  return `<button class="tcard ${has ? 'busy' : ''} ${wide ? 'wide' : ''}" data-act="openTable" data-t="${k}">
+    <span class="tnum">${num}</span>
+    <span class="tlabel">${tableName(k)}${has ? ' · ' + countQty(t.items) + ' món' : ''}</span>
+    ${has ? `<span class="tamt">${fmt(subtotal(t.items))}</span><span class="ttime">⏱ ${elapsed(t.openedAt)}</span>`
+          : `<span class="tfree">● Trống</span>`}
+  </button>`;
+}
+function renderTables() {
+  const n = S.settings.tableCount;
+  let busy = 0, sum = 0, cards = '';
+  const keys = ['mv']; for (let i = 1; i <= n; i++) keys.push(String(i));
+  keys.forEach(k => {
+    const t = S.tables[k]; const has = t && t.items.length;
+    if (has) { if (k !== 'mv') busy++; sum += subtotal(t.items); }
+    if (ui.filter === 'busy' && !has) return;
+    if (ui.filter === 'free' && has) return;
+    cards += tableCard(k);
+  });
+  const [a, b] = dayRange(0); const todayRev = S.bills.filter(x => x.time >= a && x.time < b).reduce((s, x) => s + x.total, 0);
+  $('#main').innerHTML = `
+    <div class="summary">
+      <div class="stat"><b>${busy}/${n}</b><span>Bàn đang có khách</span></div>
+      <div class="stat"><b>${fmt(sum)}</b><span>Đang phục vụ (tạm tính)</span></div>
+      <div class="stat" style="grid-column:1/-1"><b>${fmt(todayRev)}</b><span>Doanh thu đã thu hôm nay</span></div>
+    </div>
+    <div class="chips">
+      ${[['all', 'Tất cả'], ['busy', 'Có khách'], ['free', 'Bàn trống']].map(([v, l]) => `<button class="chip ${ui.filter === v ? 'on' : ''}" data-act="filter" data-v="${v}">${l}</button>`).join('')}
+    </div>
+    <div class="tgrid">${cards || '<p class="muted">Không có bàn nào.</p>'}</div>`;
+}
+
+/* ================= GỌI MÓN ================= */
+function openTable(k) {
+  ui.table = k; ui.cat = 'all'; ui.q = ''; ui.cartOpen = false;
+  $('#oSearch').value = '';
+  renderOrder();
+  $('#order').classList.add('open');
+}
+function closeOrder() { $('#order').classList.remove('open'); ui.table = null; render(); }
+function curItems() { return (S.tables[ui.table] || { items: [] }).items; }
+
+function renderOrder() {
+  const k = ui.table; const items = curItems();
+  const t = S.tables[k];
+  $('#oTitle').textContent = tableName(k) + (t && t.items.length ? ' · ' + hhmm(t.openedAt) : '');
+  $('#oCats').innerHTML = ['all', ...S.cats].map(c => `<button class="chip ${ui.cat === c ? 'on' : ''}" data-act="cat" data-c="${esc(c)}">${c === 'all' ? 'Tất cả' : esc(c)}</button>`).join('');
+  renderGrid();
+  renderCart();
+}
+function renderGrid() {
+  const items = curItems(); const q = norm(ui.q.trim());
+  const qtyOf = id => items.filter(l => l.itemId === id).reduce((a, l) => a + l.qty, 0);
+  const list = S.menu.filter(m => (ui.cat === 'all' || m.cat === ui.cat) && (!q || norm(m.name).includes(q)));
+  $('#oGrid').innerHTML = list.map(m => {
+    const q = qtyOf(m.id);
+    return `<button class="mcard ${m.off ? 'off' : ''}" data-act="add" data-id="${m.id}">
+      ${q ? `<span class="badge">${q}</span>` : ''}
+      <span class="em">${esc(m.emoji || '🍽️')}</span><span class="nm">${esc(m.name)}</span><span class="pr">${fmt(m.price)}</span>
+    </button>`;
+  }).join('') || '<p class="muted" style="grid-column:1/-1;text-align:center">Không tìm thấy món.</p>';
+}
+function renderCart() {
+  const items = curItems();
+  $('#cart').classList.toggle('expanded', ui.cartOpen);
+  $('#cToggle').textContent = ui.cartOpen ? 'Thu gọn' : 'Xem đơn';
+  $('#cTotal').textContent = fmt(subtotal(items));
+  $('#cCount').textContent = items.length ? countQty(items) + ' món · chạm để ' + (ui.cartOpen ? 'thu gọn' : 'xem/sửa') : 'Chưa có món · chọn món ở trên';
+  $('#cLines').innerHTML = items.map((l, i) => `
+    <div class="line">
+      <div class="lmain"><div class="lname">${esc(l.name)}</div><div class="lsub">${fmt(l.price)}${l.note ? ' · <i>' + esc(l.note) + '</i>' : ''}</div></div>
+      <button class="ibtn" data-act="note" data-i="${i}" aria-label="Ghi chú">✎</button>
+      <div class="qty"><button data-act="qty" data-i="${i}" data-d="-1">−</button><b>${l.qty}</b><button data-act="qty" data-i="${i}" data-d="1">+</button></div>
+      <div class="lamt">${fmt(l.price * l.qty)}</div>
+    </div>`).join('') || '<p class="muted" style="text-align:center">Chưa có món nào.</p>';
+}
+function addItem(id) {
+  const m = S.menu.find(x => x.id === id); if (!m) return;
+  if (m.off) return toast('Món này đang hết');
+  const k = ui.table;
+  if (!S.tables[k]) S.tables[k] = { items: [], openedAt: Date.now() };
+  const items = S.tables[k].items;
+  const line = items.find(l => l.itemId === id && !l.note);
+  if (line) line.qty++; else items.push({ itemId: id, name: m.name, price: m.price, qty: 1, note: '' });
+  buzz(); save(); renderOrder();
+}
+function changeQty(i, d) {
+  const items = curItems(); const l = items[i]; if (!l) return;
+  l.qty += d;
+  if (l.qty <= 0) items.splice(i, 1);
+  if (!items.length) delete S.tables[ui.table];
+  save(); renderOrder();
+}
+function editNote(i) {
+  const l = curItems()[i]; if (!l) return;
+  openModal(`<h3>Ghi chú: ${esc(l.name)}</h3>
+    <input id="noteIn" value="${esc(l.note)}" placeholder="VD: ít đường, không đá…">
+    <div class="notechips">${QUICK_NOTES.map(n => `<button class="chip" data-act="noteQuick" data-n="${esc(n)}">${esc(n)}</button>`).join('')}</div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost grow" data-act="closeModal">Hủy</button><button class="btn pri grow" data-act="noteSave" data-i="${i}">Lưu</button></div>`);
+}
+function saveNote(i) {
+  const items = curItems(); const l = items[i]; if (!l) return;
+  const note = $('#noteIn').value.trim();
+  if (l.qty > 1 && note !== l.note && confirm(`Áp ghi chú cho cả ${l.qty} phần?\n(Bấm "Hủy" để chỉ áp cho 1 phần)`) === false) {
+    l.qty--; items.splice(i + 1, 0, { ...l, qty: 1, note });
+  } else l.note = note;
+  save(); closeModal(); renderOrder();
+}
+
+/* ---- Tùy chọn bàn ---- */
+function tableMenu() {
+  const has = curItems().length;
+  openModal(`<h3>${tableName(ui.table)}</h3>
+    <div style="display:grid;gap:9px;margin-top:12px">
+      <button class="btn" data-act="moveTable" ${has ? '' : 'disabled'}>🔀 Chuyển / Gộp bàn</button>
+      <button class="btn" data-act="printTemp" ${has ? '' : 'disabled'}>🧾 In phiếu tạm tính</button>
+      <button class="btn danger" data-act="clearTable" ${has ? '' : 'disabled'}>🗑️ Hủy toàn bộ món của bàn</button>
+      <button class="btn ghost" data-act="closeModal">Đóng</button>
+    </div>`);
+}
+function moveTable() {
+  const keys = ['mv']; for (let i = 1; i <= S.settings.tableCount; i++) keys.push(String(i));
+  openModal(`<h3>Chuyển ${tableName(ui.table)} sang…</h3>
+    <p class="muted" style="margin:0">Bàn màu cam đang có khách → sẽ <b>gộp</b> đơn.</p>
+    <div class="tpick">${keys.filter(k => k !== ui.table).map(k => {
+      const busy = S.tables[k] && S.tables[k].items.length;
+      return `<button class="${busy ? 'busy' : ''}" data-act="moveTo" data-t="${k}">${k === 'mv' ? '🛍️' : k}</button>`;
+    }).join('')}</div>
+    <button class="btn ghost" style="width:100%;margin-top:14px" data-act="closeModal">Hủy</button>`);
+}
+function moveTo(to) {
+  const from = ui.table; const src = S.tables[from]; if (!src) return;
+  const dst = S.tables[to];
+  if (dst && dst.items.length) {
+    if (!confirm(`${tableName(to)} đang có khách. Gộp đơn ${tableName(from)} vào ${tableName(to)}?`)) return;
+    src.items.forEach(l => {
+      const same = dst.items.find(x => x.itemId === l.itemId && x.note === l.note && x.price === l.price);
+      if (same) same.qty += l.qty; else dst.items.push(l);
+    });
+    dst.openedAt = Math.min(dst.openedAt, src.openedAt);
+  } else S.tables[to] = src;
+  delete S.tables[from];
+  save(); closeModal(); toast(`Đã chuyển sang ${tableName(to)}`);
+  ui.table = to; renderOrder();
+}
+function clearTable() {
+  if (!confirm(`Hủy toàn bộ món của ${tableName(ui.table)}?`)) return;
+  delete S.tables[ui.table]; save(); closeModal(); renderOrder(); toast('Đã hủy đơn');
+}
+
+/* ================= THANH TOÁN ================= */
+function openPay() {
+  const items = curItems();
+  if (!items.length) return toast('Chưa có món nào');
+  pay = { disc: 0, discType: '%', method: 'cash', given: 0 };
+  const hasBank = S.settings.bankId && S.settings.bankAcc;
+  openModal(`<h3>Thanh toán · ${tableName(ui.table)}</h3>
+    <div class="card" style="margin:10px 0">
+      ${items.map(l => `<div class="kv"><span>${l.qty} × ${esc(l.name)}${l.note ? ' <small class="muted">(' + esc(l.note) + ')</small>' : ''}</span><span>${fmt(l.qty * l.price)}</span></div>`).join('')}
+      <div class="kv" style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px"><span>Tạm tính</span><b id="pSub"></b></div>
+      <div class="kv"><span>Giảm giá</span><span id="pDisc"></span></div>
+      <div class="kv big"><span>TỔNG CỘNG</span><span id="pTotal"></span></div>
+    </div>
+    <label class="f">Giảm giá</label>
+    <div class="row"><input id="discIn" type="number" inputmode="numeric" min="0" placeholder="0" class="grow">
+      <div class="seg" style="width:120px"><button data-act="discType" data-v="%" class="on">%</button><button data-act="discType" data-v="đ">đ</button></div></div>
+    <label class="f">Hình thức</label>
+    <div class="seg"><button data-act="method" data-v="cash" class="on">💵 Tiền mặt</button><button data-act="method" data-v="bank">🏦 Chuyển khoản</button></div>
+    <div id="cashBox">
+      <label class="f">Khách đưa</label>
+      <input id="givenIn" type="number" inputmode="numeric" min="0" placeholder="Nhập số tiền khách đưa">
+      <div class="cashbtns" id="cashBtns"></div>
+      <div class="kv" style="font-size:18px;margin-top:8px"><span>Tiền thối lại</span><b id="pChange" style="color:var(--ok)">0đ</b></div>
+    </div>
+    <div id="bankBox" class="hidden">
+      ${hasBank ? `<img id="qrImg" class="qr" alt="Mã QR chuyển khoản"><p class="muted" style="text-align:center;font-size:13px;margin:6px 0 0">${esc(S.settings.bankId)} · ${esc(S.settings.bankAcc)}<br>${esc(S.settings.bankName)}</p>`
+                : `<p class="muted" style="font-size:13px">Mẹo: nhập thông tin ngân hàng ở <b>Cài đặt</b> để hiện mã QR VietQR có sẵn số tiền.</p>`}
+    </div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn ghost" data-act="closeModal">Hủy</button>
+      <button class="btn pri grow" data-act="confirmPay" data-print="1">🧾 In & thu</button>
+      <button class="btn ok grow" data-act="confirmPay">✓ Đã thu</button>
+    </div>`);
+  $('#discIn').addEventListener('input', e => { pay.disc = Math.max(0, +e.target.value || 0); updatePay(); });
+  $('#givenIn').addEventListener('input', e => { pay.given = Math.max(0, +e.target.value || 0); updatePay(false); });
+  updatePay();
+}
+function payCalc() {
+  const sub = subtotal(curItems());
+  const d = pay.discType === '%' ? Math.round(sub * Math.min(pay.disc, 100) / 100) : Math.min(pay.disc, sub);
+  const total = sub - d;
+  return { sub, d, total, change: Math.max(0, pay.given - total) };
+}
+function updatePay(rebuildBtns = true) {
+  const c = payCalc();
+  $('#pSub').textContent = fmt(c.sub);
+  $('#pDisc').textContent = c.d ? '−' + fmt(c.d) : '0đ';
+  $('#pTotal').textContent = fmt(c.total);
+  $('#pChange').textContent = pay.given >= c.total ? fmt(c.change) : (pay.given ? 'Thiếu ' + fmt(c.total - pay.given) : '0đ');
+  $('#pChange').style.color = pay.given && pay.given < c.total ? 'var(--danger)' : 'var(--ok)';
+  $('#cashBox').classList.toggle('hidden', pay.method !== 'cash');
+  $('#bankBox').classList.toggle('hidden', pay.method !== 'bank');
+  if (rebuildBtns) {
+    const sug = new Set([c.total]);
+    [10000, 50000, 100000, 200000, 500000].forEach(s => { const v = Math.ceil(c.total / s) * s; if (v > c.total) sug.add(v); });
+    $('#cashBtns').innerHTML = [...sug].sort((a, b) => a - b).slice(0, 6).map((v, i) => `<button data-act="given" data-v="${v}">${i === 0 ? 'Đủ ' : ''}${(v / 1000).toLocaleString('vi-VN')}k</button>`).join('');
+  }
+  const qr = $('#qrImg');
+  if (qr && pay.method === 'bank') qr.src = vietQR(c.total, tableName(ui.table));
+}
+function vietQR(amount, info) {
+  const s = S.settings;
+  return `https://img.vietqr.io/image/${encodeURIComponent(s.bankId)}-${encodeURIComponent(s.bankAcc)}-compact2.png?amount=${Math.round(amount)}&addInfo=${encodeURIComponent(info)}&accountName=${encodeURIComponent(s.bankName)}`;
+}
+function confirmPay(doPrint) {
+  const c = payCalc();
+  if (pay.method === 'cash' && pay.given && pay.given < c.total) return toast('Khách đưa chưa đủ tiền');
+  const k = ui.table; const t = S.tables[k];
+  const bill = {
+    id: ++S.seq, table: k, tableName: tableName(k), items: t.items.map(l => ({ ...l })),
+    sub: c.sub, disc: c.d, total: c.total, method: pay.method,
+    given: pay.method === 'cash' ? (pay.given || c.total) : c.total, change: pay.method === 'cash' ? c.change : 0,
+    openedAt: t.openedAt, time: Date.now()
+  };
+  S.bills.push(bill);
+  delete S.tables[k];
+  save(); closeModal();
+  toast(`✓ Đã thu ${fmt(bill.total)} · ${bill.tableName}`);
+  if (doPrint) printBill(bill);
+  closeOrder();
+}
+
+/* ================= IN HÓA ĐƠN ================= */
+function printBill(b, temp = false) {
+  const s = S.settings;
+  $('#print').innerHTML = `
+    <div class="c"><h2>${esc(s.shopName)}</h2>${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}</div>
+    <hr><div class="c t">${temp ? 'PHIẾU TẠM TÍNH' : 'HÓA ĐƠN THANH TOÁN'}</div>
+    <div>${temp ? '' : 'Số: ' + pad(b.id) + ' · '}${esc(b.tableName)}<br>Ngày: ${ddmm(b.time)} ${hhmm(b.time)}</div><hr>
+    <table>${b.items.map(l => `<tr><td colspan="3">${esc(l.name)}${l.note ? ' (' + esc(l.note) + ')' : ''}</td></tr>
+      <tr><td>${l.qty} x ${(l.price).toLocaleString('vi-VN')}</td><td></td><td class="r">${(l.qty * l.price).toLocaleString('vi-VN')}</td></tr>`).join('')}</table><hr>
+    <table>
+      <tr><td>Tạm tính</td><td class="r">${fmt(b.sub)}</td></tr>
+      ${b.disc ? `<tr><td>Giảm giá</td><td class="r">-${fmt(b.disc)}</td></tr>` : ''}
+      <tr class="t"><td>TỔNG</td><td class="r">${fmt(b.total)}</td></tr>
+      ${!temp && b.method === 'cash' ? `<tr><td>Khách đưa</td><td class="r">${fmt(b.given)}</td></tr><tr><td>Tiền thối</td><td class="r">${fmt(b.change)}</td></tr>` : ''}
+      ${!temp && b.method === 'bank' ? `<tr><td>Hình thức</td><td class="r">Chuyển khoản</td></tr>` : ''}
+    </table>
+    ${temp && s.bankId && s.bankAcc ? `<img src="${vietQR(b.total, b.tableName)}" alt="QR">` : ''}
+    <hr><div class="c">${esc(s.footer)}</div>`;
+  const imgs = [...$('#print').querySelectorAll('img')];
+  const go = () => setTimeout(() => window.print(), 150);
+  if (!imgs.length) return go();
+  let left = imgs.length; const done = () => { if (--left === 0) go(); };
+  imgs.forEach(i => { if (i.complete) done(); else { i.onload = i.onerror = done; } });
+}
+function printTemp() {
+  const t = S.tables[ui.table]; if (!t) return;
+  const sub = subtotal(t.items);
+  closeModal();
+  printBill({ tableName: tableName(ui.table), items: t.items, sub, disc: 0, total: sub, time: Date.now() }, true);
+}
+
+/* ================= QUẢN LÝ THỰC ĐƠN ================= */
+function renderMenuAdmin() {
+  $('#main').innerHTML = `
+    <div class="row"><button class="btn pri grow" data-act="editItem">＋ Thêm món</button><button class="btn" data-act="addCat">＋ Nhóm</button></div>
+    <p class="muted" style="font-size:13px;margin:10px 2px 0">Gạt công tắc để báo <b>hết món</b> trong ngày. Chạm vào món để sửa giá/tên.</p>
+    ${S.cats.map(c => {
+      const list = S.menu.filter(m => m.cat === c);
+      return `<div class="sec-title row"><span class="grow">${esc(c)} (${list.length})</span>${list.length ? '' : `<button class="tag" data-act="delCat" data-c="${esc(c)}">Xóa nhóm</button>`}</div>
+      <div class="card" style="padding:4px 12px">${list.map(m => `
+        <div class="mrow">
+          <span class="em">${esc(m.emoji || '🍽️')}</span>
+          <button class="nm" style="text-align:left" data-act="editItem" data-id="${m.id}">${esc(m.name)}<small>${fmt(m.price)}</small></button>
+          <button class="sw ${m.off ? '' : 'on'}" data-act="toggleOff" data-id="${m.id}" aria-label="Còn/Hết"></button>
+        </div>`).join('') || '<p class="muted" style="margin:10px 0">Chưa có món.</p>'}</div>`;
+    }).join('')}`;
+}
+function editItem(id) {
+  const m = S.menu.find(x => x.id === id) || { name: '', price: '', cat: ui.cat !== 'all' && S.cats.includes(ui.cat) ? ui.cat : S.cats[0], emoji: '' };
+  openModal(`<h3>${id ? 'Sửa món' : 'Thêm món mới'}</h3>
+    <label class="f">Tên món</label><input id="iName" value="${esc(m.name)}" placeholder="VD: Cà phê sữa đá">
+    <label class="f">Giá bán (đ)</label><input id="iPrice" type="number" inputmode="numeric" value="${m.price}" placeholder="VD: 20000">
+    <label class="f">Nhóm</label><select id="iCat">${S.cats.map(c => `<option ${c === m.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+    <label class="f">Biểu tượng (emoji)</label><input id="iEmoji" value="${esc(m.emoji)}" placeholder="☕ 🍜 🥖 🧋 …" maxlength="4">
+    <div class="row" style="margin-top:16px">
+      ${id ? `<button class="btn danger" data-act="delItem" data-id="${id}">Xóa</button>` : ''}
+      <button class="btn ghost grow" data-act="closeModal">Hủy</button>
+      <button class="btn pri grow" data-act="saveItem" data-id="${id || ''}">Lưu</button>
+    </div>`);
+  if (!id) setTimeout(() => $('#iName').focus(), 250);
+}
+function saveItem(id) {
+  const name = $('#iName').value.trim(), price = Math.round(+$('#iPrice').value);
+  if (!name) return toast('Nhập tên món');
+  if (!(price >= 0) || $('#iPrice').value === '') return toast('Nhập giá hợp lệ');
+  const data = { name, price, cat: $('#iCat').value, emoji: $('#iEmoji').value.trim() || '🍽️' };
+  if (id) Object.assign(S.menu.find(x => x.id === id), data);
+  else S.menu.push({ id: uid(), off: false, ...data });
+  save(); closeModal(); render(); toast('Đã lưu món');
+}
+
+/* ================= BÁO CÁO ================= */
+function dayRange(offsetDays) {
+  const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + offsetDays);
+  const e = new Date(d); e.setDate(e.getDate() + 1); return [+d, +e];
+}
+function reportRange() {
+  const today = dayRange(0);
+  switch (ui.rpt) {
+    case 'today': return today;
+    case 'yest': return dayRange(-1);
+    case '7d': return [dayRange(-6)[0], today[1]];
+    case 'month': { const d = new Date(); return [+new Date(d.getFullYear(), d.getMonth(), 1), today[1]]; }
+    default: {
+      const a = new Date(ui.from + 'T00:00:00'), b = new Date(ui.to + 'T00:00:00'); b.setDate(b.getDate() + 1);
+      return [+a, +b];
+    }
+  }
+}
+function renderReport() {
+  const [a, b] = reportRange();
+  const bills = S.bills.filter(x => x.time >= a && x.time < b);
+  const rev = bills.reduce((s, x) => s + x.total, 0);
+  const cash = bills.filter(x => x.method === 'cash').reduce((s, x) => s + x.total, 0);
+  const disc = bills.reduce((s, x) => s + x.disc, 0);
+  // Biểu đồ
+  const oneDay = b - a <= 864e5;
+  let bars = [];
+  if (oneDay) {
+    const hs = bills.map(x => new Date(x.time).getHours());
+    const h0 = Math.min(6, ...hs), h1 = Math.max(21, ...hs);
+    for (let h = h0; h <= h1; h++) bars.push({ l: h + 'h', v: bills.filter(x => new Date(x.time).getHours() === h).reduce((s, x) => s + x.total, 0) });
+  } else {
+    for (let t = a; t < b; t += 864e5) {
+      const d = new Date(t);
+      bars.push({ l: d.getDate() + '/' + (d.getMonth() + 1), v: bills.filter(x => x.time >= t && x.time < t + 864e5).reduce((s, x) => s + x.total, 0) });
+    }
+    if (bars.length > 31) bars = bars.slice(-31);
+  }
+  const maxV = Math.max(1, ...bars.map(x => x.v));
+  // Top món
+  const agg = {};
+  bills.forEach(x => x.items.forEach(l => { const o = agg[l.name] || (agg[l.name] = { q: 0, v: 0 }); o.q += l.qty; o.v += l.qty * l.price; }));
+  const top = Object.entries(agg).sort((p, q) => q[1].q - p[1].q).slice(0, 8);
+  const maxQ = Math.max(1, ...top.map(x => x[1].q));
+
+  $('#main').innerHTML = `
+    <div class="chips">${[['today', 'Hôm nay'], ['yest', 'Hôm qua'], ['7d', '7 ngày'], ['month', 'Tháng này'], ['custom', 'Tùy chọn']]
+      .map(([v, l]) => `<button class="chip ${ui.rpt === v ? 'on' : ''}" data-act="rpt" data-v="${v}">${l}</button>`).join('')}</div>
+    ${ui.rpt === 'custom' ? `<div class="row" style="margin-top:10px"><input type="date" id="rFrom" value="${ui.from}"><span>→</span><input type="date" id="rTo" value="${ui.to}"></div>` : ''}
+    <div class="kpis" style="margin-top:12px">
+      <div class="kpi main"><span>Doanh thu</span><b>${fmt(rev)}</b></div>
+      <div class="kpi"><span>Số hóa đơn</span><b>${bills.length}</b></div>
+      <div class="kpi"><span>TB / hóa đơn</span><b>${fmt(bills.length ? rev / bills.length : 0)}</b></div>
+      <div class="kpi"><span>💵 Tiền mặt</span><b>${fmt(cash)}</b></div>
+      <div class="kpi"><span>🏦 Chuyển khoản</span><b>${fmt(rev - cash)}</b></div>
+      ${disc ? `<div class="kpi" style="grid-column:1/-1"><span>Đã giảm giá</span><b>${fmt(disc)}</b></div>` : ''}
+    </div>
+    <div class="sec-title">Doanh thu theo ${oneDay ? 'giờ' : 'ngày'}</div>
+    <div class="card"><div class="bars">${bars.map(x => `<div class="bc" title="${x.l}: ${fmt(x.v)}"><div class="b" style="height:${x.v / maxV * 100}%"></div><span class="bl">${x.l}</span></div>`).join('')}</div></div>
+    <div class="sec-title">Món bán chạy</div>
+    <div class="card">${top.map(([n, o], i) => `<div class="top5"><b style="width:20px;color:var(--muted)">${i + 1}</b>
+      <div class="grow"><div class="row"><span class="grow">${esc(n)}</span><b>${o.q}</b><span class="muted" style="width:86px;text-align:right">${fmt(o.v)}</span></div>
+      <div class="tb" style="width:${o.q / maxQ * 100}%"></div></div></div>`).join('') || '<p class="muted" style="margin:0">Chưa có dữ liệu.</p>'}</div>
+    <div class="sec-title row"><span class="grow">Hóa đơn (${bills.length})</span><button class="tag" data-act="exportCsv">⬇ Xuất Excel (CSV)</button></div>
+    <div class="card" style="padding:2px 12px">${bills.slice().reverse().map(x => `
+      <button class="bill" data-act="billDetail" data-id="${x.id}">
+        <b style="width:44px">#${pad(x.id)}</b>
+        <span class="grow">${esc(x.tableName)}<br><small class="muted">${oneDay ? '' : ddmm(x.time) + ' '}${hhmm(x.time)} · ${countQty(x.items)} món</small></span>
+        <span class="tag ${x.method === 'bank' ? 'ck' : 'tm'}">${x.method === 'bank' ? 'CK' : 'TM'}</span>
+        <b style="min-width:84px;text-align:right">${fmt(x.total)}</b>
+      </button>`).join('') || '<p class="muted">Chưa có hóa đơn trong khoảng này.</p>'}</div>`;
+  if (ui.rpt === 'custom') {
+    $('#rFrom').addEventListener('change', e => { ui.from = e.target.value || ui.from; renderReport(); });
+    $('#rTo').addEventListener('change', e => { ui.to = e.target.value || ui.to; renderReport(); });
+  }
+}
+function billDetail(id) {
+  const b = S.bills.find(x => x.id === id); if (!b) return;
+  openModal(`<h3>Hóa đơn #${pad(b.id)} · ${esc(b.tableName)}</h3>
+    <p class="muted" style="margin:0 0 8px">${ddmm(b.time)} ${hhmm(b.time)} · ${b.method === 'bank' ? 'Chuyển khoản' : 'Tiền mặt'}</p>
+    <div class="card">${b.items.map(l => `<div class="kv"><span>${l.qty} × ${esc(l.name)}${l.note ? ' <small class="muted">(' + esc(l.note) + ')</small>' : ''}</span><span>${fmt(l.qty * l.price)}</span></div>`).join('')}
+      ${b.disc ? `<div class="kv"><span>Giảm giá</span><span>−${fmt(b.disc)}</span></div>` : ''}
+      <div class="kv big"><span>TỔNG</span><span>${fmt(b.total)}</span></div></div>
+    <div class="row"><button class="btn danger" data-act="delBill" data-id="${b.id}">Hủy HĐ</button>
+      <button class="btn ghost grow" data-act="closeModal">Đóng</button>
+      <button class="btn pri grow" data-act="reprint" data-id="${b.id}">🧾 In lại</button></div>`);
+}
+async function shareOrDownload(name, text, type) {
+  const blob = new Blob([text], { type });
+  try {
+    const file = new File([blob], name, { type });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: name }); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function exportCsv() {
+  const [a, b] = reportRange();
+  const bills = S.bills.filter(x => x.time >= a && x.time < b);
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+  const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Bàn', 'Món', 'SL', 'Đơn giá', 'Thành tiền', 'Ghi chú', 'Giảm giá HĐ', 'Tổng HĐ', 'Hình thức']];
+  bills.forEach(x => x.items.forEach((l, i) => rows.push([x.id, ddmm(x.time), hhmm(x.time), x.tableName, l.name, l.qty, l.price, l.qty * l.price, l.note || '',
+    i === 0 ? x.disc : '', i === 0 ? x.total : '', x.method === 'bank' ? 'Chuyển khoản' : 'Tiền mặt'])));
+  shareOrDownload(`doanh-thu_${isoDate(a)}_${isoDate(b - 1)}.csv`, '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n'), 'text/csv');
+}
+
+/* ================= CÀI ĐẶT ================= */
+function renderSettings() {
+  const s = S.settings;
+  const f = (id, label, val, ph = '', type = 'text') => `<label class="f">${label}</label><input id="${id}" type="${type}" value="${esc(val)}" placeholder="${ph}" ${type === 'number' ? 'inputmode="numeric"' : ''}>`;
+  $('#main').innerHTML = `
+    <div class="sec-title" style="margin-top:4px">Thông tin quán</div>
+    <div class="card">
+      ${f('sName', 'Tên quán', s.shopName, 'VD: Cà Phê Sáng')}
+      ${f('sAddr', 'Địa chỉ', s.address, 'In trên hóa đơn')}
+      ${f('sPhone', 'Số điện thoại', s.phone)}
+      ${f('sTables', 'Số bàn', s.tableCount, '20', 'number')}
+      ${f('sFooter', 'Lời cảm ơn cuối hóa đơn', s.footer)}
+    </div>
+    <div class="sec-title">Chuyển khoản (mã QR VietQR)</div>
+    <div class="card">
+      ${f('sBank', 'Mã ngân hàng', s.bankId, 'VD: VCB, MB, TCB, ICB, BIDV, ACB…')}
+      ${f('sAcc', 'Số tài khoản', s.bankAcc)}
+      ${f('sAccName', 'Tên chủ tài khoản', s.bankName, 'VIET HOA KHONG DAU')}
+      <p class="muted" style="font-size:12.5px;margin:8px 0 0">Mã QR được tạo qua dịch vụ img.vietqr.io (cần có mạng). Nên chuyển thử 1 lần nhỏ để kiểm tra đúng tài khoản.</p>
+    </div>
+    <button class="btn pri" style="width:100%" data-act="saveSettings">💾 Lưu cài đặt</button>
+
+    <div class="sec-title">Dữ liệu</div>
+    <div class="card" style="display:grid;gap:9px">
+      <p class="muted" style="margin:0;font-size:13px">Dữ liệu lưu ngay trên điện thoại này (${S.bills.length} hóa đơn). Nên sao lưu định kỳ, nhất là trước khi xóa lịch sử trình duyệt.</p>
+      <button class="btn" data-act="backup">⬇ Sao lưu dữ liệu (.json)</button>
+      <label class="btn" style="display:block">⬆ Khôi phục từ file sao lưu<input type="file" id="restoreIn" accept=".json,application/json" hidden></label>
+      <button class="btn ghost" data-act="clearBills">🧹 Xóa lịch sử hóa đơn</button>
+      <button class="btn danger" data-act="resetAll">⚠️ Đặt lại toàn bộ app</button>
+    </div>
+
+    <div class="sec-title">Cài app lên màn hình chính</div>
+    <div class="card" style="font-size:14px">
+      <b>iPhone (Safari):</b> bấm nút Chia sẻ <b>⬆</b> → <b>Thêm vào MH chính</b>.<br>
+      <b>Android (Chrome):</b> bấm <b>⋮</b> → <b>Cài đặt ứng dụng</b> / <b>Thêm vào màn hình chính</b>.<br>
+      <span class="muted">Sau khi cài, app chạy toàn màn hình và dùng được cả khi mất mạng.</span>
+    </div>
+    <p class="muted" style="text-align:center;font-size:12px">Cà Phê POS · v1.0</p>`;
+  $('#restoreIn').addEventListener('change', restore);
+}
+function saveSettings() {
+  const v = id => $('#' + id).value.trim();
+  const n = Math.round(+v('sTables'));
+  if (!(n >= 1 && n <= 200)) return toast('Số bàn từ 1 đến 200');
+  const busyOver = Object.keys(S.tables).filter(k => k !== 'mv' && +k > n && S.tables[k].items.length);
+  if (busyOver.length) return toast('Bàn ' + busyOver.join(', ') + ' đang có khách, chưa giảm được');
+  Object.assign(S.settings, { shopName: v('sName') || 'Cà Phê POS', address: v('sAddr'), phone: v('sPhone'), tableCount: n, footer: v('sFooter'),
+    bankId: v('sBank').toUpperCase(), bankAcc: v('sAcc').replace(/\s/g, ''), bankName: v('sAccName').toUpperCase() });
+  save(); render(); toast('Đã lưu cài đặt');
+}
+function restore(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d.menu || !d.settings || !Array.isArray(d.bills)) throw new Error('sai định dạng');
+      if (!confirm(`Khôi phục dữ liệu (${d.bills.length} hóa đơn, ${d.menu.length} món)? Dữ liệu hiện tại sẽ bị thay thế.`)) return;
+      S = { ...defaultState(), ...d, settings: { ...defaultState().settings, ...d.settings } }; save(); render(); toast('Đã khôi phục');
+    } catch (err) { toast('File không hợp lệ'); }
+  };
+  r.readAsText(file);
+}
+
+/* ================= MODAL ================= */
+function openModal(html) { $('#sheet').innerHTML = html; $('#modal').classList.remove('hidden'); }
+function closeModal() { $('#modal').classList.add('hidden'); $('#sheet').innerHTML = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+
+/* ================= SỰ KIỆN ================= */
+const A = {
+  tab: d => { ui.tab = d.tab; $('#main').scrollTop = 0; render(); },
+  filter: d => { ui.filter = d.v; renderTables(); },
+  openTable: d => openTable(d.t),
+  closeOrder, tableMenu, moveTable, clearTable, printTemp,
+  moveTo: d => moveTo(d.t),
+  cat: d => { ui.cat = d.c; renderOrder(); $('#oGrid').scrollTop = 0; },
+  add: d => addItem(d.id),
+  qty: d => changeQty(+d.i, +d.d),
+  note: d => editNote(+d.i),
+  noteQuick: d => { const i = $('#noteIn'); i.value = i.value ? i.value + ', ' + d.n : d.n; },
+  noteSave: d => saveNote(+d.i),
+  toggleCart: () => { ui.cartOpen = !ui.cartOpen; renderCart(); },
+  pay: openPay,
+  discType: (d, el) => { pay.discType = d.v; el.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); updatePay(); },
+  method: (d, el) => { pay.method = d.v; el.parentNode.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === el)); updatePay(); },
+  given: d => { pay.given = +d.v; $('#givenIn').value = d.v; updatePay(false); },
+  confirmPay: d => confirmPay(!!d.print),
+  closeModal,
+  editItem: d => editItem(d.id),
+  saveItem: d => saveItem(d.id),
+  delItem: d => {
+    const m = S.menu.find(x => x.id === d.id);
+    if (m && confirm(`Xóa món "${m.name}"?`)) { S.menu = S.menu.filter(x => x.id !== d.id); save(); closeModal(); render(); }
+  },
+  toggleOff: d => { const m = S.menu.find(x => x.id === d.id); m.off = !m.off; save(); renderMenuAdmin(); toast(m.name + (m.off ? ': HẾT' : ': CÒN')); },
+  addCat: () => {
+    const n = (prompt('Tên nhóm món mới:') || '').trim();
+    if (!n) return; if (S.cats.includes(n)) return toast('Nhóm đã có');
+    S.cats.push(n); save(); renderMenuAdmin();
+  },
+  delCat: d => { if (confirm(`Xóa nhóm "${d.c}"?`)) { S.cats = S.cats.filter(c => c !== d.c); save(); renderMenuAdmin(); } },
+  rpt: d => { ui.rpt = d.v; renderReport(); },
+  billDetail: d => billDetail(+d.id),
+  reprint: d => { const b = S.bills.find(x => x.id === +d.id); closeModal(); printBill(b); },
+  delBill: d => {
+    if (!confirm('Hủy hóa đơn này? Doanh thu sẽ bị trừ tương ứng.')) return;
+    S.bills = S.bills.filter(x => x.id !== +d.id); save(); closeModal(); render(); toast('Đã hủy hóa đơn');
+  },
+  exportCsv, saveSettings,
+  backup: () => shareOrDownload(`cafe-pos-backup_${isoDate(Date.now())}.json`, JSON.stringify(S, null, 1), 'application/json'),
+  clearBills: () => { if (confirm('Xóa TOÀN BỘ lịch sử hóa đơn? Nên sao lưu trước.')) { S.bills = []; save(); render(); toast('Đã xóa lịch sử'); } },
+  resetAll: () => { if (confirm('Đặt lại toàn bộ (thực đơn, bàn, hóa đơn, cài đặt)?') && confirm('Chắc chắn? Không thể hoàn tác.')) { S = defaultState(); save(); render(); toast('Đã đặt lại'); } }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  const fn = A[el.dataset.act]; if (fn) fn(el.dataset, el, e);
+});
+$('#oSearch').addEventListener('input', e => { ui.q = e.target.value; renderGrid(); });
+
+/* Đồng hồ + cập nhật thời gian ngồi */
+function tick() {
+  const d = new Date();
+  $('#clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
+}
+setInterval(() => { tick(); if (ui.tab === 'tables' && !ui.table && $('#modal').classList.contains('hidden')) renderTables(); }, 30000);
+tick(); render();
+
+/* Chạy offline */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
