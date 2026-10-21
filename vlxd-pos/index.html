@@ -1,0 +1,1778 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d232a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VLXD POS">
+<meta name="description" content="Phần mềm bán hàng & quản lý kho cho cửa hàng sắt thép, đinh vít, vật liệu xây dựng.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<title>VLXD POS</title>
+<style>
+:root{
+  --bg:#eceef1;--surface:#fff;--surface2:#f1f3f5;--ink:#1d232a;--muted:#66717d;--line:#dde1e6;
+  --steel:#1d232a;--steel2:#2c3641;--yel:#f5b700;--org:#ff7a00;
+  --pri:#1d232a;--pri-ink:#fff;--ok:#2f9e6e;--err:#d64545;--warn:#c27c0e;
+  --r:12px;--sh:0 1px 2px rgba(0,0,0,.05),0 6px 18px rgba(20,30,40,.07);
+  --grid:rgba(40,90,140,.07);--grid2:rgba(40,90,140,.11);--art:#2b5d8a;
+  --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);
+  --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --hz:repeating-linear-gradient(-45deg,#f5b700 0 12px,#1d232a 12px 24px);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#11161b;--surface:#1a2129;--surface2:#222b35;--ink:#e7ebef;--muted:#9aa6b2;--line:#2c3742;
+    --pri:#f5b700;--pri-ink:#1d232a;--sh:0 6px 20px rgba(0,0,0,.4);--grid:rgba(120,170,220,.05);--grid2:rgba(120,170,220,.08);--art:#7fb2e0}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans);overflow:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--yel);box-shadow:0 0 0 3px rgba(245,183,0,.25)}
+input:disabled,select:disabled{opacity:.6}
+h1,h2,h3{font-family:var(--cond);font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.hidden{display:none!important}
+.grow{flex:1}.muted{color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.f{margin-bottom:12px}
+.f>label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.err-t{color:var(--err)}.ok-t{color:var(--ok)}
+.num{font-variant-numeric:tabular-nums}
+svg.i{width:20px;height:20px;flex-shrink:0}
+.hazard{height:6px;background:var(--hz)}
+
+/* ===== Nền bản vẽ công trình ===== */
+.bg-art{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px),linear-gradient(var(--grid2) 1px,transparent 1px),linear-gradient(90deg,var(--grid2) 1px,transparent 1px);
+  background-size:20px 20px,20px 20px,100px 100px,100px 100px}
+.bg-art .crane{position:absolute;right:-20px;bottom:40px;width:min(560px,55vw);color:var(--art);opacity:.12}
+.bg-art .sky{position:absolute;left:0;right:0;bottom:0;width:100%;height:170px;color:var(--art);opacity:.1}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:600;background:var(--surface2);transition:transform .08s,filter .15s;white-space:nowrap}
+.btn:hover{filter:brightness(.96)}.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--pri);color:var(--pri-ink)}
+.btn.yel{background:linear-gradient(180deg,#ffc928,#f5b700);color:#1d232a;box-shadow:0 4px 12px rgba(245,183,0,.35)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.danger{background:var(--err);color:#fff}
+.btn.danger.ghost{background:transparent;color:var(--err);border-color:rgba(214,69,69,.35)}
+.btn.sm{padding:7px 12px;font-size:13.5px;border-radius:9px}
+.btn.block{width:100%}
+.ibtn{width:38px;height:38px;border-radius:10px;display:inline-grid;place-items:center;background:var(--surface2)}
+kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-radius:5px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:7px 13px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:500}
+.chip.on{background:var(--steel);color:#fff;border-color:var(--steel);box-shadow:inset 0 -3px 0 var(--yel)}
+.chip button{font-size:11px;opacity:.7;margin-left:2px}
+.chip-add{display:inline-flex;border:1px dashed var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.chip-add input{border:0;padding:6px 10px;font-size:14px;width:130px;background:transparent;box-shadow:none}
+.chip-add button{padding:0 12px;font-weight:700;color:var(--org)}
+.seg{display:inline-flex;background:var(--surface2);border-radius:10px;padding:3px}
+.seg button{padding:8px 14px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.seg.sm button{padding:5px 10px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.tag.ok{background:rgba(47,158,110,.13);color:var(--ok)}
+.tag.err{background:rgba(214,69,69,.12);color:var(--err)}
+.tag.yel{background:rgba(245,183,0,.2);color:#8a6400}
+.tag.blue{background:rgba(70,120,210,.13);color:#3e6fc2}
+.tag.org{background:rgba(255,122,0,.14);color:#b85500}
+@media (prefers-color-scheme:dark){.tag.yel{color:#f5c84a}.tag.org{color:#ffa65a}}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);padding:18px;border:1px solid var(--line)}
+.card h3{margin:0 0 12px;font-size:21px}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.empty svg{width:44px;height:44px;opacity:.4}
+
+/* ===== Đăng nhập ===== */
+#auth{position:fixed;inset:0;z-index:30;overflow-y:auto}
+.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;isolation:isolate;overflow:hidden;color:#fff;
+  background-color:#0c1f30;
+  background-image:linear-gradient(rgba(130,190,250,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(130,190,250,.07) 1px,transparent 1px),
+    linear-gradient(rgba(130,190,250,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(130,190,250,.13) 1px,transparent 1px),
+    radial-gradient(ellipse at 85% 105%,rgba(255,122,0,.42),transparent 55%),radial-gradient(ellipse at 5% -5%,rgba(40,120,200,.55),transparent 60%);
+  background-size:24px 24px,24px 24px,120px 120px,120px 120px,100% 100%,100% 100%}
+.auth::before,.auth::after{content:"";position:absolute;left:0;right:0;height:10px;background:var(--hz);z-index:-1}
+.auth::before{top:0}.auth::after{bottom:0}
+.auth .crane{position:absolute;left:29%;bottom:150px;width:min(660px,50%);color:#f5b700;opacity:.55;z-index:-1}
+.auth .sky{position:absolute;left:0;bottom:10px;width:100%;height:200px;color:#8cc4f5;opacity:.28;z-index:-1}
+.auth .tblock{position:absolute;right:16px;bottom:24px;border:1px solid rgba(140,196,245,.45);font:600 10.5px/1.5 ui-monospace,Menlo,Consolas,monospace;color:rgba(170,210,250,.75);z-index:-1}
+.auth .tblock div{padding:3px 10px;border-bottom:1px solid rgba(140,196,245,.3)}
+.auth .tblock div:last-child{border:0}
+.auth-art{padding:64px 56px;display:flex;flex-direction:column;justify-content:center}
+.brand-lg{display:flex;align-items:center;gap:14px;margin-bottom:36px}
+.brand-lg svg{width:60px;height:60px}
+.brand-lg .bn{font:700 30px/1.1 var(--cond);text-transform:uppercase;letter-spacing:.5px}
+.brand-lg .bt{font-size:12px;letter-spacing:3.5px;text-transform:uppercase;color:#f5b700}
+.auth-art h2{font-size:54px;line-height:1.02;margin:0 0 14px;max-width:560px}
+.auth-art h2 em{font-style:normal;color:#f5b700}
+.auth-art p{margin:0;color:rgba(255,255,255,.8);font-size:16px;max-width:470px}
+.svcs{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;max-width:540px}
+.svcs span{border:1px solid rgba(245,183,0,.5);background:rgba(10,25,40,.55);color:#ffe08a;padding:7px 13px;border-radius:6px;font-size:13.5px;font-weight:500}
+.auth-side{display:flex;align-items:center;justify-content:center;padding:40px 24px calc(40px + var(--sb))}
+.auth-card{width:100%;max-width:420px;background:#fff;color:#1d232a;border-radius:14px;padding:0 0 26px;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}
+.auth-card>.hazard{height:10px;margin-bottom:24px}
+.auth-card>*:not(.hazard){margin-left:28px;margin-right:28px}
+.auth-card h1{font-size:36px;margin-top:0;margin-bottom:4px}
+.auth-card .lead{color:#66717d;margin-top:0;margin-bottom:22px}
+.auth-card input,.auth-card textarea{background:#fff;color:#1d232a;border-color:#d5dae0}
+.auth-card textarea{font:14px ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.auth-card .f>label{color:#66717d}
+.pw{position:relative}.pw input{padding-right:46px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;color:var(--muted)}
+.auth-msg{min-height:22px;font-size:14px;color:var(--err);margin:4px 0 10px}
+.check{display:flex;align-items:center;gap:9px;font-size:14px;margin:6px 0 16px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:#1d232a}
+.lock-user{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.auth-card .lock-user{background:#f1f3f5;border-color:#dde1e6}
+.auth-foot{margin-top:22px;font-size:12.5px;color:#66717d;text-align:center}
+.link{color:#c27c0e;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.devcode{font:700 21px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:2px;text-align:center;padding:14px;border-radius:10px;background:rgba(245,183,0,.12);border:1.5px dashed #c99500;user-select:all;-webkit-user-select:all}
+@media(max-width:899px){
+  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .auth-art{padding:calc(var(--st) + 34px) 22px 8px}
+  .auth-art h2{font-size:36px}.brand-lg{margin-bottom:18px}.svcs{margin-top:14px}.svcs span{font-size:12.5px;padding:5px 10px}
+  .auth .crane{width:90%;bottom:auto;top:60px;opacity:.22}.auth .tblock{display:none}
+  .auth-side{align-items:flex-start;padding-top:18px}
+  .auth-card>*:not(.hazard){margin-left:20px;margin-right:20px}
+}
+
+/* ===== Khung ứng dụng ===== */
+#app{position:relative;z-index:1;display:flex;height:100dvh}
+.side{position:relative;overflow:hidden;width:250px;flex-shrink:0;background:linear-gradient(180deg,#232b34,#151a20);color:#cfd6de;display:flex;flex-direction:column;padding:calc(var(--st) + 20px) 14px 16px}
+.side::before{content:"";position:absolute;top:0;left:0;right:0;height:6px;background:var(--hz)}
+.side .side-art{position:absolute;left:-30px;bottom:70px;width:300px;color:#f5b700;opacity:.07;pointer-events:none}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px 20px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+.brand svg{width:44px;height:44px;flex-shrink:0}
+.brand b{display:block;font:700 19px/1.1 var(--cond);text-transform:uppercase;color:#fff;letter-spacing:.3px}
+.brand small{font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:#f5b700}
+.nav{display:flex;flex-direction:column;gap:3px;position:relative}
+.nav button{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:9px;font-weight:500;color:#c6ced7;text-align:left;border-left:3px solid transparent}
+.nav button:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav button.on{background:rgba(245,183,0,.12);color:#ffd451;border-left-color:#f5b700}
+.nav .badge{margin-left:auto;background:#f5b700;color:#1d232a;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px}
+.me{position:relative;margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.08)}
+.me .who{flex:1;min-width:0}
+.me .who b{display:block;color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me .who small{font-size:12px;color:#f5b700}
+.me .ibtn{background:rgba(255,255,255,.08);color:#cfd6de}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:#f5b700;color:#1d232a;flex-shrink:0}
+.content{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:12px;padding:calc(var(--st) + 12px) 24px 12px;background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0}
+.topbar h1{margin:0;font-size:26px;flex:1}
+.topbar .av{width:36px;height:36px;display:none}
+.trial{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:6px;background:var(--yel);color:#1d232a;white-space:nowrap}
+.trial.urgent{background:var(--err);color:#fff}
+.net{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(194,124,14,.14);color:var(--warn)}
+#view{flex:1;overflow-y:auto;padding:20px 24px 30px;-webkit-overflow-scrolling:touch}
+#view.flush{padding:0;overflow:hidden}
+.tabbar{display:none}
+@media(max-width:899px){
+  .side{display:none}
+  .topbar{position:relative;padding:calc(var(--st) + 10px) 16px 12px;background:linear-gradient(180deg,#232b34,#1a2027);color:#fff;border:0}
+  .topbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--hz)}
+  .topbar h1{font-size:22px}.topbar .av{display:grid}
+  #view{padding:14px 14px 22px}
+  .tabbar{display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--sb);flex-shrink:0}
+  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:10.5px;font-weight:500;color:var(--muted);position:relative}
+  .tabbar button.on{color:var(--ink);font-weight:700}
+  .tabbar button.on svg{color:#e0a500}
+  .tabbar svg{width:23px;height:23px}
+  .tabbar .badge{position:absolute;top:4px;left:calc(50% + 6px);background:#f5b700;color:#1d232a;font-size:10px;font-weight:700;border-radius:999px;padding:0 5px}
+  .g2,.g3{grid-template-columns:1fr}
+}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.search{position:relative;flex:1;min-width:200px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);width:18px;height:18px}
+.search input{padding-left:38px}
+.sum-line{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--muted);margin:0 2px 12px}
+.sum-line b{color:var(--ink)}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.tabs button{padding:10px 16px;font:700 17px var(--cond);text-transform:uppercase;letter-spacing:.3px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--yel)}
+
+/* ===== Bán hàng ===== */
+.pos{display:grid;grid-template-columns:1fr 410px;height:100%}
+.pos-l{display:flex;flex-direction:column;min-width:0;min-height:0}
+.pos-tools{padding:14px 20px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 80%,transparent)}
+.tickets{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.tickets::-webkit-scrollbar{display:none}
+.tk{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 13px;border-radius:9px;background:var(--surface);border:1px solid var(--line);min-width:120px;text-align:left}
+.tk b{font-size:13.5px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tk small{font-size:11.5px;color:var(--muted)}
+.tk.on{background:var(--steel);color:#fff;border-color:var(--steel);box-shadow:inset 0 -4px 0 var(--yel)}
+.tk.on small{color:#cfd6de}
+.tk.new{justify-content:center;align-items:center;border-style:dashed;color:var(--org);font-weight:700;min-width:auto}
+.plist{flex:1;overflow-y:auto;padding:14px 20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));grid-auto-rows:max-content;gap:10px;align-content:start}
+.pc{position:relative;display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 12px;text-align:left;transition:transform .1s,box-shadow .15s;border-left:4px solid var(--c)}
+.pc:hover{box-shadow:var(--sh)}.pc:active{transform:scale(.985)}
+.pc-ic{width:40px;height:40px;border-radius:8px;flex-shrink:0;display:grid;place-items:center;font-size:21px;background:var(--surface2)}
+.pc-b{flex:1;min-width:0}
+.pc-b b{display:block;font-size:14.5px;line-height:1.3}
+.pc-b small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-f{display:flex;justify-content:space-between;align-items:baseline;gap:6px;margin-top:4px}
+.pc-f .pr{font-weight:700;color:var(--ink);font-size:14.5px}
+.pc-f .pr small{display:inline;color:var(--muted);font-weight:500}
+.st{font-size:12px;font-weight:600;color:var(--ok)}
+.st.lo{color:var(--warn)}.st.z{color:var(--err)}
+.pc .cnt{position:absolute;top:-6px;right:-6px;background:var(--yel);color:#1d232a;font-size:11.5px;font-weight:700;min-width:22px;height:22px;border-radius:11px;display:grid;place-items:center;padding:0 6px}
+.pos-r{background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.cart-h{display:flex;align-items:center;gap:10px;padding:14px 18px 8px}
+.cart-h h2{margin:0;font-size:24px}
+.cart-h small{color:var(--muted)}
+.cust{display:flex;align-items:center;gap:10px;margin:0 18px 8px;padding:10px 12px;border-radius:10px;border:1px dashed var(--line);cursor:pointer;text-align:left;background:var(--surface2)}
+.cust:hover{border-color:var(--yel)}
+.cust>svg{color:#e0a500}
+.cust b{display:block;font-size:14px}
+.cust small{color:var(--muted);font-size:12px}
+.cust .x{margin-left:auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--surface);font-size:12px}
+.cart-lines{flex:1;overflow-y:auto;padding:0 18px}
+.cl{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.cl:hover{background:var(--surface2)}
+.cl-m{flex:1;min-width:0}
+.cl-m b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-m small{color:var(--muted);font-size:12.5px}
+.cl-a{font-weight:700;font-variant-numeric:tabular-nums}
+.cart-f{padding:10px 18px calc(14px + var(--sb));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.cart-f .row b{font-variant-numeric:tabular-nums}
+.cart-f input{width:110px;padding:6px 10px;text-align:right}
+.cart-f .total{font-size:15px;font-weight:600;border-top:2px solid var(--ink);padding-top:9px}
+.cart-f .total b{font:700 30px var(--cond);color:var(--ink)}
+.cartbar{display:none}
+.only-m{display:none!important}
+@media(max-width:899px){
+  .pos{grid-template-columns:1fr}
+  .pos-tools{padding:12px 14px 8px}
+  .plist{padding:12px 14px 20px;grid-template-columns:1fr;gap:8px}
+  .pos-r{position:fixed;inset:0;z-index:40;border:0;transform:translateY(102%);transition:transform .24s ease;padding-top:var(--st)}
+  .pos-r.open{transform:none}
+  .cartbar{display:flex;align-items:center;gap:10px;margin:0 12px 10px;padding:12px 16px;border-radius:10px;background:#1d232a;color:#fff;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.3);border-bottom:4px solid var(--yel)}
+  .cartbar .ct{margin-left:auto;color:#f5b700;font:700 22px var(--cond)}
+  .only-m{display:inline-grid!important}
+}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.li{display:grid;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.li:last-child{border-bottom:0}
+.li:hover{background:var(--surface2)}
+.li small{display:block;color:var(--muted);font-size:12px;font-weight:400}
+.li .r{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.li-o{grid-template-columns:130px 1fr auto 130px}
+.li-p{grid-template-columns:40px 1fr 120px 130px 120px}
+.li-c{grid-template-columns:40px 1fr 120px 130px}
+.li-u{grid-template-columns:40px 1fr auto auto}
+.li-d{grid-template-columns:120px 1fr auto 130px}
+.void{opacity:.55}.void .r{text-decoration:line-through}
+@media(max-width:699px){
+  .li-o,.li-d{grid-template-columns:1fr auto}.li-o .hm,.li-d .hm{display:none}
+  .li-p{grid-template-columns:36px 1fr auto}.li-p .hm{display:none}
+  .li-c{grid-template-columns:40px 1fr auto}.li-c .hm{display:none}
+}
+
+/* ===== Modal ===== */
+.modal{position:fixed;inset:0;background:rgba(10,15,20,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .15s}
+.modal.show{opacity:1}
+.dlg{background:var(--surface);border-radius:14px;width:100%;max-width:540px;max-height:calc(100dvh - 40px);display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,.35);transform:translateY(12px);transition:transform .2s;overflow:hidden}
+.dlg::before{content:"";height:5px;background:var(--hz);flex-shrink:0}
+.modal.show .dlg{transform:none}
+.dlg.sm{max-width:430px}.dlg.lg{max-width:900px}
+.dlg-h{display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.dlg-h h3{margin:0;flex:1;font-size:23px}
+.dlg-b{padding:16px 20px;overflow-y:auto;flex:1}
+.dlg-f{display:flex;gap:10px;align-items:center;padding:12px 20px calc(12px + var(--sb));border-top:1px solid var(--line);flex-wrap:wrap}
+@media(max-width:699px){
+  .modal{padding:0;align-items:flex-end}
+  .dlg,.dlg.lg,.dlg.sm{max-width:none;border-radius:14px 14px 0 0;max-height:94dvh}
+  .dlg-f .btn{flex:1}
+}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-variant-numeric:tabular-nums}
+.kv.big{font-size:22px;font-weight:700;border-top:2px solid var(--ink);margin-top:6px;padding-top:10px}
+.kv.big span:last-child{font-family:var(--cond);font-size:28px}
+.sec-l{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.qbtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.qbtns button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);font-weight:600;font-size:14px;background:var(--surface)}
+.qrbox{background:#fff;color:#111;border-radius:12px;padding:12px;margin-top:10px;text-align:center;border:1px solid var(--line)}
+.qrbox svg{display:block;width:210px;max-width:70vw;height:auto;margin:0 auto}
+.qrbox .qa{font:700 24px var(--cond);color:#1d232a}
+.qrbox .qi{font-size:13px;color:#555}
+.warn{background:rgba(245,183,0,.15);color:#7a5600;border-radius:10px;padding:11px 13px;font-size:13.5px;border-left:4px solid var(--yel)}
+@media (prefers-color-scheme:dark){.warn{color:#f5d27a}}
+.success{text-align:center;padding:10px 0}
+.success .ck{width:74px;height:74px;border-radius:50%;margin:0 auto 12px;background:rgba(47,158,110,.14);color:var(--ok);display:grid;place-items:center}
+.success .ck svg{width:38px;height:38px}
+.success h3{font-size:28px;margin:0 0 4px}
+.tbl-w{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th,.tbl td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child,.tbl .l{text-align:left}
+.tbl thead th{background:var(--surface2);font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;position:sticky;top:0}
+.tbl tfoot td{font-weight:700;background:var(--surface2)}
+.tbl input{width:96px;padding:6px 8px;text-align:right;font-size:15px}
+.tbl tr:last-child td{border-bottom:0}
+.ps{position:relative}
+.ps-res{display:flex;flex-direction:column;margin-top:4px;max-height:240px;overflow-y:auto}
+.ps-res button{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);border-radius:0}
+.ps-res button:hover{background:var(--surface2)}
+.ps-res small{color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;border-top:4px solid var(--c,var(--line))}
+.kpi span{font-size:12.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.kpi b{display:block;font:700 27px var(--cond);margin-top:2px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi small{font-size:12px;color:var(--muted)}
+.kpi.hero{background:linear-gradient(135deg,#232b34,#151a20);color:#fff;border:0;position:relative;overflow:hidden}
+.kpi.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--hz)}
+.kpi.hero span,.kpi.hero small{color:#b9c2cc}.kpi.hero b{color:#f5b700;font-size:30px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:170px;padding-top:6px}
+.bars .bc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.bars .b{width:100%;max-width:30px;background:linear-gradient(180deg,#ffc928,#e09a00);border-radius:3px 3px 0 0;min-height:2px;box-shadow:inset 0 -2px 0 #1d232a}
+.bars .bl{font-size:10px;color:var(--muted);margin-top:5px;white-space:nowrap}
+.hb{margin-bottom:11px}.hb .row{font-size:13.5px}
+.hb .tr{height:8px;border-radius:2px;background:var(--surface2);margin-top:5px;overflow:hidden}
+.hb .tr i{display:block;height:100%;background:var(--c,var(--yel))}
+.sgrid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start}
+.set-actions{display:grid;gap:9px}
+.ver{text-align:center;font-size:12px;color:var(--muted);margin-top:20px}
+.lic-st{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:12px;background:var(--surface2);border-left:4px solid var(--yel)}
+.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translateX(-50%);background:#1d232a;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:90vw;animation:tin .2s;border-left:4px solid var(--yel)}
+.toast.err{background:var(--err);border-left-color:#fff}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
+.fatal{position:relative;z-index:2;padding:40px 24px;max-width:520px;margin:auto;text-align:center}
+
+/* ===== In ấn ===== */
+#print{display:none}
+@media print{
+  body{overflow:visible;background:#fff;color:#000;height:auto}
+  body>*:not(#print){display:none!important}
+  #print{display:block;color:#000;font:12px/1.4 Arial,Helvetica,sans-serif}
+  #print .c{text-align:center}#print .r{text-align:right}
+  #print table{width:100%;border-collapse:collapse}
+  #print .pA5 .hd{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid #000;padding-bottom:6px}
+  #print .pA5 h1{font:700 18px Arial;margin:8px 0 2px;text-align:center;text-transform:uppercase}
+  #print .pA5 .items th,#print .pA5 .items td{border:1px solid #000;padding:3px 5px}
+  #print .pA5 .items th{background:#eee}
+  #print .pA5 .tot td{padding:2px 5px}
+  #print .pA5 .sig{display:flex;justify-content:space-around;margin-top:14px;text-align:center}
+  #print .pA5 .sig div{width:24%}
+  #print .pA5 .sig small{display:block;font-style:italic;margin-bottom:46px}
+  #print .p80{width:72mm;margin:0 auto;font:12px/1.4 "Courier New",monospace}
+  #print .p80 h1{font:700 14px "Courier New";margin:4px 0;text-align:center}
+  #print .p80 h2{font:700 16px Arial;margin:0;text-align:center}
+  #print hr{border:0;border-top:1px dashed #000;margin:6px 0}
+  #print .pqr{text-align:center;font-size:11px}
+  #print .pqr svg{width:34mm;height:34mm;display:block;margin:4px auto 2px}
+}
+</style>
+</head>
+<body>
+<div class="bg-art" aria-hidden="true" id="bgArt"></div>
+<div id="auth" class="hidden"></div>
+
+<div id="app" class="hidden">
+  <aside class="side">
+    <span id="sideArt"></span>
+    <div class="brand"><span id="logoS"></span><div><b id="sbName">VLXD</b><small>Sắt thép · VLXD</small></div></div>
+    <nav class="nav" id="sideNav"></nav>
+    <div class="me" id="sideMe"></div>
+  </aside>
+  <div class="content">
+    <header class="topbar">
+      <h1 id="vTitle"></h1>
+      <button class="trial hidden" id="trialBtn" data-act="license"></button>
+      <span class="net hidden" id="net">● Ngoại tuyến</span>
+      <button class="av" id="tbMe" data-act="meMenu" aria-label="Tài khoản"></button>
+    </header>
+    <main id="view"></main>
+    <nav class="tabbar" id="tabNav"></nav>
+  </div>
+</div>
+<div id="print"></div>
+
+<script src="qrcode.js"></script>
+<script>
+'use strict';
+/* ================= HẰNG SỐ ================= */
+const APP_VER = '1.0';
+const DAY = 864e5;
+const DEFAULT_CATS = ['Thép xây dựng', 'Thép hình - Ống thép', 'Tôn - Xà gồ', 'Đinh - Vít - Bu lông', 'Xi măng', 'Cát - Đá - Gạch', 'Ống nước - Điện', 'Sơn - Chống thấm', 'Dụng cụ - Phụ kiện'];
+const CAT_ICON = { 'Thép xây dựng': '🏗️', 'Thép hình - Ống thép': '📐', 'Tôn - Xà gồ': '🏠', 'Đinh - Vít - Bu lông': '🔩', 'Xi măng': '🪨', 'Cát - Đá - Gạch': '🧱', 'Ống nước - Điện': '🚰', 'Sơn - Chống thấm': '🎨', 'Dụng cụ - Phụ kiện': '🔨' };
+const PALETTE = ['#f5b700', '#5b8def', '#ff7a00', '#8a96a3', '#9c6b3f', '#c0503a', '#2fa3b5', '#7a5cc4', '#4fa36b', '#d4a64a'];
+const DEFAULT_UNITS = ['cây', 'kg', 'tấn', 'bao', 'm', 'm²', 'm³', 'viên', 'con', 'cái', 'hộp', 'thùng', 'cuộn', 'tấm', 'bó', 'bộ', 'lít', 'xe'];
+const ROLES = { admin: 'Quản lý', sale: 'Bán hàng', kho: 'Thủ kho' };
+const PERM = { sell: ['admin', 'sale'], stock: ['admin', 'kho'], price: ['admin'], void: ['admin'], collect: ['admin', 'sale'], payNcc: ['admin', 'kho'] };
+const METHODS = { cash: 'Tiền mặt', bank: 'Chuyển khoản', card: 'Thẻ / POS' };
+const MOVE_T = { D: 'Tồn đầu', N: 'Nhập kho', B: 'Bán hàng', H: 'Hủy HĐ (nhập lại)', X: 'Xuất khác', K: 'Kiểm kho' };
+const ISSUE_REASONS = ['Hao hụt', 'Hư hỏng', 'Xuất dùng nội bộ', 'Trả hàng nhà cung cấp', 'Khác'];
+const BANKS = [
+  ['970436', 'VCB', 'Vietcombank'], ['970415', 'ICB', 'VietinBank'], ['970418', 'BIDV', 'BIDV'],
+  ['970405', 'VBA', 'Agribank'], ['970422', 'MB', 'MB Bank'], ['970407', 'TCB', 'Techcombank'],
+  ['970416', 'ACB', 'ACB'], ['970432', 'VPB', 'VPBank'], ['970423', 'TPB', 'TPBank'],
+  ['970403', 'STB', 'Sacombank'], ['970437', 'HDB', 'HDBank'], ['970441', 'VIB', 'VIB'],
+  ['970443', 'SHB', 'SHB'], ['970426', 'MSB', 'MSB'], ['970448', 'OCB', 'OCB'],
+  ['970431', 'EIB', 'Eximbank'], ['970440', 'SEAB', 'SeABank'], ['970449', 'LPB', 'LPBank'],
+  ['970428', 'NAB', 'Nam A Bank'], ['970409', 'BAB', 'Bac A Bank'], ['970425', 'ABB', 'ABBank'],
+  ['970452', 'KLB', 'KienlongBank'], ['970427', 'VAB', 'VietABank'], ['970412', 'PVCB', 'PVcomBank'],
+  ['970438', 'BVB', 'BaoViet Bank'], ['970419', 'NCB', 'NCB'], ['970424', 'SHBVN', 'Shinhan Bank'], ['546034', 'CAKE', 'CAKE by VPBank']
+];
+/* ---- Hình minh họa công trình (vẽ bằng SVG) ---- */
+function craneSVG(cls) {
+  let mast = '', jib = '';
+  for (let y = 340; y > 90; y -= 20) mast += `M90 ${y}L110 ${y - 20}M110 ${y - 20}L90 ${y - 20}`;
+  for (let x = 110; x < 380; x += 20) jib += `M${x} 90L${x + 10} 70L${x + 20} 90`;
+  for (let x = 40; x < 90; x += 16) jib += `M${x} 70L${x + 8} 90L${x + 16} 70`;
+  return `<svg class="${cls}" viewBox="0 0 400 360" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">
+    <path d="M90 340V70M110 340V90${mast}"/><path d="M40 70H380M110 90H380M40 90H90${jib}"/>
+    <path d="M100 18 46 70M100 18 300 70M100 18V70"/><rect x="40" y="90" width="34" height="26"/><rect x="112" y="92" width="26" height="22"/>
+    <rect x="250" y="90" width="22" height="8"/><path d="M261 98V206M254 206h14l-2 8h-10z"/>
+    <path d="M206 218h110M206 236h110M206 218v18M316 218v18M246 214l15-8 15 8"/><path d="M66 352h68v-12H66z"/></svg>`;
+}
+function skylineSVG(cls) {
+  let s = '';
+  const B = [[0, 70, 90], [95, 110, 60], [165, 50, 120], [240, 90, 80], [345, 70, 135], [430, 110, 70], [550, 80, 100], [640, 60, 150], [710, 100, 85], [820, 90, 120], [920, 80, 75]];
+  B.forEach(([x, w, h], i) => {
+    s += `<rect x="${x}" y="${170 - h}" width="${w}" height="${h}"/>`;
+    if (i % 3 === 2) { for (let gx = x; gx <= x + w; gx += w / 4) s += `<path d="M${gx} ${170 - h - 22}V170"/>`; for (let gy = 170 - h - 22; gy < 170; gy += 18) s += `<path d="M${x - 4} ${gy}H${x + w + 4}"/>`; }
+    else for (let wy = 170 - h + 10; wy < 160; wy += 16) for (let wx = x + 8; wx < x + w - 10; wx += 16) s += `<rect x="${wx}" y="${wy}" width="7" height="8"/>`;
+  });
+  return `<svg class="${cls}" viewBox="0 0 1000 170" preserveAspectRatio="xMidYMax slice" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">${s}<path d="M0 169.5H1000"/></svg>`;
+}
+const LOGO = `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#1d232a"/><path d="M0 52 12 64H0zM64 52 52 64h12z" fill="#f5b700"/>
+  <path d="M17 15h30v7H36v20h11v7H17v-7h11V22H17z" fill="#f5b700"/><path d="M12 58h40" stroke="#f5b700" stroke-width="3" stroke-dasharray="6 4"/></svg>`;
+const I = (d, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICON = {
+  pos: I('<path d="M3 5h2l2.4 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 9H6"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/>'),
+  orders: I('<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>'),
+  stock: I('<path d="M3 9 12 4l9 5v11H3z"/><path d="M7 20v-7h10v7M7 16h10"/>'),
+  customers: I('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6 6 0 0 1 3.5 6"/>'),
+  reports: I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+  settings: I('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'),
+  more: I('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'),
+  search: I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
+  user: I('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+  logout: I('<path d="M15 4h4v16h-4M10 16l4-4-4-4M14 12H3"/>'),
+  lock: I('<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'),
+  eye: I('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+  check: I('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  print: I('<path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3"/><path d="M7 14h10v7H7z"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>'),
+  key: I('<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l3 3M14 9l2 2"/>'),
+  truck: I('<path d="M2 6h11v10H2zM13 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/>')
+};
+const NAV = [
+  { id: 'pos', label: 'Bán hàng', roles: ['admin', 'sale'] }, { id: 'orders', label: 'Hóa đơn', roles: ['admin', 'sale', 'kho'] },
+  { id: 'stock', label: 'Kho hàng', roles: ['admin', 'sale', 'kho'] }, { id: 'customers', label: 'Khách hàng', roles: ['admin', 'sale'] },
+  { id: 'reports', label: 'Báo cáo', roles: ['admin'] }, { id: 'settings', label: 'Cài đặt', roles: ['admin', 'sale', 'kho'] }
+];
+
+/* ================= TIỆN ÍCH ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const fmt = n => (Math.round(n) || 0).toLocaleString('vi-VN') + 'đ';
+const num = n => (Math.round(n) || 0).toLocaleString('vi-VN');
+const fq = n => (Math.round((+n || 0) * 1000) / 1000).toLocaleString('vi-VN', { maximumFractionDigits: 3 });
+const pq = s => { const v = parseFloat(String(s ?? '').replace(/\s/g, '').replace(',', '.')); return isFinite(v) ? Math.round(v * 1000) / 1000 : 0; };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+const pad = (n, l = 2) => String(n).padStart(l, '0');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const hhmm = t => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const ddmm = t => { const d = new Date(t); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); };
+const ddmmyy = t => ddmm(t) + '/' + new Date(t).getFullYear();
+const isoDate = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+const startOfDay = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); return +d; };
+const addDays = (t, n) => { const d = new Date(t); d.setDate(d.getDate() + n); return +d; };
+const initials = n => String(n || '?').trim().split(/\s+/).slice(-2).map(w => w[0]).join('').toUpperCase();
+const bankLabel = bin => { const b = BANKS.find(x => x[0] === bin); return b ? b[2] : 'Mã ' + bin; };
+function docSo(n) {
+  n = Math.floor(Math.abs(n)); if (!n) return 'Không đồng';
+  const so = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'], U = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ'];
+  const d3 = (x, full) => {
+    const t = Math.floor(x / 100), c = Math.floor(x % 100 / 10), d = x % 10, s = [];
+    if (full || t) s.push(so[t] + ' trăm');
+    if (c === 0) { if (d && (full || t)) s.push('lẻ'); } else s.push(c === 1 ? 'mười' : so[c] + ' mươi');
+    if (d) s.push(d === 1 && c > 1 ? 'mốt' : d === 5 && c > 0 ? 'lăm' : so[d]);
+    return s.join(' ');
+  };
+  const g = []; while (n > 0) { g.push(n % 1000); n = Math.floor(n / 1000); }
+  const parts = []; for (let k = g.length - 1; k >= 0; k--) if (g[k]) parts.push(d3(g[k], k < g.length - 1) + (U[k] ? ' ' + U[k] : ''));
+  const s = parts.join(' '); return s[0].toUpperCase() + s.slice(1) + ' đồng';
+}
+function toast(msg, type) {
+  $$('.toast').forEach(t => t.remove());
+  const el = document.createElement('div'); el.className = 'toast' + (type === 'err' ? ' err' : ''); el.textContent = msg;
+  document.body.appendChild(el); setTimeout(() => el.remove(), type === 'err' ? 2800 : 1800);
+}
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(10); } catch (e) {} };
+
+/* ================= LƯU TRỮ ================= */
+const IDB = (() => {
+  let db;
+  const open = () => new Promise((res, rej) => {
+    const r = indexedDB.open('vlxd-pos', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => { db = r.result; res(); };
+    r.onerror = () => rej(r.error || new Error('IndexedDB'));
+  });
+  const tx = (mode, fn) => new Promise((res, rej) => {
+    const t = db.transaction('kv', mode); const r = fn(t.objectStore('kv'));
+    t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  });
+  return { open, get: k => tx('readonly', s => s.get(k)), set: (k, v) => tx('readwrite', s => s.put(v, k)), clear: () => tx('readwrite', s => s.clear()) };
+})();
+const COLS = ['settings', 'users', 'products', 'customers', 'suppliers', 'orders', 'imports', 'issues', 'payments', 'moves', 'tickets', 'seq'];
+function defaults() {
+  return {
+    settings: { shopName: 'Sắt Thép & VLXD', address: '', phone: '', taxCode: '', footer: 'Cảm ơn quý khách! Hàng đã mua xin kiểm tra kỹ khi nhận.',
+      bankId: '', bankAcc: '', bankName: '', lockMin: 15, printSize: 'A5', allowNeg: false, cats: DEFAULT_CATS.slice(), units: DEFAULT_UNITS.slice(), demo: false },
+    users: [], products: [], customers: [], suppliers: [], orders: [], imports: [], issues: [], payments: [], moves: [], tickets: [],
+    seq: { order: 0, imp: 0, iss: 0, pay: 0, prod: 0, tk: 0 }
+  };
+}
+let S = defaults();
+async function loadAll() {
+  const d = defaults();
+  for (const k of COLS) { const v = await IDB.get(k); S[k] = v ?? d[k]; }
+  S.settings = { ...d.settings, ...S.settings }; S.seq = { ...d.seq, ...S.seq };
+}
+const dirty = new Set(); let saveT;
+function save(...keys) { keys.forEach(k => dirty.add(k)); clearTimeout(saveT); saveT = setTimeout(flush, 150); }
+async function flush() { const ks = [...dirty]; dirty.clear(); try { for (const k of ks) await IDB.set(k, S[k]); } catch (e) { toast('Lỗi lưu dữ liệu: ' + e.message, 'err'); } }
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', flush);
+
+/* ================= BẢN QUYỀN / DÙNG THỬ =================
+   Mỗi thiết bị có "Mã máy" riêng, dùng thử TRIAL_DAYS ngày. Mã kích hoạt là chữ ký số ECDSA P-256
+   trên (VL | mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật trong công cụ của nhà cung cấp. */
+const TRIAL_DAYS = 7;
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '', zalo: '' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "uqMBhT8HA1X37oJb2-rYcJTnQY4PmYtiD4SGPoWZ9Hk", "y": "X0vFhRqyGOeNlzUpTP9lbjEG848NB_v0NDZWw_CTcos"};
+const PLANS = { T7: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
+const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+let LIC = null, LST = null;
+const b64uDec = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+function newDevId() { const r = crypto.getRandomValues(new Uint8Array(12)), c = [...r].map(b => B32[b & 31]).join(''); return `VL-${c.slice(0, 4)}-${c.slice(4, 8)}-${c.slice(8)}`; }
+async function licSave() { try { await IDB.set('lic', LIC); } catch (e) {} try { localStorage.setItem('vpos-lic', JSON.stringify(LIC)); } catch (e) {} }
+async function licLoad() {
+  let l = null, ls = null;
+  try { l = await IDB.get('lic'); } catch (e) {}
+  try { ls = JSON.parse(localStorage.getItem('vpos-lic')); } catch (e) {}
+  if (!l && ls) l = ls;
+  if (!l) l = { dev: newDevId(), start: Date.now(), last: Date.now(), key: '' };
+  if (ls && ls.dev === l.dev) { l.start = Math.min(l.start, ls.start || l.start); l.last = Math.max(l.last || 0, ls.last || 0); if (!l.key && ls.key) l.key = ls.key; }
+  l.last = Math.max(l.last || 0, Date.now()); LIC = l; await licSave();
+}
+async function verifyKey(key) {
+  try {
+    const m = String(key).replace(/\s+/g, '').match(/^VL1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/);
+    if (!m) return { ok: false, why: 'Mã kích hoạt sai định dạng (phải bắt đầu bằng VL1.)' };
+    const payload = b64uDec(m[1]), sig = b64uDec(m[2]);
+    const pk = await crypto.subtle.importKey('jwk', LIC_PUB, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    if (!(await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pk, sig, payload))) return { ok: false, why: 'Mã kích hoạt không hợp lệ' };
+    const [tag, dev, expDays, plan] = new TextDecoder().decode(payload).split('|');
+    if (tag !== 'VL') return { ok: false, why: 'Mã kích hoạt không dành cho VLXD POS' };
+    if (dev !== LIC.dev) return { ok: false, why: 'Mã kích hoạt này dành cho máy khác (' + dev + ')' };
+    return { ok: true, exp: +expDays ? +expDays * DAY : 0, plan };
+  } catch (e) { return { ok: false, why: 'Mã kích hoạt không hợp lệ' }; }
+}
+async function licStatus() {
+  const now = Math.max(Date.now(), LIC.last), tamper = Date.now() < LIC.last - 2 * 3600000;
+  if (LIC.key) { const k = await verifyKey(LIC.key); if (k.ok) return { mode: 'licensed', plan: k.plan, exp: k.exp, active: !k.exp || now < k.exp, daysLeft: k.exp ? Math.ceil((k.exp - now) / DAY) : Infinity, tamper }; }
+  const left = TRIAL_DAYS - Math.floor((now - LIC.start) / DAY);
+  return { mode: 'trial', active: left > 0, daysLeft: Math.max(0, left), end: LIC.start + TRIAL_DAYS * DAY, tamper };
+}
+function updTrial() {
+  const b = $('#trialBtn'); if (!b || !LST) return;
+  b.classList.toggle('hidden', !(LST.mode === 'trial' || (LST.exp && LST.daysLeft <= 10)));
+  b.classList.toggle('urgent', LST.daysLeft <= 2);
+  b.textContent = LST.mode === 'trial' ? `Dùng thử · còn ${LST.daysLeft} ngày` : `Bản quyền còn ${LST.daysLeft} ngày`;
+}
+async function licCheck() {
+  LIC.last = Math.max(LIC.last, Date.now()); await licSave(); LST = await licStatus(); updTrial();
+  if (!LST.active) { ME = null; sessSet(null); closeAllModals(); renderActivation(); return false; }
+  return true;
+}
+const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b>${VENDOR.phone ? ' · ĐT ' + esc(VENDOR.phone) : ''}${VENDOR.zalo ? ' · Zalo ' + esc(VENDOR.zalo) : ''} để nhận mã kích hoạt.`;
+function copyText(t) {
+  const ok = () => toast('Đã sao chép: ' + t.slice(0, 40));
+  const fb = () => { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Hãy tự chọn và sao chép', 'err'); } a.remove(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, fb); else fb();
+}
+const licDesc = st => st.mode === 'trial' ? (st.active ? `Dùng thử · còn <b>${st.daysLeft}</b>/${TRIAL_DAYS} ngày (đến ${ddmmyy(st.end)})` : `Đã hết ${TRIAL_DAYS} ngày dùng thử`)
+  : `${PLANS[st.plan] || 'Bản quyền'} · ${st.exp ? (st.active ? `hết hạn ${ddmmyy(st.exp - 1)} (còn ${st.daysLeft} ngày)` : `đã hết hạn ${ddmmyy(st.exp - 1)}`) : 'không giới hạn thời gian'}`;
+async function activate(key) {
+  const r = await verifyKey(key); if (!r.ok) return r;
+  if (r.exp && Math.max(Date.now(), LIC.last) >= r.exp) return { ok: false, why: 'Mã kích hoạt này đã hết hạn' };
+  LIC.key = String(key).replace(/\s+/g, ''); await licSave(); LST = await licStatus(); updTrial(); return r;
+}
+function renderActivation() {
+  const exp = LST.mode !== 'trial';
+  const f = authShell(`<h1>${exp ? 'Bản quyền hết hạn' : 'Hết hạn dùng thử'}</h1>
+    <p class="lead">${exp ? 'Thời hạn sử dụng đã kết thúc.' : `Bạn đã dùng thử ${TRIAL_DAYS} ngày.`} <b>Dữ liệu vẫn được giữ nguyên.</b> Gửi <b>Mã máy</b> cho nhà cung cấp để nhận mã kích hoạt.</p>
+    <div class="f"><label>Mã máy</label><div class="devcode">${esc(LIC.dev)}</div></div>
+    <button type="button" class="btn ghost block" id="acCopy">Sao chép mã máy</button>
+    <p style="font-size:13.5px;color:#66717d">${vendorLine()}</p>
+    <div class="f"><label for="acKey">Mã kích hoạt</label><textarea id="acKey" rows="3" placeholder="Dán mã kích hoạt bắt đầu bằng VL1."></textarea></div>
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn yel block" type="submit">Kích hoạt</button>
+    ${LST.tamper ? '<div class="auth-msg">⚠ Ngày giờ trên máy đang lùi so với lần dùng trước. Hãy chỉnh lại đúng ngày giờ.</div>' : ''}
+    <div class="auth-foot">${S.users.length ? '<a href="#" class="link" id="acBackup">Tải bản sao lưu dữ liệu</a>' : ''}</div>`, exp ? 'Gia hạn để <em>tiếp tục</em> công việc' : 'Cảm ơn bạn đã <em>dùng thử</em>');
+  $('#acCopy').onclick = () => copyText(LIC.dev);
+  const bk = $('#acBackup'); if (bk) bk.onclick = e => { e.preventDefault(); A.backup(); };
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const r = await activate($('#acKey').value); if (!r.ok) return authMsg(r.why);
+    toast('Kích hoạt thành công!');
+    if (!S.users.length) renderSetup(); else renderLogin('');
+    setTimeout(() => { const m = $('#authMsg'); if (m) { m.textContent = 'Kích hoạt thành công: ' + licDesc(LST).replace(/<[^>]+>/g, ''); m.style.color = 'var(--ok)'; } }, 30);
+  };
+}
+function licenseModal() {
+  const d = openModal(`<div class="dlg-h"><h3>Bản quyền phần mềm</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="lic-st">${ICON.key}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
+      <div class="f"><label>Mã máy</label><div class="devcode">${esc(LIC.dev)}</div></div>
+      <button class="btn ghost block" id="lmCopy">Sao chép mã máy</button>
+      <p class="muted" style="font-size:13px">${vendorLine()}</p>
+      <div class="f"><label>Mã kích hoạt</label><textarea id="lmKey" rows="3" placeholder="Dán mã kích hoạt bắt đầu bằng VL1." style="font:14px ui-monospace,Menlo,Consolas,monospace"></textarea></div>
+      <div class="auth-msg" id="lmMsg"></div></div>
+    <div class="dlg-f"><span class="grow"></span><button class="btn ghost" data-act="close">Đóng</button><button class="btn yel" id="lmOk">Kích hoạt</button></div>`, 'sm');
+  $('#lmCopy', d).onclick = () => copyText(LIC.dev);
+  $('#lmOk', d).onclick = async () => { const r = await activate($('#lmKey', d).value); if (!r.ok) return $('#lmMsg', d).textContent = r.why; closeModal(); toast('Kích hoạt thành công!'); refresh(); };
+}
+
+/* ================= ĐĂNG NHẬP ================= */
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+const newSalt = () => hex(crypto.getRandomValues(new Uint8Array(16)));
+async function hashPw(pw, salt) {
+  const enc = new TextEncoder(), key = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256));
+}
+const verifyPw = async (u, pw) => (await hashPw(pw, u.salt)) === u.hash;
+async function setPw(u, pw) { u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); }
+let ME = null;
+const can = act => !!ME && PERM[act].includes(ME.role);
+const isAdmin = () => ME && ME.role === 'admin';
+const SESS = 'vpos-session';
+const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
+const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
+let lastAct = Date.now(), fails = 0, lockUntil = 0;
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { lastAct = Date.now(); if (ME) sessSet({ uid: ME.id, last: lastAct }); }, { passive: true }));
+setInterval(() => { const m = +S.settings.lockMin; if (ME && m > 0 && Date.now() - lastAct > m * 60000) lockScreen(); }, 15000);
+function authShell(inner, title) {
+  $('#app').classList.add('hidden');
+  const a = $('#auth'); a.classList.remove('hidden');
+  a.innerHTML = `<div class="auth">${craneSVG('crane')}${skylineSVG('sky')}
+    <div class="tblock"><div>CÔNG TRÌNH: ${esc(S.settings.shopName).toUpperCase()}</div><div>BẢN VẼ: A-01 · TỶ LỆ 1:100</div><div>HẠNG MỤC: QUẢN LÝ BÁN HÀNG & KHO</div></div>
+    <section class="auth-art">
+      <div class="brand-lg">${LOGO}<div><div class="bn">${esc(S.settings.shopName)}</div><div class="bt">Sắt thép · Vật liệu xây dựng</div></div></div>
+      <h2>${title || 'Vững nền móng <em>chắc kinh doanh</em>'}</h2>
+      <p>Phần mềm bán hàng, công nợ và quản lý <b>nhập – xuất – tồn kho</b> cho cửa hàng, công ty vật liệu xây dựng.</p>
+      <div class="svcs">${['🏗️ Sắt thép', '🔩 Đinh vít · Bu lông', '🪨 Xi măng', '🧱 Cát đá · Gạch', '🏠 Tôn · Xà gồ', '🚰 Ống nước'].map(x => `<span>${x}</span>`).join('')}</div>
+    </section>
+    <section class="auth-side"><form class="auth-card" id="authForm" novalidate><div class="hazard"></div>${inner}</form></section></div>`;
+  a.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
+  return $('#authForm');
+}
+const pwField = (id, label, ac = 'current-password') => `<div class="f"><label for="${id}">${label}</label><div class="pw"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" aria-label="Hiện mật khẩu">${ICON.eye}</button></div></div>`;
+const authMsg = m => { $('#authMsg').textContent = m; };
+const wirePw = d => d.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
+function renderSetup() {
+  const f = authShell(`<h1>Thiết lập lần đầu</h1><p class="lead">Tạo tài khoản <b>Quản lý</b>. Bạn được <b>dùng thử miễn phí ${TRIAL_DAYS} ngày</b>.</p>
+    <div class="f"><label for="suShop">Tên cửa hàng / công ty</label><input id="suShop" value="${esc(S.settings.shopName)}"></div>
+    <div class="f"><label for="suName">Họ tên quản lý</label><input id="suName" autocomplete="name" placeholder="VD: Trần Văn Hùng"></div>
+    <div class="f"><label for="suUser">Tên đăng nhập</label><input id="suUser" autocomplete="username" autocapitalize="none" placeholder="VD: admin"></div>
+    ${pwField('suPw', 'Mật khẩu (ít nhất 6 ký tự)', 'new-password')}${pwField('suPw2', 'Nhập lại mật khẩu', 'new-password')}
+    <label class="check"><input type="checkbox" id="suDemo" checked> Tạo sẵn dữ liệu mẫu (hàng hóa, khách, nhà cung cấp, hóa đơn)</label>
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn yel block" type="submit">Tạo tài khoản & bắt đầu</button>
+    <div class="auth-foot">Dữ liệu được lưu an toàn ngay trên thiết bị này.</div>`, 'Khởi công <em>VLXD POS</em>');
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#suName').value.trim(), user = $('#suUser').value.trim().toLowerCase(), pw = $('#suPw').value;
+    if (!name) return authMsg('Nhập họ tên quản lý');
+    if (!/^[a-z0-9._]{3,20}$/.test(user)) return authMsg('Tên đăng nhập 3–20 ký tự: chữ không dấu, số, dấu . hoặc _');
+    if (pw.length < 6) return authMsg('Mật khẩu phải có ít nhất 6 ký tự');
+    if (pw !== $('#suPw2').value) return authMsg('Hai mật khẩu không khớp');
+    const u = { id: uid(), username: user, name, role: 'admin', active: true, created: Date.now() };
+    await setPw(u, pw); S.users.push(u);
+    S.settings.shopName = $('#suShop').value.trim() || S.settings.shopName;
+    if ($('#suDemo').checked) seedDemo(u);
+    save(...COLS); await flush(); login(u);
+  };
+}
+function renderLogin(msg) {
+  let last = ''; try { last = localStorage.getItem('vpos-lastuser') || ''; } catch (e) {}
+  const f = authShell(`<h1>Đăng nhập</h1><p class="lead">Đăng nhập để vào hệ thống bán hàng & kho.</p>
+    <div class="f"><label for="liUser">Tên đăng nhập</label><input id="liUser" autocomplete="username" autocapitalize="none" value="${esc(last)}"></div>
+    ${pwField('liPw', 'Mật khẩu')}
+    <label class="check"><input type="checkbox" id="liRem" ${last ? 'checked' : ''}> Ghi nhớ tên đăng nhập</label>
+    <div class="auth-msg" id="authMsg">${esc(msg || '')}</div>
+    <button class="btn yel block" type="submit">Đăng nhập</button>
+    <div class="auth-foot">Quên mật khẩu? Liên hệ quản lý để đặt lại.</div>`);
+  setTimeout(() => (last ? $('#liPw') : $('#liUser')).focus(), 50);
+  f.onsubmit = async e => {
+    e.preventDefault();
+    if (Date.now() < lockUntil) return authMsg(`Đăng nhập sai nhiều lần. Thử lại sau ${Math.ceil((lockUntil - Date.now()) / 1000)} giây.`);
+    const name = $('#liUser').value.trim().toLowerCase(), pw = $('#liPw').value, u = S.users.find(x => x.username === name);
+    if (!u || !(await verifyPw(u, pw))) { if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; } $('#liPw').value = ''; return authMsg('Sai tên đăng nhập hoặc mật khẩu'); }
+    if (!u.active) return authMsg('Tài khoản đã bị khóa. Liên hệ quản lý.');
+    fails = 0;
+    try { $('#liRem').checked ? localStorage.setItem('vpos-lastuser', name) : localStorage.removeItem('vpos-lastuser'); } catch (e) {}
+    history.replaceState(null, '', '#'); login(u);
+  };
+}
+function lockScreen() {
+  if (!ME) return;
+  const u = ME; ME = null; sessSet(null); closeAllModals(); flush();
+  const f = authShell(`<h1>Màn hình đã khóa</h1><p class="lead">Nhập mật khẩu để tiếp tục làm việc.</p>
+    <div class="lock-user"><span class="av">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><br><small style="color:#66717d">@${esc(u.username)} · ${ROLES[u.role]}</small></div></div>
+    ${pwField('lkPw', 'Mật khẩu')}<div class="auth-msg" id="authMsg"></div>
+    <button class="btn yel block" type="submit">Mở khóa</button>
+    <div class="auth-foot"><a href="#" class="link" id="lkOther">Đăng nhập tài khoản khác</a></div>`);
+  setTimeout(() => $('#lkPw').focus(), 50);
+  $('#lkOther').onclick = e => { e.preventDefault(); history.replaceState(null, '', '#'); renderLogin(); };
+  f.onsubmit = async e => {
+    e.preventDefault();
+    if (Date.now() < lockUntil) return authMsg('Thử lại sau ít phút.');
+    if (!(await verifyPw(u, $('#lkPw').value))) { if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; } $('#lkPw').value = ''; return authMsg('Mật khẩu không đúng'); }
+    fails = 0; login(u, true);
+  };
+}
+function login(u, resume) {
+  if (LST && !LST.active) return renderActivation();
+  ME = u; lastAct = Date.now(); sessSet({ uid: u.id, last: lastAct });
+  $('#auth').classList.add('hidden'); $('#auth').innerHTML = '';
+  $('#app').classList.remove('hidden');
+  renderShell(); updTrial(); go(resume ? cur : (location.hash.slice(2) || homeView()));
+  if (u.mustChange) changePassword(true); else if (!resume) toast(`Xin chào, ${u.name}!`);
+}
+function logout() { ME = null; sessSet(null); closeAllModals(); flush(); renderLogin(); }
+function changePassword(force) {
+  const d = openModal(`<div class="dlg-h"><h3>${force ? 'Đặt mật khẩu mới' : 'Đổi mật khẩu'}</h3>${force ? '' : '<button class="ibtn" data-act="close">✕</button>'}</div>
+    <div class="dlg-b">${force ? '<div class="warn" style="margin-bottom:14px">Quản lý vừa đặt mật khẩu tạm cho bạn. Hãy đặt mật khẩu riêng để tiếp tục.</div>' : ''}
+      ${pwField('cpOld', force ? 'Mật khẩu tạm' : 'Mật khẩu hiện tại')}${pwField('cpNew', 'Mật khẩu mới (ít nhất 6 ký tự)', 'new-password')}${pwField('cpNew2', 'Nhập lại mật khẩu mới', 'new-password')}
+      <div class="auth-msg" id="cpMsg"></div></div>
+    <div class="dlg-f">${force ? '' : '<button class="btn ghost" data-act="close">Hủy</button>'}<button class="btn pri grow" id="cpOk">Lưu mật khẩu</button></div>`, 'sm', force);
+  wirePw(d);
+  const msg = m => $('#cpMsg', d).textContent = m;
+  $('#cpOk', d).onclick = async () => {
+    const o = $('#cpOld', d).value, n = $('#cpNew', d).value;
+    if (!(await verifyPw(ME, o))) return msg('Mật khẩu hiện tại không đúng');
+    if (n.length < 6) return msg('Mật khẩu mới phải có ít nhất 6 ký tự');
+    if (n !== $('#cpNew2', d).value) return msg('Hai mật khẩu mới không khớp');
+    if (n === o) return msg('Mật khẩu mới phải khác mật khẩu cũ');
+    await setPw(ME, n); delete ME.mustChange; save('users'); closeModal(); toast('Đã đổi mật khẩu');
+  };
+}
+
+/* ================= MODAL ================= */
+function openModal(html, size = '', isStatic = false) {
+  const m = document.createElement('div'); m.className = 'modal'; if (isStatic) m.dataset.static = '1';
+  m.innerHTML = `<div class="dlg ${size}" role="dialog" aria-modal="true">${html}</div>`;
+  m.addEventListener('mousedown', e => { if (e.target === m && !m.dataset.static) closeModal(); });
+  document.body.appendChild(m); requestAnimationFrame(() => m.classList.add('show'));
+  return m.firstElementChild;
+}
+function closeModal() { const ms = $$('.modal'); const m = ms[ms.length - 1]; if (m) m.remove(); }
+function closeAllModals() { $$('.modal').forEach(m => m.remove()); }
+function ask(msg, ok = 'Đồng ý', danger = false, withInput) {
+  return new Promise(res => {
+    const d = openModal(`<div class="dlg-b" style="padding-top:20px"><h3 style="margin:0 0 8px;font-size:22px">Xác nhận</h3><p style="margin:0">${msg}</p>
+      ${withInput ? `<input id="askIn" style="margin-top:12px" placeholder="${esc(withInput)}">` : ''}</div>
+      <div class="dlg-f"><button class="btn ghost grow" data-x="0">Hủy</button><button class="btn ${danger ? 'danger' : 'pri'} grow" data-x="1">${ok}</button></div>`, 'sm', true);
+    d.addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (!b) return; const v = withInput ? $('#askIn', d).value.trim() : true; closeModal(); res(b.dataset.x === '1' ? v : false); });
+  });
+}
+
+/* ================= KHUNG ỨNG DỤNG ================= */
+let cur = 'pos';
+const navItems = () => NAV.filter(n => ME && n.roles.includes(ME.role));
+const homeView = () => ME && ME.role === 'kho' ? 'stock' : (navItems()[0] || NAV[5]).id;
+const lowCount = () => S.products.filter(p => p.active !== false && p.stock <= (p.min || 0)).length;
+function renderShell() {
+  const items = navItems(), badge = id => id === 'pos' && S.tickets.length ? `<span class="badge">${S.tickets.length}</span>` : id === 'stock' && lowCount() ? `<span class="badge">${lowCount()}</span>` : '';
+  $('#logoS').innerHTML = LOGO; $('#sideArt').innerHTML = craneSVG('side-art');
+  $('#sbName').textContent = S.settings.shopName;
+  $('#sideNav').innerHTML = items.map(n => `<button data-act="go" data-v="${n.id}" class="${n.id === cur ? 'on' : ''}">${ICON[n.id]}<span>${n.label}</span>${badge(n.id)}</button>`).join('');
+  const mob = items.length > 5 ? [...items.slice(0, 4), { id: 'more', label: 'Thêm' }] : items;
+  $('#tabNav').innerHTML = mob.map(n => `<button data-act="${n.id === 'more' ? 'moreMenu' : 'go'}" data-v="${n.id}" class="${n.id === cur || (n.id === 'more' && !mob.some(x => x.id === cur)) ? 'on' : ''}">${ICON[n.id]}<span>${n.label}</span>${badge(n.id)}</button>`).join('');
+  $('#sideMe').innerHTML = `<span class="av">${esc(initials(ME.name))}</span><div class="who"><b>${esc(ME.name)}</b><small>${ROLES[ME.role]}</small></div>
+    <button class="ibtn" data-act="lock" title="Khóa màn hình">${ICON.lock}</button><button class="ibtn" data-act="logout" title="Đăng xuất">${ICON.logout}</button>`;
+  $('#tbMe').textContent = initials(ME.name);
+}
+const VIEWS = { pos: vPOS, orders: vOrders, stock: vStock, customers: vCustomers, reports: vReports, settings: vSettings };
+function go(v) {
+  if (!navItems().some(n => n.id === v)) v = homeView();
+  cur = v; history.replaceState(null, '', '#/' + v);
+  renderShell(); $('#vTitle').textContent = NAV.find(x => x.id === v).label;
+  const view = $('#view'); view.className = ''; view.scrollTop = 0; VIEWS[v]();
+}
+const refresh = () => { if (ME) { renderShell(); VIEWS[cur](); } };
+function moreMenu() {
+  openModal(`<div class="dlg-h"><h3>Chức năng khác</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-f" style="flex-direction:column;align-items:stretch;border:0">${navItems().slice(4).map(n => `<button class="btn ghost" style="justify-content:flex-start" data-act="go" data-v="${n.id}">${ICON[n.id]} ${n.label}</button>`).join('')}
+    <button class="btn ghost" style="justify-content:flex-start" data-act="lock">${ICON.lock} Khóa màn hình</button><button class="btn danger ghost" style="justify-content:flex-start" data-act="logout">${ICON.logout} Đăng xuất</button></div>`, 'sm');
+}
+function meMenu() {
+  openModal(`<div class="dlg-h"><h3>Tài khoản</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="lock-user" style="margin:0"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><br><small class="muted">@${esc(ME.username)} · ${ROLES[ME.role]}</small></div></div></div>
+    <div class="dlg-f" style="flex-direction:column;align-items:stretch"><button class="btn ghost" data-act="chpw">${ICON.lock} Đổi mật khẩu</button><button class="btn ghost" data-act="lock">${ICON.lock} Khóa màn hình</button><button class="btn danger ghost" data-act="logout">${ICON.logout} Đăng xuất</button></div>`, 'sm');
+}
+
+/* ================= HÀM CHUNG: HÀNG HÓA, KHO ================= */
+const prodOf = id => S.products.find(x => x.id === id);
+const custOf = id => S.customers.find(x => x.id === id);
+const supOf = id => S.suppliers.find(x => x.id === id);
+const catColor = c => { const i = S.settings.cats.indexOf(c); return PALETTE[(i < 0 ? 9 : i) % PALETTE.length]; };
+const catIcon = c => CAT_ICON[c] || '📦';
+const stCls = p => p.stock <= 0 ? 'z' : p.stock <= (p.min || 0) ? 'lo' : '';
+const stockTxt = p => `${fq(p.stock)} ${esc(p.unit)}${p.unit2 && p.rate2 ? ` <small>(≈${fq(p.stock / p.rate2)} ${esc(p.unit2)})</small>` : ''}`;
+const priceFor = (p, cu) => cu && cu.group === 'si' && p.priceSi ? p.priceSi : p.price;
+function move(pid, d, type, ref, t) {
+  const p = prodOf(pid); if (!p || !d) return;
+  p.stock = Math.round((p.stock + d) * 1000) / 1000;
+  S.moves.push({ t: t || Date.now(), pid, d: Math.round(d * 1000) / 1000, type, ref: ref || '' });
+}
+const nextCode = (k, pre) => pre + pad(++S.seq[k], 6);
+function prodSearch(box, onPick, filter) {
+  box.innerHTML = `<div class="search">${ICON.search}<input placeholder="Gõ tên / mã hàng để thêm…" autocomplete="off"></div><div class="ps-res"></div>`;
+  const inp = $('input', box), res = $('.ps-res', box);
+  const draw = () => { const q = norm(inp.value.trim()); if (!q) { res.innerHTML = ''; return; }
+    const l = S.products.filter(p => (!filter || filter(p)) && norm(p.name + ' ' + p.code + ' ' + (p.spec || '')).includes(q)).slice(0, 8);
+    res.innerHTML = l.map(p => `<button type="button" data-pp="${p.id}">${catIcon(p.cat)} <b>${esc(p.name)}</b> <small>${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''} · Tồn ${fq(p.stock)} ${esc(p.unit)}</small></button>`).join('') || '<div class="muted" style="padding:8px 12px">Không tìm thấy</div>'; };
+  inp.oninput = draw;
+  inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const b = $('[data-pp]', res); if (b) b.click(); } };
+  res.onclick = e => { const b = e.target.closest('[data-pp]'); if (b) { onPick(b.dataset.pp); inp.value = ''; draw(); inp.focus(); } };
+  return inp;
+}
+function pickParty(kind, cb, title) {
+  const list = kind === 'cust' ? S.customers : S.suppliers;
+  const d = openModal(`<div class="dlg-h"><h3>${title || (kind === 'cust' ? 'Chọn khách hàng' : 'Chọn nhà cung cấp')}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="search" style="margin-bottom:12px">${ICON.search}<input id="ppQ" type="search" placeholder="Tìm tên hoặc số điện thoại…" autocomplete="off"></div><div class="list" id="ppL"></div></div>
+    <div class="dlg-f"><button class="btn ghost grow" data-act="close">Đóng</button><button class="btn yel grow" id="ppNew">${ICON.plus} Thêm mới</button></div>`, 'md');
+  const draw = () => {
+    const q = norm($('#ppQ', d).value.trim());
+    const l = list.filter(c => !q || norm(c.name).includes(q) || (c.phone || '').includes(q)).slice(0, 60);
+    $('#ppL', d).innerHTML = l.map(c => `<button class="li li-u" data-pc="${c.id}"><span class="av" style="width:36px;height:36px">${esc(initials(c.name))}</span>
+      <span>${esc(c.name)}<small>${esc(c.phone || '')}${c.addr ? ' · ' + esc(c.addr) : ''}</small></span>${kind === 'cust' ? `<span class="tag ${c.group === 'si' ? 'org' : ''}">${c.group === 'si' ? 'Sỉ / Thầu' : 'Lẻ'}</span>` : '<span></span>'}
+      <span class="r ${c.debt > 0 ? 'err-t' : ''}">${c.debt ? fmt(c.debt) : ''}<small>${c.debt ? 'công nợ' : ''}</small></span></button>`).join('') || '<div class="empty" style="padding:24px">Không tìm thấy. Bấm "Thêm mới".</div>';
+  };
+  $('#ppQ', d).addEventListener('input', draw);
+  d.addEventListener('click', e => { const b = e.target.closest('[data-pc]'); if (b) { closeModal(); cb(list.find(x => x.id === b.dataset.pc)); } });
+  $('#ppNew', d).onclick = () => editParty(kind, null, c => { closeModal(); cb(c); }, $('#ppQ', d).value.trim());
+  draw(); setTimeout(() => $('#ppQ', d).focus(), 60);
+}
+
+/* ================= BÁN HÀNG ================= */
+let curTk = null;
+const posF = { q: '', cat: 'all' };
+const tkOf = () => S.tickets.find(t => t.id === curTk);
+const tkName = t => { const c = custOf(t.customerId); return c ? c.name : 'Đơn #' + t.no; };
+function tkCalc(t) {
+  const sub = t ? t.lines.reduce((a, l) => a + Math.round(l.qty * l.price), 0) : 0;
+  const d = !t ? 0 : t.discType === '%' ? Math.round(sub * Math.min(t.disc || 0, 100) / 100) : Math.min(t.disc || 0, sub);
+  const ship = t ? Math.max(0, t.ship || 0) : 0;
+  return { sub, d, ship, total: sub - d + ship, n: t ? t.lines.length : 0 };
+}
+function newTicket(customerId) {
+  const t = { id: uid(), no: ++S.seq.tk, created: Date.now(), customerId: customerId || null, lines: [], disc: 0, discType: '%', ship: 0 };
+  S.tickets.push(t); curTk = t.id; save('tickets', 'seq'); return t;
+}
+const baseInTicket = (t, pid, exceptLid) => t.lines.filter(l => l.pid === pid && l.lid !== exceptLid).reduce((a, l) => a + l.qty * l.factor, 0);
+function vPOS() {
+  if (!tkOf()) curTk = S.tickets.length ? S.tickets[S.tickets.length - 1].id : null;
+  const view = $('#view'); view.className = 'flush';
+  view.innerHTML = `<div class="pos"><section class="pos-l">
+      <div class="pos-tools"><div class="tickets" id="tkStrip"></div>
+        <div class="search">${ICON.search}<input id="posQ" type="search" placeholder="Tìm tên hàng, mã, quy cách… (F2)" autocomplete="off" value="${esc(posF.q)}"></div>
+        <div class="chips" id="posCat"></div></div>
+      <div class="plist" id="posGrid"></div>
+      <button class="cartbar" data-act="openCart" id="cartBar"></button>
+    </section><aside class="pos-r" id="cartPanel"></aside></div>`;
+  $('#posQ').addEventListener('input', e => { posF.q = e.target.value; renderGrid(); });
+  $('#posQ').addEventListener('keydown', e => { if (e.key !== 'Enter') return; const v = e.target.value.trim().toUpperCase(), l = posList(), p = S.products.find(x => x.code.toUpperCase() === v) || (l.length === 1 ? l[0] : null); if (p) { pickQty(p.id); e.target.value = ''; posF.q = ''; renderGrid(); } });
+  renderStrip(); renderCats(); renderGrid(); renderTicket();
+}
+function renderStrip() {
+  $('#tkStrip').innerHTML = S.tickets.map(t => { const c = tkCalc(t); return `<button class="tk ${t.id === curTk ? 'on' : ''}" data-act="selTk" data-id="${t.id}"><b>${esc(tkName(t))}</b><small>${c.n} mặt hàng · ${fmt(c.total)}</small></button>`; }).join('')
+    + `<button class="tk new" data-act="newTk">${ICON.plus} Đơn mới</button>`;
+}
+function renderCats() { $('#posCat').innerHTML = ['all', ...S.settings.cats].map(c => `<button class="chip ${posF.cat === c ? 'on' : ''}" data-act="posCat" data-v="${esc(c)}">${c === 'all' ? 'Tất cả' : catIcon(c) + ' ' + esc(c)}</button>`).join(''); }
+function posList() { const q = norm(posF.q.trim()); return S.products.filter(p => p.active !== false && (posF.cat === 'all' || p.cat === posF.cat) && (!q || norm(p.name + ' ' + p.code + ' ' + (p.spec || '')).includes(q))); }
+function renderGrid() {
+  const t = tkOf(), cu = t && custOf(t.customerId);
+  $('#posGrid').innerHTML = posList().map(p => { const n = t ? t.lines.filter(l => l.pid === p.id).length : 0;
+    return `<button class="pc" style="--c:${catColor(p.cat)}" data-act="pick" data-id="${p.id}">${n ? `<span class="cnt">${n}</span>` : ''}<span class="pc-ic">${catIcon(p.cat)}</span>
+      <span class="pc-b"><b>${esc(p.name)}</b><small>${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''}</small>
+      <span class="pc-f"><span class="pr">${fmt(priceFor(p, cu))}<small>/${esc(p.unit)}</small></span><span class="st ${stCls(p)}">Tồn ${fq(p.stock)} ${esc(p.unit)}</span></span></span></button>`; }).join('')
+    || `<div class="empty" style="grid-column:1/-1">${ICON.stock}<p>Không có hàng phù hợp.</p></div>`;
+}
+function pickQty(pid, lid) {
+  const p = prodOf(pid); if (!p) return;
+  const t = tkOf() || newTicket(), cu = custOf(t.customerId), line = lid ? t.lines.find(l => l.lid === lid) : null;
+  const st = { u: line ? (line.factor > 1 || line.uname !== p.unit ? 2 : 1) : 1, qty: line ? line.qty : 1, price: line ? line.price : priceFor(p, cu) };
+  const unitP = u => u === 2 ? priceFor(p, cu) * p.rate2 : priceFor(p, cu);
+  const d = openModal(`<div class="dlg-h"><h3>${line ? 'Sửa' : 'Thêm'} hàng</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="row" style="align-items:flex-start;margin-bottom:12px"><span class="pc-ic" style="background:${catColor(p.cat)}22">${catIcon(p.cat)}</span><div class="grow"><b style="font-size:16px">${esc(p.name)}</b><div class="muted" style="font-size:13px">${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''}</div>
+        <div style="font-size:13px">Tồn kho: <b class="st ${stCls(p)}">${stockTxt(p)}</b>${cu && cu.group === 'si' && p.priceSi ? ' · <span class="tag org">Giá sỉ</span>' : ''}</div></div></div>
+      ${p.unit2 && p.rate2 ? `<div class="f"><label>Đơn vị tính</label><div class="seg" style="display:flex"><button class="grow ${st.u === 1 ? 'on' : ''}" data-u="1">${esc(p.unit)}</button><button class="grow ${st.u === 2 ? 'on' : ''}" data-u="2">${esc(p.unit2)} (= ${fq(p.rate2)} ${esc(p.unit)})</button></div></div>` : ''}
+      <div class="g2"><div class="f"><label>Số lượng (<span id="qU"></span>)</label><input id="qQty" inputmode="decimal" value="${fq(st.qty)}"></div>
+        <div class="f"><label>Đơn giá / <span id="pU"></span></label><input id="qPrice" type="number" inputmode="numeric" min="0" value="${st.price}"></div></div>
+      <div class="qbtns">${[-1, 1, 5, 10, 50, 100].map(v => `<button data-q="${v}">${v > 0 ? '+' : ''}${v}</button>`).join('')}</div>
+      <div class="kv big"><span>Thành tiền</span><span id="qAmt"></span></div>
+      <div class="muted" style="font-size:12.5px" id="qInfo"></div>
+    </div>
+    <div class="dlg-f">${line ? '<button class="btn danger ghost" id="qDel">Xóa dòng</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn yel" id="qOk">${line ? 'Cập nhật' : 'Thêm vào đơn'}</button></div>`, 'sm');
+  const fac = () => st.u === 2 ? p.rate2 : 1, un = () => st.u === 2 ? p.unit2 : p.unit;
+  const upd = () => {
+    st.qty = pq($('#qQty', d).value); st.price = Math.max(0, Math.round(+$('#qPrice', d).value || 0));
+    $('#qU', d).textContent = un(); $('#pU', d).textContent = un(); $('#qAmt', d).textContent = fmt(st.qty * st.price);
+    const need = baseInTicket(t, pid, lid) + st.qty * fac(), over = need > p.stock + 1e-9;
+    $('#qInfo', d).innerHTML = `Quy đổi: ${fq(st.qty * fac())} ${esc(p.unit)}${over ? ` · <b class="err-t">Vượt tồn kho (${fq(p.stock)} ${esc(p.unit)})</b>` : ''}`;
+  };
+  d.addEventListener('click', e => {
+    const u = e.target.closest('[data-u]'); if (u) { st.u = +u.dataset.u; $$('[data-u]', d).forEach(b => b.classList.toggle('on', b === u)); $('#qPrice', d).value = Math.round(unitP(st.u)); upd(); }
+    const q = e.target.closest('[data-q]'); if (q) { $('#qQty', d).value = fq(Math.max(0, pq($('#qQty', d).value) + +q.dataset.q)); upd(); }
+  });
+  $('#qQty', d).oninput = upd; $('#qPrice', d).oninput = upd;
+  $('#qQty', d).onkeydown = e => { if (e.key === 'Enter') $('#qOk', d).click(); };
+  $('#qOk', d).onclick = () => {
+    upd(); if (!(st.qty > 0)) return toast('Nhập số lượng lớn hơn 0', 'err');
+    if (!S.settings.allowNeg && baseInTicket(t, pid, lid) + st.qty * fac() > p.stock + 1e-9) return toast(`Không đủ tồn kho (còn ${fq(p.stock)} ${p.unit})`, 'err');
+    const data = { pid, name: p.name, code: p.code, spec: p.spec || '', cat: p.cat, uname: un(), factor: fac(), qty: st.qty, price: st.price };
+    if (line) Object.assign(line, data); else t.lines.push({ lid: uid(), ...data });
+    save('tickets'); closeModal(); buzz(); renderStrip(); renderGrid(); renderTicket(); renderShell();
+    if (!line && window.innerWidth < 900) toast('Đã thêm: ' + p.name);
+  };
+  const del = $('#qDel', d); if (del) del.onclick = () => { t.lines = t.lines.filter(l => l !== line); save('tickets'); closeModal(); renderStrip(); renderGrid(); renderTicket(); };
+  upd(); setTimeout(() => { const i = $('#qQty', d); i.focus(); i.select(); }, 80);
+}
+function renderTicket() {
+  const pn = $('#cartPanel'); if (!pn) return;
+  const t = tkOf(), c = tkCalc(t), cu = t && custOf(t.customerId);
+  if (!t) {
+    pn.innerHTML = `<div class="cart-h"><div class="grow"><h2>Đơn hàng</h2></div><button class="ibtn only-m" data-act="closeCart">✕</button></div>
+      <div class="empty" style="flex:1;display:flex;flex-direction:column;justify-content:center">${ICON.pos}<p>Chưa có đơn đang mở<br><small>Chọn hàng bên trái hoặc bấm "Đơn mới"</small></p><button class="btn yel" style="margin:10px auto" data-act="newTk">${ICON.plus} Đơn mới</button></div>`;
+    updateBar(); return;
+  }
+  pn.innerHTML = `
+    <div class="cart-h"><div class="grow"><h2>${esc(tkName(t))}</h2><small>Đơn #${t.no} · mở lúc ${hhmm(t.created)} · ${c.n} mặt hàng</small></div><button class="ibtn only-m" data-act="closeCart">✕</button></div>
+    <div class="cust" data-act="tkCustomer">${ICON.user}<div>${cu ? `<b>${esc(cu.name)} <span class="tag ${cu.group === 'si' ? 'org' : ''}">${cu.group === 'si' ? 'Sỉ / Thầu' : 'Lẻ'}</span></b><small>${esc(cu.phone || '')}${cu.debt ? ' · <b class="err-t">Nợ cũ ' + fmt(cu.debt) + '</b>' : ''}</small>` : '<b>Khách lẻ</b><small>Chọn khách để áp giá sỉ / ghi công nợ</small>'}</div>${cu ? '<span class="x" data-act="tkNoCust">✕</span>' : ''}</div>
+    <div class="cart-lines">${t.lines.map(l => `<button class="cl" data-act="editLine" data-lid="${l.lid}"><div class="cl-m"><b>${esc(l.name)}</b><small>${fq(l.qty)} ${esc(l.uname)} × ${fmt(l.price)}${l.spec ? ' · ' + esc(l.spec) : ''}</small></div><b class="cl-a">${fmt(l.qty * l.price)}</b></button>`).join('')
+      || `<div class="empty">${ICON.pos}<p>Đơn trống<br><small>Chọn hàng bên trái để thêm</small></p></div>`}</div>
+    <div class="cart-f">
+      <div class="row"><span class="grow muted">Tiền hàng</span><b id="cSub">${fmt(c.sub)}</b></div>
+      <div class="row"><span class="grow muted">Chiết khấu</span><input id="cDisc" type="number" inputmode="numeric" min="0" placeholder="0" value="${t.disc || ''}"><div class="seg sm">${['%', 'đ'].map(x => `<button data-act="tdt" data-v="${x}" class="${t.discType === x ? 'on' : ''}">${x}</button>`).join('')}</div></div>
+      <div class="row"><span class="grow muted">${ICON.truck} Phí vận chuyển</span><input id="cShip" type="number" inputmode="numeric" min="0" placeholder="0" value="${t.ship || ''}"></div>
+      <div class="row total"><span class="grow">Tổng cộng</span><b id="cTotal">${fmt(c.total)}</b></div>
+      <div class="row"><button class="btn ghost" data-act="cancelTk" title="Hủy đơn">Hủy</button><button class="btn ghost" data-act="quote" ${t.lines.length ? '' : 'disabled'}>${ICON.print} Báo giá</button>
+        <button class="btn yel grow" data-act="checkout" ${t.lines.length ? '' : 'disabled'}>Thanh toán <kbd>F9</kbd></button></div>
+    </div>`;
+  const upd = () => { const c2 = tkCalc(t); $('#cSub').textContent = fmt(c2.sub); $('#cTotal').textContent = fmt(c2.total); save('tickets'); updateBar(); renderStrip(); };
+  $('#cDisc').addEventListener('input', e => { t.disc = Math.max(0, +e.target.value || 0); upd(); });
+  $('#cShip').addEventListener('input', e => { t.ship = Math.max(0, Math.round(+e.target.value || 0)); upd(); });
+  updateBar();
+}
+function updateBar() { const b = $('#cartBar'); if (!b) return; const t = tkOf(), c = tkCalc(t); b.innerHTML = `${ICON.pos}<span>${t ? esc(tkName(t)) + ' · ' + c.n + ' mặt hàng' : 'Chưa có đơn'}</span><span class="ct">${fmt(c.total)}</span>`; }
+
+/* ---- Thanh toán ---- */
+function checkout() {
+  const t = tkOf(); if (!t || !t.lines.length) return;
+  if (!S.settings.allowNeg) for (const l of t.lines) { const p = prodOf(l.pid); if (!p || baseInTicket(t, l.pid) > p.stock + 1e-9) return toast(`"${l.name}" không đủ tồn kho`, 'err'); }
+  const c = tkCalc(t), cu = custOf(t.customerId), pay = { method: 'cash', amount: c.total, addr: cu ? cu.addr || '' : '', note: '' };
+  const d = openModal(`<div class="dlg-h"><h3>Thanh toán · ${esc(tkName(t))}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="kv"><span class="muted">Tiền hàng (${c.n} mặt hàng)</span><span>${fmt(c.sub)}</span></div>
+      ${c.d ? `<div class="kv"><span class="muted">Chiết khấu</span><span>−${fmt(c.d)}</span></div>` : ''}${c.ship ? `<div class="kv"><span class="muted">Phí vận chuyển</span><span>${fmt(c.ship)}</span></div>` : ''}
+      <div class="kv big"><span>Tổng cộng</span><span>${fmt(c.total)}</span></div>
+      <div class="sec-l" style="margin:14px 0 8px">Hình thức</div>
+      <div class="seg" style="display:flex">${Object.entries(METHODS).map(([k, v]) => `<button class="grow ${k === 'cash' ? 'on' : ''}" data-pm="${k}">${v}</button>`).join('')}</div>
+      <div class="f" style="margin-top:12px"><label id="amLbl">Khách đưa</label><input id="pmAmt" type="number" inputmode="numeric" min="0" value="${c.total}"></div>
+      <div class="qbtns"><button data-am="${c.total}">Trả đủ</button>${cu ? '<button data-am="0">Ghi nợ toàn bộ</button>' : ''}${[100000, 500000, 1000000].map(s => Math.ceil(c.total / s) * s).filter((v, i, a) => v > c.total && a.indexOf(v) === i).slice(0, 2).map(v => `<button data-am="${v}">${num(v / 1000)}k</button>`).join('')}</div>
+      <div id="pmSum" style="margin-top:10px"></div>
+      <div id="pmQR"></div>
+      <div class="f" style="margin-top:12px"><label>${ICON.truck} Địa chỉ giao hàng</label><input id="pmAddr" value="${esc(pay.addr)}" placeholder="Để trống nếu khách lấy tại cửa hàng"></div>
+      <div class="f"><label>Ghi chú</label><input id="pmNote" placeholder="VD: giao trước 9h sáng, công trình nhà anh Tư"></div>
+    </div>
+    <div class="dlg-f"><button class="btn ghost" data-act="close">Hủy</button><span class="grow"></span><button class="btn pri" id="payOk">${ICON.check} Hoàn tất</button><button class="btn yel" id="payPrint">${ICON.print} Hoàn tất & In</button></div>`, 'md');
+  const calc = () => { const amt = Math.max(0, Math.round(+$('#pmAmt', d).value || 0)); const paid = Math.min(amt, c.total); return { amt, paid, change: pay.method === 'cash' ? Math.max(0, amt - c.total) : 0, debt: c.total - paid }; };
+  const upd = () => {
+    const x = calc();
+    $('#amLbl', d).textContent = pay.method === 'cash' ? 'Tiền khách đưa' : 'Số tiền khách thanh toán';
+    $('#pmSum', d).innerHTML = `${x.change ? `<div class="kv" style="font-size:17px"><span>Tiền thối lại</span><b class="ok-t">${fmt(x.change)}</b></div>` : ''}
+      ${x.debt ? `<div class="kv" style="font-size:17px"><span>Ghi nợ đơn này</span><b class="err-t">${fmt(x.debt)}</b></div>${cu ? `<div class="kv"><span class="muted">Nợ cũ → Tổng nợ sau</span><span>${fmt(cu.debt || 0)} → <b class="err-t">${fmt((cu.debt || 0) + x.debt)}</b></span></div>` : '<div class="warn">Chọn khách hàng trước khi ghi nợ.</div>'}` : ''}`;
+    $('#pmQR', d).innerHTML = pay.method === 'bank' ? (hasBank() ? qrBlock(x.paid || c.total, tkName(t)) : `<div class="warn" style="margin-top:8px">Chưa cài tài khoản ngân hàng nên chưa tạo được mã QR${isAdmin() ? ' (Cài đặt → Chuyển khoản QR)' : ''}.</div>`) : '';
+  };
+  d.addEventListener('click', e => {
+    const m = e.target.closest('[data-pm]'); if (m) { pay.method = m.dataset.pm; $$('[data-pm]', d).forEach(b => b.classList.toggle('on', b === m)); if (pay.method !== 'cash' && +$('#pmAmt', d).value > c.total) $('#pmAmt', d).value = c.total; upd(); }
+    const a = e.target.closest('[data-am]'); if (a) { $('#pmAmt', d).value = a.dataset.am; upd(); }
+  });
+  $('#pmAmt', d).oninput = upd;
+  const done = print => {
+    const x = calc(); if (x.debt && !cu) return toast('Chọn khách hàng để ghi công nợ', 'err');
+    Object.assign(pay, x, { addr: $('#pmAddr', d).value.trim(), note: $('#pmNote', d).value.trim() });
+    const o = createOrder(t, c, pay); closeModal(); saleDone(o); if (print) printOrder(o);
+  };
+  $('#payOk', d).onclick = () => done(false); $('#payPrint', d).onclick = () => done(true);
+  upd();
+}
+function createOrder(t, c, pay, time, staff) {
+  const cu = custOf(t.customerId), tm = time || Date.now(), st = staff || ME;
+  const o = { id: uid(), no: ++S.seq.order, time: tm, staffName: st.name, customerId: cu ? cu.id : null, customerName: cu ? cu.name : '', phone: cu ? cu.phone || '' : '', addr: pay.addr || '',
+    items: t.lines.map(l => { const p = prodOf(l.pid); return { pid: l.pid, name: l.name, code: l.code, spec: l.spec, cat: l.cat, uname: l.uname, factor: l.factor, qty: l.qty, base: Math.round(l.qty * l.factor * 1000) / 1000, price: l.price, amount: Math.round(l.qty * l.price), cost: p ? p.cost || 0 : 0 }; }),
+    sub: c.sub, disc: c.d, ship: c.ship, total: c.total, paid: pay.paid, debt: c.total - pay.paid, method: pay.method, given: pay.amt, change: pay.change || 0, note: pay.note || '', oldDebt: cu ? cu.debt || 0 : 0 };
+  o.code = 'HD' + pad(o.no, 6);
+  for (const it of o.items) move(it.pid, -it.base, 'B', o.code, tm);
+  if (cu) { cu.debt = (cu.debt || 0) + o.debt; cu.spent = (cu.spent || 0) + o.total; cu.orders = (cu.orders || 0) + 1; cu.last = tm; }
+  S.orders.push(o); S.tickets = S.tickets.filter(x => x !== t);
+  if (curTk === t.id) curTk = S.tickets.length ? S.tickets[S.tickets.length - 1].id : null;
+  save('orders', 'products', 'customers', 'tickets', 'moves', 'seq');
+  return o;
+}
+function saleDone(o) {
+  if (cur === 'pos') vPOS(); renderShell();
+  openModal(`<div class="dlg-b"><div class="success"><div class="ck">${ICON.check}</div><h3>Đã lập hóa đơn</h3>
+      <p class="muted" style="margin:0 0 14px">${o.code} · ${METHODS[o.method]}${o.customerName ? ' · ' + esc(o.customerName) : ''}</p>
+      <div class="kv big" style="border:0;margin:0"><span>Tổng cộng</span><span>${fmt(o.total)}</span></div>
+      ${o.change ? `<div class="kv" style="font-size:17px"><span>Tiền thối lại</span><b class="ok-t">${fmt(o.change)}</b></div>` : ''}
+      ${o.debt ? `<div class="kv" style="font-size:17px"><span>Ghi nợ</span><b class="err-t">${fmt(o.debt)}</b></div>` : ''}</div></div>
+    <div class="dlg-f"><button class="btn ghost grow" data-act="reprint" data-id="${o.id}">${ICON.print} In phiếu</button><button class="btn yel grow" data-act="close">Xong</button></div>`, 'sm');
+}
+
+/* ---- VietQR ---- */
+const tlv = (id, v) => id + String(v.length).padStart(2, '0') + v;
+function crc16(str) { let c = 0xFFFF; for (const b of new TextEncoder().encode(str)) { c ^= b << 8; for (let i = 0; i < 8; i++) c = c & 0x8000 ? ((c << 1) ^ 0x1021) & 0xFFFF : (c << 1) & 0xFFFF; } return c.toString(16).toUpperCase().padStart(4, '0'); }
+function vietQRPayload(bin, acc, amount, info) {
+  const mai = tlv('00', 'A000000727') + tlv('01', tlv('00', bin) + tlv('01', acc)) + tlv('02', 'QRIBFTTA');
+  const memo = norm(info || '').toUpperCase().replace(/[^A-Z0-9 ]/g, '').trim().slice(0, 25);
+  const s = tlv('00', '01') + tlv('01', amount ? '12' : '11') + tlv('38', mai) + tlv('53', '704') + (amount ? tlv('54', String(Math.round(amount))) : '') + tlv('58', 'VN') + (memo ? tlv('62', tlv('08', memo)) : '') + '6304';
+  return s + crc16(s);
+}
+const hasBank = () => !!(S.settings.bankId && S.settings.bankAcc);
+function qrSvg(amount, info) { const q = qrcode(0, 'M'); q.addData(vietQRPayload(S.settings.bankId, S.settings.bankAcc, amount, info)); q.make(); return q.createSvgTag({ cellSize: 4, margin: 4, scalable: true }); }
+const qrBlock = (amount, info) => `<div class="qrbox">${qrSvg(amount, info)}<div class="qa">${fmt(amount)}</div><div class="qi"><b>${esc(bankLabel(S.settings.bankId))}</b> · ${esc(S.settings.bankAcc)}<br>${esc(S.settings.bankName)}</div></div>`;
+
+/* ---- In chứng từ (A5 hoặc khổ 80mm) ---- */
+function printDoc(doc) {
+  const s = S.settings, a5 = s.printSize !== '80';
+  const head = `<div class="hd"><div><b style="font-size:15px;text-transform:uppercase">${esc(s.shopName)}</b><br>${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}${s.taxCode ? ' · MST: ' + esc(s.taxCode) : ''}</div>
+    <div class="r">Số: <b>${esc(doc.code)}</b><br>Ngày: ${ddmmyy(doc.time)} ${hhmm(doc.time)}</div></div>`;
+  let html;
+  if (a5) {
+    html = `<style>@page{size:A5 portrait;margin:8mm}</style><div class="pA5">${head}<h1>${esc(doc.title)}</h1>${doc.sub ? `<div class="c" style="font-style:italic;margin-bottom:6px">${esc(doc.sub)}</div>` : ''}
+      <div style="margin:6px 0">${doc.party.map(([k, v]) => `<div>${k}: <b>${esc(v)}</b></div>`).join('')}</div>
+      ${doc.rows ? `<table class="items"><thead><tr>${doc.cols.map((h, i) => `<th class="${i > 2 ? 'r' : ''}">${h}</th>`).join('')}</tr></thead><tbody>${doc.rows.map(r => `<tr>${r.map((v, i) => `<td class="${i > 2 ? 'r' : ''}">${v}</td>`).join('')}</tr>`).join('')}</tbody></table>` : ''}
+      <table class="tot" style="margin-top:6px">${doc.totals.map(([k, v, b]) => `<tr><td class="r" style="width:70%">${k}:</td><td class="r">${b ? '<b>' + v + '</b>' : v}</td></tr>`).join('')}</table>
+      ${doc.words != null ? `<div style="margin-top:4px">Bằng chữ: <i>${docSo(doc.words)}</i></div>` : ''}
+      ${doc.note ? `<div>Ghi chú: ${esc(doc.note)}</div>` : ''}
+      ${doc.qr ? `<div class="pqr">${qrSvg(doc.qr.amount, doc.qr.info)}Quét mã để chuyển khoản ${fmt(doc.qr.amount)}</div>` : ''}
+      <div class="sig">${doc.sigs.map(x => `<div><b>${x}</b><small>(Ký, ghi rõ họ tên)</small></div>`).join('')}</div>
+      ${doc.footer ? `<div class="c" style="margin-top:8px;font-style:italic">${esc(doc.footer)}</div>` : ''}</div>`;
+  } else {
+    html = `<style>@page{size:80mm auto;margin:0}</style><div class="p80"><h2>${esc(s.shopName)}</h2><div class="c">${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}</div><hr>
+      <h1>${esc(doc.title)}</h1><div>Số: ${esc(doc.code)}<br>Ngày: ${ddmmyy(doc.time)} ${hhmm(doc.time)}${doc.party.map(([k, v]) => `<br>${k}: ${esc(v)}`).join('')}</div><hr>
+      ${doc.rows ? `<table>${doc.rows80.map(r => `<tr><td colspan="2">${r[0]}</td></tr><tr><td>${r[1]}</td><td class="r">${r[2]}</td></tr>`).join('')}</table><hr>` : ''}
+      <table>${doc.totals.map(([k, v, b]) => `<tr><td>${k}</td><td class="r">${b ? '<b>' + v + '</b>' : v}</td></tr>`).join('')}</table>
+      ${doc.qr ? `<div class="pqr">${qrSvg(doc.qr.amount, doc.qr.info)}Quét mã để chuyển khoản</div>` : ''}<hr><div class="c">${esc(doc.footer || '')}</div></div>`;
+  }
+  $('#print').innerHTML = html; setTimeout(() => window.print(), 150);
+}
+function printOrder(o, quote) {
+  const rows = o.items.map((l, i) => [i + 1, esc(l.name) + (l.spec ? `<br><small>${esc(l.spec)}</small>` : ''), esc(l.uname), fq(l.qty), num(l.price), num(l.amount)]);
+  const totals = [['Cộng tiền hàng', fmt(o.sub)]];
+  if (o.disc) totals.push(['Chiết khấu', '-' + fmt(o.disc)]);
+  if (o.ship) totals.push(['Phí vận chuyển', fmt(o.ship)]);
+  totals.push(['TỔNG CỘNG', fmt(o.total), 1]);
+  if (!quote) {
+    totals.push([`Đã thanh toán (${METHODS[o.method]})`, fmt(o.paid)]);
+    if (o.change) totals.push(['Tiền thối lại', fmt(o.change)]);
+    if (o.debt) totals.push(['Còn nợ đơn này', fmt(o.debt), 1]);
+    if (o.customerId && (o.oldDebt || o.debt)) totals.push(['Nợ cũ', fmt(o.oldDebt)], ['TỔNG NỢ HIỆN TẠI', fmt(o.oldDebt + o.debt), 1]);
+  }
+  printDoc({ title: quote ? 'Bảng báo giá' : o.void ? 'Phiếu xuất kho (ĐÃ HỦY)' : 'Phiếu xuất kho kiêm hóa đơn', sub: quote ? 'Báo giá có hiệu lực trong 7 ngày' : '', code: o.code, time: o.time,
+    party: [['Khách hàng', o.customerName || 'Khách lẻ'], ...(o.phone ? [['Điện thoại', o.phone]] : []), ...(o.addr ? [['Địa chỉ giao', o.addr]] : []), ...(quote ? [] : [['Người lập', o.staffName]])],
+    cols: ['STT', 'Tên hàng - Quy cách', 'ĐVT', 'SL', 'Đơn giá', 'Thành tiền'], rows, rows80: o.items.map(l => [esc(l.name), `${fq(l.qty)} ${esc(l.uname)} x ${num(l.price)}`, num(l.amount)]),
+    totals, words: o.total, note: o.note, qr: hasBank() && (quote || o.debt || o.method === 'bank') ? { amount: quote ? o.total : o.debt || o.total, info: o.code } : null,
+    sigs: quote ? ['Khách hàng', 'Người báo giá'] : ['Người mua hàng', 'Người giao hàng', 'Thủ kho', 'Người lập phiếu'], footer: quote ? '' : S.settings.footer });
+}
+
+/* ================= HÓA ĐƠN ================= */
+const ordF = { q: '', r: 'today', st: 'all' };
+const RANGES = [['today', 'Hôm nay'], ['yest', 'Hôm qua'], ['7d', '7 ngày'], ['month', 'Tháng này'], ['lmonth', 'Tháng trước'], ['all', 'Tất cả']];
+function rangeOf(r, from, to) {
+  const d0 = startOfDay(Date.now()), n = new Date();
+  switch (r) {
+    case 'today': return [d0, d0 + DAY]; case 'yest': return [addDays(d0, -1), d0];
+    case '7d': return [addDays(d0, -6), d0 + DAY]; case 'month': return [+new Date(n.getFullYear(), n.getMonth(), 1), d0 + DAY];
+    case 'lmonth': return [+new Date(n.getFullYear(), n.getMonth() - 1, 1), +new Date(n.getFullYear(), n.getMonth(), 1)];
+    case 'custom': return [startOfDay(new Date(from + 'T00:00:00')), startOfDay(new Date(to + 'T00:00:00')) + DAY];
+    default: return [0, Infinity];
+  }
+}
+const rangeChips = (f, act) => `<div class="chips" style="margin-bottom:12px">${RANGES.map(([v, l]) => `<button class="chip ${f.r === v ? 'on' : ''}" data-act="${act}" data-v="${v}">${l}</button>`).join('')}</div>`;
+function vOrders() {
+  $('#view').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="oQ" type="search" placeholder="Tìm số HĐ, tên / SĐT khách, tên hàng…" value="${esc(ordF.q)}"></div>
+      <select id="oSt" style="width:auto">${[['all', 'Mọi trạng thái'], ['debt', 'Còn nợ'], ['paid', 'Đã thanh toán đủ'], ['void', 'Đã hủy']].map(([v, l]) => `<option value="${v}" ${ordF.st === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+    ${rangeChips(ordF, 'ordR')}<div class="sum-line" id="oSum"></div><div class="list" id="oList"></div>`;
+  $('#oQ').addEventListener('input', e => { ordF.q = e.target.value; drawOrders(); });
+  $('#oSt').onchange = e => { ordF.st = e.target.value; drawOrders(); };
+  drawOrders();
+}
+function drawOrders() {
+  const [a, b] = rangeOf(ordF.r), q = norm(ordF.q.trim());
+  const list = S.orders.filter(o => o.time >= a && o.time < b && (ordF.st === 'all' || (ordF.st === 'void' ? o.void : !o.void && (ordF.st === 'debt' ? o.debt > 0 : o.debt <= 0)))
+    && (!q || norm(o.code + ' ' + o.customerName + ' ' + o.phone + ' ' + o.items.map(l => l.name).join(' ')).includes(q))).slice().reverse();
+  const ok = list.filter(o => !o.void);
+  $('#oSum').innerHTML = `<span><b>${ok.length}</b> hóa đơn</span><span>Doanh thu: <b>${fmt(ok.reduce((s, o) => s + o.total, 0))}</b></span><span>Đã thu: <b>${fmt(ok.reduce((s, o) => s + o.paid, 0))}</b></span><span>Ghi nợ: <b class="err-t">${fmt(ok.reduce((s, o) => s + o.debt, 0))}</b></span>`;
+  $('#oList').innerHTML = list.slice(0, 300).map(o => `<button class="li li-o ${o.void ? 'void' : ''}" data-act="order" data-id="${o.id}">
+      <span><b>${o.code}</b><small>${ddmm(o.time)} · ${hhmm(o.time)}</small></span>
+      <span class="hm">${esc(o.customerName || 'Khách lẻ')}<small>${o.items.map(l => esc(l.name)).join(', ').slice(0, 80)}</small></span>
+      <span class="hm">${o.void ? '<span class="tag err">Đã hủy</span>' : o.debt > 0 ? '<span class="tag org">Còn nợ</span>' : `<span class="tag ok">${METHODS[o.method]}</span>`}</span>
+      <span class="r">${fmt(o.total)}<small>${o.debt > 0 && !o.void ? 'nợ ' + fmt(o.debt) : o.items.length + ' mặt hàng'}</small></span></button>`).join('')
+    || `<div class="empty">${ICON.orders}<p>Không có hóa đơn.</p></div>`;
+}
+function orderDetail(id) {
+  const o = S.orders.find(x => x.id === id); if (!o) return;
+  openModal(`<div class="dlg-h"><h3>${o.code}</h3>${o.void ? '<span class="tag err">Đã hủy</span>' : o.debt > 0 ? '<span class="tag org">Còn nợ</span>' : '<span class="tag ok">Đã thanh toán</span>'}<span class="tag">${ddmmyy(o.time)} ${hhmm(o.time)}</span><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="g3" style="margin-bottom:14px;font-size:14px">
+        <div><div class="muted" style="font-size:12px">Khách hàng</div><b>${esc(o.customerName || 'Khách lẻ')}</b>${o.phone ? '<br>' + esc(o.phone) : ''}</div>
+        <div><div class="muted" style="font-size:12px">Giao hàng</div><b>${esc(o.addr || 'Lấy tại cửa hàng')}</b></div>
+        <div><div class="muted" style="font-size:12px">Người lập</div><b>${esc(o.staffName)}</b></div></div>
+      <div class="tbl-w"><table class="tbl"><thead><tr><th>Hàng hóa</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
+        <tbody>${o.items.map(l => `<tr><td class="l">${esc(l.name)}<br><small class="muted">${esc(l.code)}${l.spec ? ' · ' + esc(l.spec) : ''}</small></td><td>${fq(l.qty)} ${esc(l.uname)}</td><td>${num(l.price)}</td><td><b>${num(l.amount)}</b></td></tr>`).join('')}</tbody></table></div>
+      <div style="margin-top:10px"><div class="kv"><span class="muted">Tiền hàng</span><span>${fmt(o.sub)}</span></div>
+        ${o.disc ? `<div class="kv"><span class="muted">Chiết khấu</span><span>−${fmt(o.disc)}</span></div>` : ''}${o.ship ? `<div class="kv"><span class="muted">Phí vận chuyển</span><span>${fmt(o.ship)}</span></div>` : ''}
+        <div class="kv big"><span>Tổng cộng</span><span>${fmt(o.total)}</span></div>
+        <div class="kv"><span class="muted">Đã thanh toán (${METHODS[o.method]})</span><b class="ok-t">${fmt(o.paid)}</b></div>
+        ${o.debt ? `<div class="kv"><span class="muted">Ghi nợ</span><b class="err-t">${fmt(o.debt)}</b></div>` : ''}
+        ${o.note ? `<div class="kv"><span class="muted">Ghi chú</span><span>${esc(o.note)}</span></div>` : ''}
+        <div class="muted" style="font-size:12.5px;font-style:italic">Bằng chữ: ${docSo(o.total)}</div></div>
+      ${o.void ? `<div class="warn" style="margin-top:10px">Đã hủy lúc ${ddmm(o.void.time)} ${hhmm(o.void.time)} bởi ${esc(o.void.by)} · Lý do: ${esc(o.void.reason)}</div>` : ''}
+    </div>
+    <div class="dlg-f">${can('void') && !o.void ? `<button class="btn danger ghost" data-act="voidOrder" data-id="${o.id}">Hủy hóa đơn</button>` : ''}<span class="grow"></span><button class="btn yel" data-act="reprint" data-id="${o.id}">${ICON.print} In phiếu</button></div>`, 'lg');
+}
+async function voidOrder(id) {
+  const o = S.orders.find(x => x.id === id); if (!o || o.void) return;
+  const reason = await ask(`Hủy hóa đơn <b>${o.code}</b> (${fmt(o.total)})? Hàng được <b>nhập lại kho</b>, công nợ và doanh thu được trừ lại.`, 'Hủy hóa đơn', true, 'Lý do hủy (bắt buộc)');
+  if (reason === false) return; if (!reason) return toast('Cần nhập lý do hủy', 'err');
+  o.void = { time: Date.now(), by: ME.name, reason };
+  for (const it of o.items) move(it.pid, it.base, 'H', o.code);
+  const cu = custOf(o.customerId); if (cu) { cu.debt = (cu.debt || 0) - o.debt; cu.spent = Math.max(0, (cu.spent || 0) - o.total); cu.orders = Math.max(0, (cu.orders || 0) - 1); }
+  save('orders', 'products', 'customers', 'moves'); closeModal(); toast('Đã hủy hóa đơn, hàng đã nhập lại kho'); refresh();
+}
+
+/* ================= KHO HÀNG ================= */
+const stF = { tab: 'ton', q: '', cat: 'all', low: false };
+function vStock() {
+  const tabs = [['ton', 'Tồn kho'], ...(can('stock') ? [['nhap', 'Nhập kho'], ['xuat', 'Xuất & kiểm kho'], ['ncc', 'Nhà cung cấp']] : [])];
+  if (!tabs.some(t => t[0] === stF.tab)) stF.tab = 'ton';
+  $('#view').innerHTML = `<div class="tabs">${tabs.map(([k, l]) => `<button class="${stF.tab === k ? 'on' : ''}" data-act="stTab" data-v="${k}">${l}</button>`).join('')}</div><div id="stBody"></div>`;
+  ({ ton: tabTon, nhap: tabNhap, xuat: tabXuat, ncc: tabNcc })[stF.tab]();
+}
+function tabTon() {
+  $('#stBody').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="tQ" type="search" placeholder="Tìm tên, mã, quy cách…" value="${esc(stF.q)}"></div>
+      <select id="tCat" style="width:auto"><option value="all">Mọi nhóm hàng</option>${S.settings.cats.map(c => `<option ${stF.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+      <button class="chip ${stF.low ? 'on' : ''}" data-act="stLow">⚠ Dưới định mức</button>
+      ${can('stock') ? `<button class="btn yel" data-act="editProduct">${ICON.plus} Thêm hàng hóa</button>` : ''}</div>
+    <div class="sum-line" id="tSum"></div><div class="list" id="tList"></div>`;
+  $('#tQ').addEventListener('input', e => { stF.q = e.target.value; drawTon(); });
+  $('#tCat').onchange = e => { stF.cat = e.target.value; drawTon(); };
+  drawTon();
+}
+function drawTon() {
+  const q = norm(stF.q.trim());
+  const l = S.products.filter(p => (stF.cat === 'all' || p.cat === stF.cat) && (!stF.low || p.stock <= (p.min || 0)) && (!q || norm(p.name + ' ' + p.code + ' ' + (p.spec || '')).includes(q)));
+  const val = l.reduce((s, p) => s + Math.max(0, p.stock) * (p.cost || 0), 0);
+  $('#tSum').innerHTML = `<span><b>${l.length}</b> mặt hàng</span><span>Dưới định mức: <b class="err-t">${l.filter(p => p.stock <= (p.min || 0)).length}</b></span>${isAdmin() ? `<span>Giá trị tồn (giá vốn): <b>${fmt(val)}</b></span>` : ''}`;
+  $('#tList').innerHTML = l.map(p => `<button class="li li-p" data-act="product" data-id="${p.id}" ${p.active === false ? 'style="opacity:.5"' : ''}><span class="pc-ic" style="width:36px;height:36px;font-size:18px">${catIcon(p.cat)}</span>
+      <span><b>${esc(p.name)}</b><small>${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''} · ${esc(p.cat)}</small></span>
+      <span class="hm r">${fmt(p.price)}<small>/${esc(p.unit)}${p.priceSi ? ' · sỉ ' + num(p.priceSi) : ''}</small></span>
+      <span class="hm r">${isAdmin() ? fmt(Math.max(0, p.stock) * (p.cost || 0)) + '<small>vốn ' + num(p.cost) + '/' + esc(p.unit) + '</small>' : '<small>Định mức ' + fq(p.min || 0) + '</small>'}</span>
+      <span class="r st ${stCls(p)}">${fq(p.stock)}<small>${esc(p.unit)}</small></span></button>`).join('') || `<div class="empty">${ICON.stock}<p>Chưa có hàng hóa.</p></div>`;
+}
+function productDetail(id) {
+  const p = prodOf(id); if (!p) return;
+  const mv = S.moves.filter(m => m.pid === id).slice().reverse(); let bal = p.stock;
+  const rows = mv.slice(0, 200).map(m => { const r = `<tr><td class="l">${ddmmyy(m.t)} ${hhmm(m.t)}</td><td class="l">${MOVE_T[m.type] || m.type}<br><small class="muted">${esc(m.ref)}</small></td><td class="ok-t">${m.d > 0 ? fq(m.d) : ''}</td><td class="err-t">${m.d < 0 ? fq(-m.d) : ''}</td><td><b>${fq(bal)}</b></td></tr>`; bal = Math.round((bal - m.d) * 1000) / 1000; return r; }).join('');
+  openModal(`<div class="dlg-h"><h3>${esc(p.name)}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="kpis" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+        <div class="kpi" style="--c:var(--yel)"><span>Tồn kho</span><b class="st ${stCls(p)}">${fq(p.stock)}</b><small>${esc(p.unit)}${p.unit2 && p.rate2 ? ' · ≈' + fq(p.stock / p.rate2) + ' ' + esc(p.unit2) : ''}</small></div>
+        <div class="kpi"><span>Giá lẻ</span><b>${num(p.price)}</b><small>/${esc(p.unit)}</small></div>
+        <div class="kpi"><span>Giá sỉ</span><b>${num(p.priceSi || p.price)}</b><small>/${esc(p.unit)}</small></div>
+        ${isAdmin() ? `<div class="kpi"><span>Giá vốn BQ</span><b>${num(p.cost)}</b><small>/${esc(p.unit)}</small></div>` : ''}</div>
+      <div class="muted" style="font-size:13px;margin-bottom:10px">${esc(p.code)} · ${esc(p.cat)}${p.spec ? ' · ' + esc(p.spec) : ''} · Định mức tối thiểu ${fq(p.min || 0)} ${esc(p.unit)}${p.unit2 ? ` · 1 ${esc(p.unit2)} = ${fq(p.rate2)} ${esc(p.unit)}` : ''}</div>
+      <div class="sec-l" style="margin-bottom:8px">Thẻ kho (${mv.length} giao dịch)</div>
+      <div class="tbl-w" style="max-height:340px;overflow:auto"><table class="tbl"><thead><tr><th>Thời gian</th><th class="l">Nghiệp vụ</th><th>Nhập</th><th>Xuất</th><th>Tồn</th></tr></thead><tbody>${rows || '<tr><td colspan="5" class="l muted">Chưa có giao dịch</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="dlg-f"><span class="grow"></span>${can('stock') ? `<button class="btn yel" data-act="editProduct" data-id="${p.id}">Sửa thông tin</button>` : ''}</div>`, 'lg');
+}
+function editProduct(id) {
+  const o = id ? prodOf(id) : null, adm = can('price');
+  const p = o ? { ...o } : { name: '', code: '', spec: '', cat: stF.cat !== 'all' ? stF.cat : S.settings.cats[0], unit: 'cây', unit2: '', rate2: '', price: '', priceSi: '', cost: '', min: 0, active: true };
+  const unitOpts = sel => S.settings.units.map(u => `<option ${u === sel ? 'selected' : ''}>${esc(u)}</option>`).join('');
+  const d = openModal(`<div class="dlg-h"><h3>${o ? 'Sửa hàng hóa' : 'Thêm hàng hóa'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="f"><label>Tên hàng *</label><input id="pName" value="${esc(p.name)}" placeholder="VD: Thép thanh vằn D12 Hòa Phát"></div>
+      <div class="g3"><div class="f"><label>Mã hàng</label><input id="pCode" value="${esc(p.code)}" placeholder="Tự tạo nếu trống"></div>
+        <div class="f"><label>Nhóm hàng</label><select id="pCat">${S.settings.cats.map(c => `<option ${c === p.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
+        <div class="f"><label>Quy cách</label><input id="pSpec" value="${esc(p.spec || '')}" placeholder="VD: cây 11.7m, CB300"></div></div>
+      <div class="g3"><div class="f"><label>Đơn vị tính chính *</label><select id="pUnit">${unitOpts(p.unit)}</select></div>
+        <div class="f"><label>Đơn vị quy đổi</label><select id="pUnit2"><option value="">— Không —</option>${unitOpts(p.unit2)}</select></div>
+        <div class="f"><label>1 đơn vị quy đổi = ? ĐV chính</label><input id="pRate2" inputmode="decimal" value="${p.rate2 ? fq(p.rate2) : ''}" placeholder="VD: 1 tấn = 20 bao"></div></div>
+      <div class="g3"><div class="f"><label>Giá bán lẻ (đ) *</label><input id="pPrice" type="number" inputmode="numeric" min="0" value="${p.price}" ${adm || !o ? '' : 'disabled'}></div>
+        <div class="f"><label>Giá sỉ / thầu (đ)</label><input id="pPriceSi" type="number" inputmode="numeric" min="0" value="${p.priceSi || ''}" ${adm || !o ? '' : 'disabled'} placeholder="Trống = giá lẻ"></div>
+        <div class="f"><label>Giá vốn (đ)</label><input id="pCost" type="number" inputmode="numeric" min="0" value="${p.cost}" ${adm || !o ? '' : 'disabled'} placeholder="Tự tính khi nhập kho"></div></div>
+      <div class="g3"><div class="f"><label>Định mức tồn tối thiểu</label><input id="pMin" inputmode="decimal" value="${fq(p.min || 0)}"></div>
+        ${o ? `<div class="f"><label>Tồn hiện tại</label><input value="${fq(o.stock)} ${esc(o.unit)}" disabled></div>` : `<div class="f"><label>Tồn đầu kỳ</label><input id="pStock0" inputmode="decimal" value="0"></div>`}
+        <div class="f"><label>&nbsp;</label><label class="check" style="margin:8px 0"><input type="checkbox" id="pActive" ${p.active !== false ? 'checked' : ''}> Đang kinh doanh</label></div></div>
+      ${o ? '<p class="muted" style="font-size:12.5px;margin:0">Muốn thay đổi số lượng tồn, dùng <b>Nhập kho</b> hoặc <b>Kiểm kho</b> để có chứng từ.</p>' : ''}
+    </div>
+    <div class="dlg-f">${o && isAdmin() ? '<button class="btn danger ghost" id="pDel">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn yel" id="pOk">Lưu</button></div>`, 'lg');
+  $('#pOk', d).onclick = () => {
+    const name = $('#pName', d).value.trim(), pv = $('#pPrice', d).value, price = Math.round(+pv);
+    if (!name) return toast('Nhập tên hàng', 'err'); if (pv === '' || !(price >= 0)) return toast('Nhập giá bán hợp lệ', 'err');
+    const unit = $('#pUnit', d).value, unit2 = $('#pUnit2', d).value, rate2 = pq($('#pRate2', d).value);
+    if (unit2 && (unit2 === unit || !(rate2 > 0))) return toast('Đơn vị quy đổi phải khác ĐV chính và có hệ số > 0', 'err');
+    let code = $('#pCode', d).value.trim().toUpperCase().replace(/\s+/g, '');
+    if (code && S.products.some(x => x.code === code && x !== o)) return toast('Mã hàng đã tồn tại', 'err');
+    if (!code) do { code = 'VT' + pad(++S.seq.prod, 4); } while (S.products.some(x => x.code === code));
+    const data = { name, code, cat: $('#pCat', d).value, spec: $('#pSpec', d).value.trim(), unit, unit2: unit2 || '', rate2: unit2 ? rate2 : 0, min: pq($('#pMin', d).value), active: $('#pActive', d).checked };
+    if (adm || !o) Object.assign(data, { price, priceSi: Math.round(+$('#pPriceSi', d).value || 0), cost: Math.round(+$('#pCost', d).value || 0) });
+    if (o) Object.assign(o, data);
+    else { const np = { id: uid(), created: Date.now(), stock: 0, price, priceSi: 0, cost: 0, ...data }; S.products.push(np); const s0 = pq($('#pStock0', d).value); if (s0) move(np.id, s0, 'D', 'Tồn đầu kỳ'); }
+    save('products', 'moves', 'seq'); closeAllModals(); toast('Đã lưu hàng hóa'); refresh();
+  };
+  const del = $('#pDel', d);
+  if (del) del.onclick = async () => { if (S.moves.some(m => m.pid === o.id && m.type !== 'D')) return toast('Hàng đã có giao dịch, chỉ nên bỏ chọn "Đang kinh doanh"', 'err'); if (!(await ask(`Xóa <b>${esc(o.name)}</b>?`, 'Xóa', true))) return; S.products = S.products.filter(x => x !== o); S.moves = S.moves.filter(m => m.pid !== o.id); save('products', 'moves'); closeAllModals(); refresh(); };
+  setTimeout(() => $('#pName', d).focus(), 80);
+}
+/* ---- Phiếu nhập ---- */
+function tabNhap() {
+  const l = S.imports.slice().reverse();
+  $('#stBody').innerHTML = `<div class="toolbar"><span class="grow sum-line" style="margin:0"><span><b>${l.length}</b> phiếu nhập</span><span>Tổng nhập: <b>${fmt(l.reduce((s, x) => s + x.total, 0))}</b></span></span><button class="btn yel" data-act="newImport">${ICON.plus} Tạo phiếu nhập</button></div>
+    <div class="list">${l.slice(0, 300).map(x => `<button class="li li-d" data-act="import" data-id="${x.id}"><span><b>${x.code}</b><small>${ddmmyy(x.time)} ${hhmm(x.time)}</small></span>
+      <span class="hm">${esc(x.supplierName || 'Không rõ NCC')}<small>${x.items.map(i => esc(i.name)).join(', ').slice(0, 80)}</small></span><span class="hm">${x.total - x.paid > 0 ? '<span class="tag org">Còn nợ NCC</span>' : '<span class="tag ok">Đã trả</span>'}</span>
+      <span class="r">${fmt(x.total)}<small>${x.items.length} mặt hàng</small></span></button>`).join('') || `<div class="empty">${ICON.stock}<p>Chưa có phiếu nhập.</p></div>`}</div>`;
+}
+function docEditor(kind) {
+  const st = { supplierId: null, lines: [], reason: ISSUE_REASONS[0] };
+  const T = { nhap: 'Phiếu nhập kho', xuat: 'Phiếu xuất kho khác', kiem: 'Phiếu kiểm kho' }[kind];
+  const d = openModal(`<div class="dlg-h"><h3>${T}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      ${kind === 'nhap' ? '<div class="f"><label>Nhà cung cấp</label><button class="cust" style="margin:0;width:100%" id="dSup"></button></div>' : ''}
+      ${kind === 'xuat' ? `<div class="f"><label>Lý do xuất</label><select id="dReason">${ISSUE_REASONS.map(r => `<option>${r}</option>`).join('')}</select></div>` : ''}
+      ${kind === 'kiem' ? '<div class="warn" style="margin-bottom:12px">Nhập <b>số lượng thực tế</b> đếm được. Hệ thống tự điều chỉnh chênh lệch so với sổ sách.</div><div class="row" style="margin-bottom:10px"><select id="dKCat" style="flex:1"><option value="">＋ Thêm cả nhóm hàng…</option>' + S.settings.cats.map(c => `<option>${esc(c)}</option>`).join('') + '</select></div>' : ''}
+      <div class="ps" id="dPS"></div>
+      <div class="tbl-w" style="margin-top:10px"><table class="tbl"><thead><tr><th>Hàng hóa</th>${kind === 'nhap' ? '<th>SL nhập</th><th>Giá nhập</th><th>Thành tiền</th>' : kind === 'xuat' ? '<th>Tồn</th><th>SL xuất</th>' : '<th>Sổ sách</th><th>Thực tế</th><th>Chênh lệch</th>'}<th></th></tr></thead><tbody id="dRows"></tbody>${kind === 'nhap' ? '<tfoot><tr><td>Tổng tiền</td><td></td><td></td><td id="dTot"></td><td></td></tr></tfoot>' : ''}</table></div>
+      ${kind === 'nhap' ? '<div class="g2" style="margin-top:12px"><div class="f"><label>Đã trả NCC (đ)</label><input id="dPaid" type="number" inputmode="numeric" min="0" placeholder="Trống = trả đủ"></div><div class="f"><label>Ghi chú</label><input id="dNote" placeholder="Số hóa đơn NCC, xe giao…"></div></div>' : '<div class="f" style="margin-top:12px"><label>Ghi chú</label><input id="dNote"></div>'}
+    </div>
+    <div class="dlg-f"><span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn yel" id="dOk">Lưu ${T.toLowerCase()}</button></div>`, 'lg');
+  const drawSup = () => { const s = supOf(st.supplierId); $('#dSup', d).innerHTML = `${ICON.truck}<div>${s ? `<b>${esc(s.name)}</b><small>${esc(s.phone || '')}${s.debt ? ' · đang nợ NCC ' + fmt(s.debt) : ''}</small>` : '<b>Chọn nhà cung cấp</b><small>Để theo dõi công nợ phải trả</small>'}</div>`; };
+  const tot = () => st.lines.reduce((s, l) => s + Math.round(l.qty * l.cost), 0);
+  const drawRows = () => {
+    $('#dRows', d).innerHTML = st.lines.map((l, i) => { const p = prodOf(l.pid);
+      return `<tr><td class="l">${esc(p.name)}<br><small class="muted">${esc(p.code)} · ${esc(p.unit)}</small></td>${kind === 'nhap' ? `<td><input data-i="${i}" data-f="qty" inputmode="decimal" value="${fq(l.qty)}"></td><td><input data-i="${i}" data-f="cost" type="number" inputmode="numeric" value="${l.cost}"></td><td id="dA${i}"><b>${num(l.qty * l.cost)}</b></td>`
+        : kind === 'xuat' ? `<td>${fq(p.stock)}</td><td><input data-i="${i}" data-f="qty" inputmode="decimal" value="${fq(l.qty)}"></td>` : `<td>${fq(p.stock)}</td><td><input data-i="${i}" data-f="act" inputmode="decimal" value="${fq(l.act)}"></td><td id="dA${i}">${diffTxt(l.act - p.stock)}</td>`}
+        <td><button class="ibtn" data-rm="${i}" style="width:30px;height:30px">✕</button></td></tr>`; }).join('') || `<tr><td colspan="5" class="l muted">Tìm và chọn hàng hóa ở ô phía trên</td></tr>`;
+    if (kind === 'nhap') $('#dTot', d).innerHTML = `<b>${fmt(tot())}</b>`;
+  };
+  const diffTxt = v => v ? `<b class="${v > 0 ? 'ok-t' : 'err-t'}">${v > 0 ? '+' : ''}${fq(v)}</b>` : '<span class="muted">0</span>';
+  prodSearch($('#dPS', d), pid => { const p = prodOf(pid); if (st.lines.some(l => l.pid === pid)) return toast('Hàng đã có trong phiếu', 'err'); st.lines.push({ pid, qty: kind === 'xuat' ? 1 : 1, cost: p.cost || Math.round(p.price * 0.9), act: p.stock }); drawRows(); });
+  d.addEventListener('input', e => { const i = e.target.dataset.i; if (i == null) return; const l = st.lines[+i], f = e.target.dataset.f, p = prodOf(l.pid);
+    if (f === 'cost') l.cost = Math.max(0, Math.round(+e.target.value || 0)); else l[f] = pq(e.target.value);
+    if (kind === 'nhap') { $('#dA' + i, d).innerHTML = `<b>${num(l.qty * l.cost)}</b>`; $('#dTot', d).innerHTML = `<b>${fmt(tot())}</b>`; } if (kind === 'kiem') $('#dA' + i, d).innerHTML = diffTxt(l.act - p.stock); });
+  d.addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { st.lines.splice(+b.dataset.rm, 1); drawRows(); } });
+  if (kind === 'nhap') { $('#dSup', d).onclick = () => pickParty('sup', s => { st.supplierId = s.id; drawSup(); }); drawSup(); }
+  if (kind === 'kiem') $('#dKCat', d).onchange = e => { const c = e.target.value; if (!c) return; S.products.filter(p => p.cat === c && p.active !== false && !st.lines.some(l => l.pid === p.id)).forEach(p => st.lines.push({ pid: p.id, act: p.stock })); e.target.value = ''; drawRows(); };
+  $('#dOk', d).onclick = async () => {
+    if (!st.lines.length) return toast('Chưa có hàng hóa trong phiếu', 'err');
+    const note = $('#dNote', d).value.trim();
+    if (kind === 'nhap') {
+      if (st.lines.some(l => !(l.qty > 0))) return toast('Số lượng nhập phải > 0', 'err');
+      const total = tot(), pv = $('#dPaid', d).value, paid = pv === '' ? total : Math.min(total, Math.max(0, Math.round(+pv)));
+      if (paid < total && !st.supplierId) return toast('Chọn nhà cung cấp để ghi nợ phải trả', 'err');
+      const x = createImport({ supplierId: st.supplierId, lines: st.lines, paid, note });
+      closeModal(); toast(`Đã nhập kho ${x.code}`); refresh();
+      if (await ask(`Đã lưu <b>${x.code}</b>. In phiếu nhập kho?`, 'In phiếu')) printImport(x);
+    } else if (kind === 'xuat') {
+      if (st.lines.some(l => !(l.qty > 0))) return toast('Số lượng xuất phải > 0', 'err');
+      if (!S.settings.allowNeg) for (const l of st.lines) if (l.qty > prodOf(l.pid).stock + 1e-9) return toast(`"${prodOf(l.pid).name}" không đủ tồn`, 'err');
+      const x = { id: uid(), code: nextCode('iss', 'PX'), time: Date.now(), type: 'xuat', reason: $('#dReason', d).value, note, by: ME.name, items: st.lines.map(l => { const p = prodOf(l.pid); return { pid: l.pid, name: p.name, unit: p.unit, qty: l.qty, cost: p.cost || 0 }; }) };
+      x.items.forEach(i => move(i.pid, -i.qty, 'X', x.code + ' · ' + x.reason)); S.issues.push(x);
+      save('issues', 'products', 'moves', 'seq'); closeModal(); toast(`Đã lưu ${x.code}`); refresh();
+    } else {
+      const ch = st.lines.map(l => ({ ...l, p: prodOf(l.pid) })).filter(l => Math.abs(l.act - l.p.stock) > 1e-9);
+      if (!ch.length) return toast('Không có chênh lệch, không cần điều chỉnh');
+      const x = { id: uid(), code: nextCode('iss', 'KK'), time: Date.now(), type: 'kiem', reason: 'Kiểm kho', note, by: ME.name, items: ch.map(l => ({ pid: l.pid, name: l.p.name, unit: l.p.unit, before: l.p.stock, after: l.act, qty: Math.round((l.act - l.p.stock) * 1000) / 1000, cost: l.p.cost || 0 })) };
+      x.items.forEach(i => move(i.pid, i.qty, 'K', x.code)); S.issues.push(x);
+      save('issues', 'products', 'moves', 'seq'); closeModal(); toast(`Đã điều chỉnh ${ch.length} mặt hàng (${x.code})`); refresh();
+    }
+  };
+  drawRows();
+}
+function createImport({ supplierId, lines, paid, note }, time, by) {
+  const s = supOf(supplierId), tm = time || Date.now();
+  const x = { id: uid(), code: nextCode('imp', 'PN'), time: tm, supplierId: s ? s.id : null, supplierName: s ? s.name : '', note: note || '', by: by || ME.name,
+    items: lines.map(l => { const p = prodOf(l.pid); return { pid: l.pid, name: p.name, unit: p.unit, qty: l.qty, cost: l.cost, amount: Math.round(l.qty * l.cost) }; }) };
+  x.total = x.items.reduce((a, i) => a + i.amount, 0); x.paid = Math.min(paid, x.total);
+  for (const i of x.items) { const p = prodOf(i.pid), old = Math.max(0, p.stock); p.cost = Math.round(old + i.qty > 0 ? (old * (p.cost || 0) + i.qty * i.cost) / (old + i.qty) : i.cost); move(i.pid, i.qty, 'N', x.code, tm); }
+  if (s) { s.debt = (s.debt || 0) + x.total - x.paid; s.bought = (s.bought || 0) + x.total; }
+  S.imports.push(x); save('imports', 'products', 'moves', 'suppliers', 'seq'); return x;
+}
+function printImport(x) {
+  printDoc({ title: 'Phiếu nhập kho', code: x.code, time: x.time, party: [['Nhà cung cấp', x.supplierName || '—'], ['Người nhập', x.by]],
+    cols: ['STT', 'Tên hàng', 'ĐVT', 'SL', 'Đơn giá', 'Thành tiền'], rows: x.items.map((i, k) => [k + 1, esc(i.name), esc(i.unit), fq(i.qty), num(i.cost), num(i.amount)]),
+    rows80: x.items.map(i => [esc(i.name), `${fq(i.qty)} ${esc(i.unit)} x ${num(i.cost)}`, num(i.amount)]),
+    totals: [['Tổng tiền hàng', fmt(x.total), 1], ['Đã trả', fmt(x.paid)], ['Còn nợ NCC', fmt(x.total - x.paid)]], words: x.total, note: x.note, sigs: ['Người giao hàng', 'Thủ kho', 'Người lập phiếu'] });
+}
+function importDetail(id) {
+  const x = S.imports.find(i => i.id === id); if (!x) return;
+  openModal(`<div class="dlg-h"><h3>${x.code}</h3><span class="tag">${ddmmyy(x.time)} ${hhmm(x.time)}</span><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="muted" style="margin-bottom:10px">Nhà cung cấp: <b>${esc(x.supplierName || '—')}</b> · Người nhập: ${esc(x.by)}${x.note ? ' · ' + esc(x.note) : ''}</div>
+      <div class="tbl-w"><table class="tbl"><thead><tr><th>Hàng hóa</th><th>SL</th><th>Giá nhập</th><th>Thành tiền</th></tr></thead><tbody>${x.items.map(i => `<tr><td class="l">${esc(i.name)}</td><td>${fq(i.qty)} ${esc(i.unit)}</td><td>${num(i.cost)}</td><td><b>${num(i.amount)}</b></td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Tổng</td><td></td><td></td><td>${fmt(x.total)}</td></tr></tfoot></table></div>
+      <div class="kv"><span class="muted">Đã trả NCC</span><b>${fmt(x.paid)}</b></div>${x.total - x.paid ? `<div class="kv"><span class="muted">Còn nợ</span><b class="err-t">${fmt(x.total - x.paid)}</b></div>` : ''}</div>
+    <div class="dlg-f"><span class="grow"></span><button class="btn yel" data-act="printImp" data-id="${x.id}">${ICON.print} In phiếu nhập</button></div>`, 'lg');
+}
+function tabXuat() {
+  const l = S.issues.slice().reverse();
+  $('#stBody').innerHTML = `<div class="toolbar"><span class="grow sum-line" style="margin:0"><span><b>${l.length}</b> phiếu xuất khác / kiểm kho</span></span>
+      <button class="btn ghost" data-act="newIssue">${ICON.plus} Phiếu xuất khác</button><button class="btn yel" data-act="newCount">${ICON.check} Kiểm kho</button></div>
+    <p class="muted" style="font-size:13px;margin-top:0">Hàng bán ra được trừ kho tự động qua hóa đơn. Dùng <b>Phiếu xuất khác</b> cho hao hụt, hư hỏng, xuất dùng nội bộ, trả NCC; <b>Kiểm kho</b> để điều chỉnh theo số đếm thực tế.</p>
+    <div class="list">${l.slice(0, 300).map(x => `<button class="li li-d" data-act="issue" data-id="${x.id}"><span><b>${x.code}</b><small>${ddmmyy(x.time)} ${hhmm(x.time)}</small></span>
+      <span class="hm">${esc(x.reason)}<small>${x.items.map(i => esc(i.name)).join(', ').slice(0, 80)}</small></span><span class="hm"><span class="tag ${x.type === 'kiem' ? 'blue' : 'org'}">${x.type === 'kiem' ? 'Kiểm kho' : 'Xuất khác'}</span></span>
+      <span class="r">${x.items.length}<small>mặt hàng · ${esc(x.by)}</small></span></button>`).join('') || `<div class="empty">${ICON.stock}<p>Chưa có phiếu.</p></div>`}</div>`;
+}
+function issueDetail(id) {
+  const x = S.issues.find(i => i.id === id); if (!x) return;
+  openModal(`<div class="dlg-h"><h3>${x.code}</h3><span class="tag">${ddmmyy(x.time)} ${hhmm(x.time)}</span><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="muted" style="margin-bottom:10px">${esc(x.reason)} · ${esc(x.by)}${x.note ? ' · ' + esc(x.note) : ''}</div>
+      <div class="tbl-w"><table class="tbl"><thead><tr><th>Hàng hóa</th>${x.type === 'kiem' ? '<th>Sổ sách</th><th>Thực tế</th><th>Chênh lệch</th>' : '<th>SL xuất</th><th>Giá trị (vốn)</th>'}</tr></thead>
+      <tbody>${x.items.map(i => `<tr><td class="l">${esc(i.name)}</td>${x.type === 'kiem' ? `<td>${fq(i.before)}</td><td>${fq(i.after)}</td><td class="${i.qty > 0 ? 'ok-t' : 'err-t'}"><b>${i.qty > 0 ? '+' : ''}${fq(i.qty)} ${esc(i.unit)}</b></td>` : `<td>${fq(i.qty)} ${esc(i.unit)}</td><td>${num(i.qty * i.cost)}</td>`}</tr>`).join('')}</tbody></table></div></div>`, 'lg');
+}
+/* ---- Nhà cung cấp & khách hàng ---- */
+function tabNcc() {
+  $('#stBody').innerHTML = `<div class="toolbar"><span class="grow sum-line" style="margin:0"><span><b>${S.suppliers.length}</b> nhà cung cấp</span><span>Phải trả: <b class="err-t">${fmt(S.suppliers.reduce((s, x) => s + Math.max(0, x.debt || 0), 0))}</b></span></span><button class="btn yel" data-act="newSup">${ICON.plus} Thêm NCC</button></div>
+    <div class="list">${S.suppliers.slice().sort((a, b) => (b.debt || 0) - (a.debt || 0)).map(s => `<button class="li li-c" data-act="sup" data-id="${s.id}"><span class="av">${esc(initials(s.name))}</span><span><b>${esc(s.name)}</b><small>${esc(s.phone || '')}${s.addr ? ' · ' + esc(s.addr) : ''}</small></span>
+      <span class="hm r">${fmt(s.bought || 0)}<small>đã nhập</small></span><span class="r ${s.debt > 0 ? 'err-t' : ''}">${fmt(s.debt || 0)}<small>phải trả</small></span></button>`).join('') || `<div class="empty">${ICON.truck}<p>Chưa có nhà cung cấp.</p></div>`}</div>`;
+}
+function editParty(kind, id, onSaved, preset) {
+  const isC = kind === 'cust', list = isC ? S.customers : S.suppliers, o = id ? list.find(x => x.id === id) : null, isPhone = preset && /^\d+$/.test(preset);
+  const hist = !o ? [] : isC ? [...S.orders.filter(x => x.customerId === o.id && !x.void).map(x => ({ t: x.time, code: x.code, id: x.id, act: 'order', desc: x.items.map(l => l.name).join(', '), plus: x.total, minus: x.paid })),
+      ...S.payments.filter(p => p.kind === 'thu' && p.partyId === o.id).map(p => ({ t: p.time, code: p.code, desc: 'Thu nợ · ' + METHODS[p.method] + (p.note ? ' · ' + p.note : ''), plus: 0, minus: p.amount }))]
+    : [...S.imports.filter(x => x.supplierId === o.id).map(x => ({ t: x.time, code: x.code, id: x.id, act: 'import', desc: x.items.map(l => l.name).join(', '), plus: x.total, minus: x.paid })),
+      ...S.payments.filter(p => p.kind === 'chi' && p.partyId === o.id).map(p => ({ t: p.time, code: p.code, desc: 'Trả nợ · ' + METHODS[p.method], plus: 0, minus: p.amount }))];
+  hist.sort((a, b) => b.t - a.t);
+  const d = openModal(`<div class="dlg-h"><h3>${o ? esc(o.name) : isC ? 'Thêm khách hàng' : 'Thêm nhà cung cấp'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      ${o ? `<div class="kpis" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr))"><div class="kpi"><span>${isC ? 'Đã mua' : 'Đã nhập'}</span><b>${fmt(isC ? o.spent || 0 : o.bought || 0)}</b></div>
+        <div class="kpi" style="--c:var(--err)"><span>${isC ? 'Công nợ phải thu' : 'Công nợ phải trả'}</span><b class="${o.debt > 0 ? 'err-t' : ''}">${fmt(o.debt || 0)}</b>${o.debt < 0 ? '<small>khách trả dư</small>' : ''}</div></div>` : ''}
+      <div class="g2"><div class="f"><label>Tên ${isC ? 'khách / công ty / công trình' : 'nhà cung cấp'} *</label><input id="cName" value="${esc(o ? o.name : isPhone ? '' : preset || '')}"></div>
+        <div class="f"><label>Số điện thoại${isC ? ' *' : ''}</label><input id="cPhone" type="tel" inputmode="tel" value="${esc(o ? o.phone || '' : isPhone ? preset : '')}"></div></div>
+      <div class="g2"><div class="f"><label>Địa chỉ</label><input id="cAddr" value="${esc(o ? o.addr || '' : '')}"></div>
+        <div class="f"><label>Mã số thuế</label><input id="cTax" value="${esc(o ? o.taxCode || '' : '')}"></div></div>
+      <div class="g2">${isC ? `<div class="f"><label>Nhóm giá</label><select id="cGroup"><option value="le">Khách lẻ (giá lẻ)</option><option value="si" ${o && o.group === 'si' ? 'selected' : ''}>Sỉ / Thầu / Đại lý (giá sỉ)</option></select></div>` : ''}
+        <div class="f"><label>Ghi chú</label><input id="cNote" value="${esc(o ? o.note || '' : '')}" placeholder="${isC ? 'VD: công trình nhà phố Q.7, hạn nợ 30 ngày' : 'VD: giao hàng thứ 2, 5'}"></div></div>
+      ${o && !isC ? '' : ''}
+      ${hist.length ? `<div class="sec-l" style="margin:6px 0 8px">Lịch sử giao dịch</div><div class="tbl-w" style="max-height:260px;overflow:auto"><table class="tbl"><thead><tr><th>Ngày</th><th class="l">Chứng từ</th><th>Phát sinh</th><th>Thanh toán</th></tr></thead>
+        <tbody>${hist.slice(0, 100).map(h => `<tr ${h.act ? `data-act="${h.act}" data-id="${h.id}" style="cursor:pointer"` : ''}><td class="l">${ddmmyy(h.t)}</td><td class="l"><b>${h.code}</b><br><small class="muted">${esc(h.desc).slice(0, 60)}</small></td><td>${h.plus ? num(h.plus) : ''}</td><td class="ok-t">${h.minus ? num(h.minus) : ''}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    </div>
+    <div class="dlg-f">${o && isAdmin() ? '<button class="btn danger ghost" id="cDel">Xóa</button>' : ''}<span class="grow"></span>
+      ${o && o.debt > 0 && (isC ? can('collect') : can('payNcc')) ? `<button class="btn ghost" id="cPay">${isC ? '💰 Thu nợ' : '💸 Trả nợ NCC'}</button>` : ''}<button class="btn ghost" data-act="close">Đóng</button><button class="btn yel" id="cOk">Lưu</button></div>`, 'lg');
+  $('#cOk', d).onclick = () => {
+    const name = $('#cName', d).value.trim(), phone = $('#cPhone', d).value.replace(/[^\d]/g, '');
+    if (!name) return toast('Nhập tên', 'err');
+    if (isC && !/^\d{9,11}$/.test(phone)) return toast('Số điện thoại 9–11 chữ số', 'err');
+    if (phone && list.some(c => c.phone === phone && c !== o)) return toast('Số điện thoại đã có trong danh sách', 'err');
+    const data = { name, phone, addr: $('#cAddr', d).value.trim(), taxCode: $('#cTax', d).value.trim(), note: $('#cNote', d).value.trim() };
+    if (isC) data.group = $('#cGroup', d).value;
+    let c = o; if (o) Object.assign(o, data); else { c = { id: uid(), created: Date.now(), debt: 0, ...data }; list.push(c); }
+    save(isC ? 'customers' : 'suppliers'); closeModal(); toast('Đã lưu'); if (onSaved) onSaved(c); else refresh();
+  };
+  const pay = $('#cPay', d); if (pay) pay.onclick = () => payDebt(isC ? 'thu' : 'chi', o);
+  const del = $('#cDel', d); if (del) del.onclick = async () => { if (o.debt) return toast('Còn công nợ, không xóa được', 'err'); if (!(await ask(`Xóa <b>${esc(o.name)}</b>?`, 'Xóa', true))) return; list.splice(list.indexOf(o), 1); save(isC ? 'customers' : 'suppliers'); closeModal(); refresh(); };
+  setTimeout(() => $('#cName', d).focus(), 80);
+}
+function payDebt(kind, party) {
+  const isThu = kind === 'thu', pay = { method: 'cash' };
+  const d = openModal(`<div class="dlg-h"><h3>${isThu ? 'Phiếu thu nợ' : 'Phiếu chi trả NCC'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="kv"><span>${esc(party.name)}</span><b class="err-t">Nợ ${fmt(party.debt)}</b></div>
+      <div class="f" style="margin-top:10px"><label>Số tiền ${isThu ? 'thu' : 'trả'}</label><input id="yAmt" type="number" inputmode="numeric" min="0" value="${party.debt}"></div>
+      <div class="seg" style="display:flex">${Object.entries(METHODS).map(([k, v]) => `<button class="grow ${k === 'cash' ? 'on' : ''}" data-pm="${k}">${v}</button>`).join('')}</div>
+      <div class="f" style="margin-top:12px"><label>Ghi chú</label><input id="yNote"></div><div id="yQR"></div></div>
+    <div class="dlg-f"><span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn pri" id="yOk">Lưu phiếu</button><button class="btn yel" id="yPrint">${ICON.print} Lưu & In</button></div>`, 'sm');
+  const upd = () => { $('#yQR', d).innerHTML = isThu && pay.method === 'bank' && hasBank() ? qrBlock(Math.round(+$('#yAmt', d).value || 0), 'Thu no ' + party.name) : ''; };
+  d.addEventListener('click', e => { const m = e.target.closest('[data-pm]'); if (m) { pay.method = m.dataset.pm; $$('[data-pm]', d).forEach(b => b.classList.toggle('on', b === m)); upd(); } });
+  $('#yAmt', d).oninput = upd;
+  const done = print => {
+    const amt = Math.round(+$('#yAmt', d).value || 0); if (!(amt > 0)) return toast('Nhập số tiền', 'err');
+    const p = { id: uid(), code: nextCode('pay', isThu ? 'PT' : 'PC'), time: Date.now(), kind, partyId: party.id, partyName: party.name, amount: amt, method: pay.method, note: $('#yNote', d).value.trim(), by: ME.name, before: party.debt };
+    party.debt = (party.debt || 0) - amt; S.payments.push(p);
+    save('payments', isThu ? 'customers' : 'suppliers', 'seq'); closeAllModals(); toast(`Đã lưu ${p.code}: ${fmt(amt)}`); refresh();
+    if (print) printDoc({ title: isThu ? 'Phiếu thu' : 'Phiếu chi', code: p.code, time: p.time, party: [[isThu ? 'Người nộp tiền' : 'Người nhận tiền', p.partyName], ['Lý do', isThu ? 'Thu công nợ' : 'Trả công nợ nhà cung cấp'], ['Hình thức', METHODS[p.method]]],
+      totals: [['Nợ trước', fmt(p.before)], [isThu ? 'Số tiền thu' : 'Số tiền chi', fmt(amt), 1], ['Nợ còn lại', fmt(p.before - amt)]], words: amt, note: p.note, sigs: isThu ? ['Người nộp tiền', 'Thủ quỹ', 'Người lập phiếu'] : ['Người nhận tiền', 'Thủ quỹ', 'Người lập phiếu'] });
+  };
+  $('#yOk', d).onclick = () => done(false); $('#yPrint', d).onclick = () => done(true);
+}
+const cusF = { q: '', f: 'all' };
+function vCustomers() {
+  const tot = S.customers.reduce((s, c) => s + Math.max(0, c.debt || 0), 0);
+  $('#view').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="cuQ" type="search" placeholder="Tìm tên, số điện thoại…" value="${esc(cusF.q)}"></div>
+      <button class="btn yel" data-act="newCust">${ICON.plus} Thêm khách hàng</button></div>
+    <div class="chips" style="margin-bottom:12px">${[['all', 'Tất cả'], ['debt', 'Đang nợ'], ['si', 'Khách sỉ / thầu'], ['le', 'Khách lẻ']].map(([v, l]) => `<button class="chip ${cusF.f === v ? 'on' : ''}" data-act="cuF" data-v="${v}">${l}</button>`).join('')}</div>
+    <div class="sum-line"><span><b>${S.customers.length}</b> khách hàng</span><span>Tổng công nợ phải thu: <b class="err-t">${fmt(tot)}</b></span></div><div class="list" id="cuList"></div>`;
+  $('#cuQ').addEventListener('input', e => { cusF.q = e.target.value; drawCust(); });
+  drawCust();
+}
+function drawCust() {
+  const q = norm(cusF.q.trim());
+  const l = S.customers.filter(c => (cusF.f === 'all' || (cusF.f === 'debt' ? c.debt > 0 : c.group === cusF.f)) && (!q || norm(c.name).includes(q) || (c.phone || '').includes(q))).sort((a, b) => (b.debt || 0) - (a.debt || 0) || (b.spent || 0) - (a.spent || 0));
+  $('#cuList').innerHTML = l.map(c => `<button class="li li-c" data-act="cust" data-id="${c.id}"><span class="av">${esc(initials(c.name))}</span>
+    <span><b>${esc(c.name)}</b> <span class="tag ${c.group === 'si' ? 'org' : ''}">${c.group === 'si' ? 'Sỉ / Thầu' : 'Lẻ'}</span><small>${esc(c.phone || '')}${c.addr ? ' · ' + esc(c.addr) : ''}</small></span>
+    <span class="hm r">${fmt(c.spent || 0)}<small>${num(c.orders || 0)} đơn</small></span><span class="r ${c.debt > 0 ? 'err-t' : ''}">${fmt(c.debt || 0)}<small>công nợ</small></span></button>`).join('') || `<div class="empty">${ICON.customers}<p>Không có khách hàng.</p></div>`;
+}
+
+/* ================= BÁO CÁO ================= */
+const repF = { r: 'month', from: isoDate(addDays(Date.now(), -29)), to: isoDate(Date.now()), tab: 'kd', cat: 'all' };
+function vReports() {
+  if (!isAdmin()) return go(homeView());
+  const [a0, b0] = rangeOf(repF.r, repF.from, repF.to), b = b0 === Infinity ? startOfDay(Date.now()) + DAY : b0;
+  const first = Math.min(...[S.orders[0], S.imports[0], S.moves[0]].filter(Boolean).map(x => x.time || x.t), Date.now());
+  const a = a0 === 0 ? startOfDay(first) : a0;
+  $('#view').innerHTML = `<div class="tabs">${[['kd', 'Kinh doanh'], ['nxt', 'Nhập – Xuất – Tồn'], ['cn', 'Công nợ']].map(([k, l]) => `<button class="${repF.tab === k ? 'on' : ''}" data-act="repTab" data-v="${k}">${l}</button>`).join('')}</div>
+    ${repF.tab !== 'cn' ? `<div class="chips" style="margin-bottom:10px">${[...RANGES, ['custom', 'Tùy chọn']].map(([v, l]) => `<button class="chip ${repF.r === v ? 'on' : ''}" data-act="repR" data-v="${v}">${l}</button>`).join('')}</div>
+    ${repF.r === 'custom' ? `<div class="row" style="margin-bottom:12px;max-width:420px"><input type="date" id="rpFrom" value="${repF.from}"><span>→</span><input type="date" id="rpTo" value="${repF.to}"></div>` : ''}` : ''}<div id="repBody"></div>`;
+  if (repF.r === 'custom' && $('#rpFrom')) { $('#rpFrom').onchange = e => { repF.from = e.target.value || repF.from; vReports(); }; $('#rpTo').onchange = e => { repF.to = e.target.value || repF.to; vReports(); }; }
+  ({ kd: repKD, nxt: repNXT, cn: repCN })[repF.tab](a, b);
+}
+function repKD(a, b) {
+  const os = S.orders.filter(o => !o.void && o.time >= a && o.time < b);
+  const rev = os.reduce((s, o) => s + o.total, 0), cogs = os.reduce((s, o) => s + o.items.reduce((x, l) => x + l.base * (l.cost || 0), 0), 0), ship = os.reduce((s, o) => s + (o.ship || 0), 0);
+  const cashIn = os.reduce((s, o) => s + o.paid, 0) + S.payments.filter(p => p.kind === 'thu' && p.time >= a && p.time < b).reduce((s, p) => s + p.amount, 0);
+  const imp = S.imports.filter(x => x.time >= a && x.time < b), impTot = imp.reduce((s, x) => s + x.total, 0);
+  const cashOut = imp.reduce((s, x) => s + x.paid, 0) + S.payments.filter(p => p.kind === 'chi' && p.time >= a && p.time < b).reduce((s, p) => s + p.amount, 0);
+  const span = b - a, mode = span <= DAY ? 'h' : span <= 62 * DAY ? 'd' : 'm', ser = {};
+  const bk = t => { const d = new Date(t); return mode === 'h' ? d.getHours() : mode === 'd' ? startOfDay(t) : d.getFullYear() * 12 + d.getMonth(); };
+  os.forEach(o => ser[bk(o.time)] = (ser[bk(o.time)] || 0) + o.total);
+  let bars = [];
+  if (mode === 'h') { const hs = Object.keys(ser).map(Number); for (let h = Math.min(7, ...hs); h <= Math.max(18, ...hs); h++) bars.push([h + 'h', ser[h] || 0]); }
+  else if (mode === 'd') { for (let t = a; t < b; t = addDays(t, 1)) bars.push([ddmm(t), ser[startOfDay(t)] || 0]); }
+  else { const s = new Date(a), e = new Date(b - 1); for (let m = s.getFullYear() * 12 + s.getMonth(); m <= e.getFullYear() * 12 + e.getMonth(); m++) bars.push([(m % 12 + 1) + '/' + String(Math.floor(m / 12)).slice(2), ser[m] || 0]); }
+  const mx = Math.max(1, ...bars.map(x => x[1])), byCat = {}, byProd = {}, byCust = {}, byStaff = {};
+  os.forEach(o => { const r = o.sub ? (o.sub - o.disc) / o.sub : 1; byStaff[o.staffName] = (byStaff[o.staffName] || 0) + o.total; if (o.customerName) byCust[o.customerName] = (byCust[o.customerName] || 0) + o.total;
+    o.items.forEach(l => { const v = l.amount * r; byCat[l.cat] = (byCat[l.cat] || 0) + v; const k = l.name; (byProd[k] = byProd[k] || { q: 0, v: 0, u: prodOf(l.pid) ? prodOf(l.pid).unit : l.uname }).q += l.base; byProd[k].v += v; }); });
+  const hbars = (en, cf) => { const tot = en.reduce((s, x) => s + x[1], 0) || 1, m = Math.max(1, ...en.map(x => x[1])); return en.map(([k, v, lb]) => `<div class="hb"><div class="row"><span class="grow">${lb || esc(k)}</span><b>${fmt(v)}</b><span class="muted" style="width:42px;text-align:right">${Math.round(v / tot * 100)}%</span></div><div class="tr"><i style="width:${v / m * 100}%;${cf ? '--c:' + cf(k) : ''}"></i></div></div>`).join('') || '<p class="muted">Chưa có dữ liệu.</p>'; };
+  const gp = rev - ship - cogs;
+  $('#repBody').innerHTML = `<div class="kpis">
+      <div class="kpi hero"><span>Doanh thu</span><b>${fmt(rev)}</b><small>${ddmmyy(a)} – ${ddmmyy(b - 1)} · ${os.length} hóa đơn</small></div>
+      <div class="kpi" style="--c:var(--ok)"><span>Lãi gộp</span><b class="${gp < 0 ? 'err-t' : ''}">${fmt(gp)}</b><small>Biên ${rev ? (gp / (rev - ship || 1) * 100).toFixed(1) : 0}% · giá vốn ${fmt(cogs)}</small></div>
+      <div class="kpi" style="--c:var(--yel)"><span>Thực thu</span><b>${fmt(cashIn)}</b><small>gồm thu nợ cũ</small></div>
+      <div class="kpi" style="--c:var(--org)"><span>Nhập hàng</span><b>${fmt(impTot)}</b><small>Đã chi ${fmt(cashOut)}</small></div>
+      <div class="kpi" style="--c:var(--err)"><span>Ghi nợ mới</span><b class="err-t">${fmt(os.reduce((s, o) => s + o.debt, 0))}</b><small>trong kỳ</small></div></div>
+    <div class="card" style="margin-bottom:14px"><div class="row" style="margin-bottom:6px"><h3 style="margin:0" class="grow">Doanh thu theo ${mode === 'h' ? 'giờ' : mode === 'd' ? 'ngày' : 'tháng'}</h3><button class="btn sm ghost" data-act="csvSales">⬇ Xuất Excel</button></div>
+      <div class="bars">${bars.map(([l, v]) => `<div class="bc" title="${l}: ${fmt(v)}"><div class="b" style="height:${v / mx * 100}%"></div><span class="bl">${bars.length > 16 ? l.split('/')[0] : l}</span></div>`).join('')}</div></div>
+    <div class="rgrid">
+      <div class="card"><h3>Theo nhóm hàng</h3>${hbars(Object.entries(byCat).sort((x, y) => y[1] - x[1]).map(([k, v]) => [k, v, catIcon(k) + ' ' + esc(k)]), catColor)}</div>
+      <div class="card"><h3>Hàng bán chạy</h3>${Object.entries(byProd).sort((x, y) => y[1].v - x[1].v).slice(0, 10).map(([n, x], i) => `<div class="kv"><span><b class="muted">${i + 1}.</b> ${esc(n)}</span><span><b>${fq(x.q)}</b> <small class="muted">${esc(x.u)} · ${fmt(x.v)}</small></span></div>`).join('') || '<p class="muted">Chưa có dữ liệu.</p>'}</div>
+      <div class="card"><h3>Khách mua nhiều</h3>${hbars(Object.entries(byCust).sort((x, y) => y[1] - x[1]).slice(0, 8))}</div>
+      <div class="card"><h3>Theo nhân viên</h3>${hbars(Object.entries(byStaff).sort((x, y) => y[1] - x[1]))}</div></div>`;
+}
+function computeNXT(a, b) {
+  const R = S.products.map(p => {
+    let after = 0, nhap = 0, xuat = 0, kiem = 0;
+    for (const m of S.moves) { if (m.pid !== p.id) continue; if (m.t >= b) after += m.d; else if (m.t >= a) { if (m.type === 'N' || m.type === 'D') nhap += m.d; else if (m.type === 'B' || m.type === 'X') xuat -= m.d; else if (m.type === 'H') xuat -= m.d; else kiem += m.d; } }
+    const end = p.stock - after, start = end - nhap + xuat - kiem; const r3 = v => Math.round(v * 1000) / 1000;
+    return { p, start: r3(start), nhap: r3(nhap), xuat: r3(xuat), kiem: r3(kiem), end: r3(end), val: Math.max(0, end) * (p.cost || 0) };
+  });
+  return R;
+}
+function repNXT(a, b) {
+  const R = computeNXT(a, b).filter(r => repF.cat === 'all' || r.p.cat === repF.cat);
+  const sum = k => R.reduce((s, r) => s + r[k], 0);
+  $('#repBody').innerHTML = `<div class="toolbar"><select id="nxCat" style="width:auto"><option value="all">Mọi nhóm hàng</option>${S.settings.cats.map(c => `<option ${repF.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+      <span class="grow muted" style="font-size:13px">Kỳ báo cáo: <b>${ddmmyy(a)} – ${ddmmyy(b - 1)}</b> · số lượng theo đơn vị tính chính</span><button class="btn sm ghost" data-act="csvNXT">⬇ Xuất Excel</button><button class="btn sm yel" data-act="printNXT">${ICON.print} In</button></div>
+    <div class="kpis"><div class="kpi" style="--c:var(--ok)"><span>Mặt hàng có nhập</span><b>${R.filter(r => r.nhap).length}</b></div><div class="kpi" style="--c:var(--org)"><span>Mặt hàng có xuất</span><b>${R.filter(r => r.xuat).length}</b></div>
+      <div class="kpi hero"><span>Giá trị tồn cuối kỳ</span><b>${fmt(sum('val'))}</b><small>theo giá vốn bình quân hiện tại</small></div></div>
+    <div class="tbl-w"><table class="tbl" id="nxtTbl"><thead><tr><th>Mã · Tên hàng</th><th>ĐVT</th><th>Tồn đầu</th><th>Nhập</th><th>Xuất</th><th>Điều chỉnh</th><th>Tồn cuối</th><th>Giá trị tồn</th></tr></thead>
+      <tbody>${R.map(r => `<tr data-act="product" data-id="${r.p.id}" style="cursor:pointer"><td class="l"><b>${esc(r.p.name)}</b><br><small class="muted">${esc(r.p.code)}</small></td><td class="l">${esc(r.p.unit)}</td><td>${fq(r.start)}</td><td class="ok-t">${r.nhap ? fq(r.nhap) : '-'}</td><td class="err-t">${r.xuat ? fq(r.xuat) : '-'}</td><td>${r.kiem ? (r.kiem > 0 ? '+' : '') + fq(r.kiem) : '-'}</td><td><b class="st ${r.end <= (r.p.min || 0) ? (r.end <= 0 ? 'z' : 'lo') : ''}">${fq(r.end)}</b></td><td>${num(r.val)}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td>Tổng (${R.length} mặt hàng)</td><td></td><td></td><td></td><td></td><td></td><td></td><td>${num(sum('val'))}</td></tr></tfoot></table></div>`;
+  $('#nxCat').onchange = e => { repF.cat = e.target.value; vReports(); };
+  repNXT.cur = [a, b, R];
+}
+function repCN() {
+  const cs = S.customers.filter(c => c.debt).sort((a, b) => b.debt - a.debt), ss = S.suppliers.filter(s => s.debt).sort((a, b) => b.debt - a.debt);
+  const age = c => { const o = S.orders.filter(x => x.customerId === c.id && !x.void && x.debt > 0).sort((a, b) => a.time - b.time)[0]; return o ? Math.floor((Date.now() - o.time) / DAY) : 0; };
+  $('#repBody').innerHTML = `<div class="kpis"><div class="kpi hero"><span>Phải thu khách hàng</span><b>${fmt(cs.reduce((s, c) => s + Math.max(0, c.debt), 0))}</b><small>${cs.length} khách</small></div>
+      <div class="kpi" style="--c:var(--org)"><span>Phải trả nhà cung cấp</span><b>${fmt(ss.reduce((s, c) => s + Math.max(0, c.debt), 0))}</b><small>${ss.length} NCC</small></div></div>
+    <div class="rgrid"><div class="card"><div class="row" style="margin-bottom:10px"><h3 class="grow" style="margin:0">Khách hàng còn nợ</h3><button class="btn sm ghost" data-act="csvDebt">⬇ Excel</button></div><div class="tbl-w"><table class="tbl"><thead><tr><th>Khách hàng</th><th>Nợ lâu nhất</th><th>Công nợ</th></tr></thead>
+      <tbody>${cs.map(c => { const g = age(c); return `<tr data-act="cust" data-id="${c.id}" style="cursor:pointer"><td class="l"><b>${esc(c.name)}</b><br><small class="muted">${esc(c.phone || '')}</small></td><td><span class="tag ${g > 30 ? 'err' : g > 15 ? 'org' : ''}">${g} ngày</span></td><td class="err-t"><b>${num(c.debt)}</b></td></tr>`; }).join('') || '<tr><td colspan="3" class="l muted">Không có</td></tr>'}</tbody></table></div></div>
+    <div class="card"><h3>Nợ nhà cung cấp</h3><div class="tbl-w"><table class="tbl"><thead><tr><th>Nhà cung cấp</th><th>Phải trả</th></tr></thead>
+      <tbody>${ss.map(s => `<tr data-act="sup" data-id="${s.id}" style="cursor:pointer"><td class="l"><b>${esc(s.name)}</b><br><small class="muted">${esc(s.phone || '')}</small></td><td class="err-t"><b>${num(s.debt)}</b></td></tr>`).join('') || '<tr><td colspan="2" class="l muted">Không có</td></tr>'}</tbody></table></div></div></div>`;
+}
+async function shareOrDownload(name, text, type) {
+  const blob = new Blob([text], { type });
+  try { const file = new File([blob], name, { type }); if (navigator.canShare && navigator.canShare({ files: [file] }) && window.innerWidth < 900) { await navigator.share({ files: [file], title: name }); return; } } catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+const csv = rows => '﻿' + rows.map(r => r.map(v => '"' + String(v ?? '').replace(/"/g, '""') + '"').join(',')).join('\r\n');
+
+/* ================= CÀI ĐẶT ================= */
+function vSettings() {
+  const s = S.settings, ad = isAdmin();
+  const f = (id, label, val, ph = '', type = 'text') => `<div class="f"><label>${label}</label><input id="${id}" type="${type}" value="${esc(val)}" placeholder="${esc(ph)}" ${type === 'number' ? 'inputmode="numeric"' : ''}></div>`;
+  $('#view').innerHTML = `<div class="sgrid2">
+    <div class="card"><h3>Tài khoản của tôi</h3>
+      <div class="lock-user"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><br><small class="muted">@${esc(ME.username)} · ${ROLES[ME.role]}</small></div></div>
+      <div class="set-actions"><button class="btn ghost" data-act="chpw">${ICON.lock} Đổi mật khẩu</button><button class="btn ghost" data-act="lock">${ICON.lock} Khóa màn hình</button><button class="btn danger ghost" data-act="logout">${ICON.logout} Đăng xuất</button></div></div>
+    <div class="card"><h3>Bản quyền phần mềm</h3>
+      <div class="lic-st">${ICON.key}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
+      <div class="row"><span class="muted" style="font-size:13px">Mã máy</span><b style="font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px" class="grow">${esc(LIC.dev)}</b><button class="btn sm ghost" data-act="copyDev">Sao chép</button></div>
+      <button class="btn yel block" style="margin-top:12px" data-act="license">Nhập mã kích hoạt</button></div>
+    ${ad ? `
+    <div class="card"><h3>Thông tin cửa hàng</h3>
+      ${f('sShop', 'Tên cửa hàng / công ty', s.shopName)}${f('sAddr', 'Địa chỉ', s.address, 'In trên phiếu')}
+      <div class="g2">${f('sPhone', 'Điện thoại', s.phone)}${f('sTax', 'Mã số thuế', s.taxCode)}</div>
+      ${f('sFooter', 'Ghi chú cuối phiếu', s.footer)}
+      <div class="g2"><div class="f"><label>Khổ giấy in</label><select id="sPrint"><option value="A5" ${s.printSize !== '80' ? 'selected' : ''}>A5 (máy in văn phòng)</option><option value="80" ${s.printSize === '80' ? 'selected' : ''}>80mm (máy in nhiệt)</option></select></div>
+        <div class="f"><label>Tự khóa màn hình</label><select id="sLock">${[[0, 'Không tự khóa'], [5, '5 phút'], [15, '15 phút'], [30, '30 phút'], [60, '60 phút']].map(([v, l]) => `<option value="${v}" ${+s.lockMin === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div></div>
+      <label class="check"><input type="checkbox" id="sNeg" ${s.allowNeg ? 'checked' : ''}> Cho phép bán khi tồn kho không đủ (âm kho)</label>
+      <button class="btn pri block" data-act="saveShop">Lưu thông tin</button></div>
+    <div class="card"><h3>Nhóm hàng & đơn vị tính</h3><div class="sec-l" style="margin-bottom:8px">Nhóm hàng</div>
+      <div class="chips wrap">${s.cats.map(c => `<span class="chip">${catIcon(c)} ${esc(c)}<button data-act="delCat" data-v="${esc(c)}">✕</button></span>`).join('')}<span class="chip-add"><input id="catIn" placeholder="Nhóm mới"><button data-act="addCat">＋</button></span></div>
+      <div class="sec-l" style="margin:14px 0 8px">Đơn vị tính</div>
+      <div class="chips wrap">${s.units.map(u => `<span class="chip">${esc(u)}<button data-act="delUnit" data-v="${esc(u)}">✕</button></span>`).join('')}<span class="chip-add"><input id="unitIn" placeholder="ĐVT mới"><button data-act="addUnit">＋</button></span></div></div>
+    <div class="card"><h3>Chuyển khoản bằng mã QR</h3>
+      <div class="f"><label>Ngân hàng</label><select id="sBank"><option value="">— Chọn ngân hàng —</option>${BANKS.map(b => `<option value="${b[0]}" ${b[0] === s.bankId ? 'selected' : ''}>${b[2]} (${b[1]})</option>`).join('')}</select></div>
+      ${f('sAcc', 'Số tài khoản', s.bankAcc)}${f('sAccName', 'Tên chủ tài khoản', s.bankName, 'VIET HOA KHONG DAU')}
+      <div class="row"><button class="btn pri grow" data-act="saveBank">Lưu</button><button class="btn ghost grow" data-act="testQR">Xem thử mã QR</button></div>
+      <p class="muted" style="font-size:12.5px;margin:10px 0 0">Mã QR chuẩn VietQR (NAPAS 247), tạo ngay trên máy, không cần mạng. In kèm trên phiếu khi khách chuyển khoản / còn nợ.</p></div>
+    <div class="card"><div class="row" style="margin-bottom:12px"><h3 style="margin:0" class="grow">Tài khoản & phân quyền</h3><button class="btn sm yel" data-act="editUser">${ICON.plus} Thêm</button></div>
+      <div class="list">${S.users.map(u => `<button class="li li-u" data-act="editUser" data-id="${u.id}"><span class="av">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><small>@${esc(u.username)}</small></span>
+        <span class="tag ${u.role === 'admin' ? 'yel' : u.role === 'kho' ? 'blue' : 'org'}">${ROLES[u.role]}</span><span class="tag ${u.active ? 'ok' : 'err'}">${u.active ? 'Hoạt động' : 'Đã khóa'}</span></button>`).join('')}</div>
+      <p class="muted" style="font-size:12.5px;margin:10px 0 0"><b>Bán hàng</b>: bán, thu nợ, xem tồn. <b>Thủ kho</b>: nhập / xuất / kiểm kho, NCC. <b>Quản lý</b>: toàn quyền, sửa giá, hủy HĐ, báo cáo.</p></div>
+    <div class="card"><h3>Dữ liệu & sao lưu</h3>
+      ${s.demo ? `<div class="warn" style="margin-bottom:12px">Đang có <b>dữ liệu mẫu</b>. Xóa trước khi dùng thật (giữ danh mục hàng hóa, tồn kho về 0).<br><button class="btn sm danger" style="margin-top:8px" data-act="clearDemo">Xóa dữ liệu mẫu</button></div>` : ''}
+      <p class="muted" style="font-size:13px;margin-top:0">${S.products.length} mặt hàng · ${S.customers.length} khách · ${S.suppliers.length} NCC · ${S.orders.length} hóa đơn · ${S.imports.length} phiếu nhập.</p>
+      <div class="set-actions"><button class="btn" data-act="backup">⬇ Sao lưu toàn bộ dữ liệu</button><label class="btn">⬆ Khôi phục từ file sao lưu<input type="file" id="restoreIn" accept=".json,application/json" hidden></label>
+        <button class="btn danger ghost" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>` : ''}
+    <div class="card"><h3>Cài đặt ứng dụng</h3><div style="font-size:14px;display:grid;gap:8px">
+      <div><b>iPhone / iPad:</b> Safari → nút Chia sẻ ⬆ → <b>Thêm vào MH chính</b>.</div><div><b>Android:</b> Chrome → ⋮ → <b>Cài đặt ứng dụng</b>.</div>
+      <div><b>Windows / Mac / Linux:</b> Chrome hoặc Edge → biểu tượng <b>⊕ Cài đặt</b> cuối thanh địa chỉ.</div><div class="muted">Sau khi cài, ứng dụng chạy toàn màn hình và dùng được khi mất mạng.</div></div></div>
+  </div><div class="ver">VLXD POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}</div>`;
+  const ri = $('#restoreIn'); if (ri) ri.onchange = restore;
+  const ci = $('#catIn'); if (ci) ci.onkeydown = e => { if (e.key === 'Enter') A.addCat(); };
+  const ui = $('#unitIn'); if (ui) ui.onkeydown = e => { if (e.key === 'Enter') A.addUnit(); };
+}
+function editUser(id) {
+  const u = id ? S.users.find(x => x.id === id) : null, self = u && u.id === ME.id;
+  const d = openModal(`<div class="dlg-h"><h3>${u ? 'Sửa tài khoản' : 'Thêm tài khoản'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="f"><label>Họ tên *</label><input id="uName" value="${esc(u ? u.name : '')}"></div>
+      <div class="f"><label>Tên đăng nhập *</label><input id="uUser" value="${esc(u ? u.username : '')}" autocapitalize="none" ${u ? 'disabled' : ''}></div>
+      <div class="g2"><div class="f"><label>Vai trò</label><select id="uRole" ${self ? 'disabled' : ''}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${(u ? u.role : 'sale') === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+        <div class="f"><label>Trạng thái</label><select id="uActive" ${self ? 'disabled' : ''}><option value="1">Hoạt động</option><option value="0" ${u && !u.active ? 'selected' : ''}>Khóa tài khoản</option></select></div></div>
+      ${pwField('uPw', u ? 'Đặt lại mật khẩu (để trống nếu không đổi)' : 'Mật khẩu tạm * (ít nhất 6 ký tự)', 'new-password')}
+      ${self ? '' : '<p class="muted" style="font-size:12.5px;margin:0">Người dùng sẽ phải đổi mật khẩu tạm ở lần đăng nhập đầu tiên.</p>'}</div>
+    <div class="dlg-f">${u && !self ? '<button class="btn danger ghost" id="uDel">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn yel" id="uOk">Lưu</button></div>`, 'sm');
+  wirePw(d);
+  const admins = () => S.users.filter(x => x.role === 'admin' && x.active).length;
+  $('#uOk', d).onclick = async () => {
+    const name = $('#uName', d).value.trim(), user = $('#uUser', d).value.trim().toLowerCase(), pw = $('#uPw', d).value, role = $('#uRole', d).value, active = $('#uActive', d).value === '1';
+    if (!name) return toast('Nhập họ tên', 'err');
+    if (!u) { if (!/^[a-z0-9._]{3,20}$/.test(user)) return toast('Tên đăng nhập 3–20 ký tự: chữ không dấu, số, . hoặc _', 'err'); if (S.users.some(x => x.username === user)) return toast('Tên đăng nhập đã tồn tại', 'err'); if (pw.length < 6) return toast('Mật khẩu ít nhất 6 ký tự', 'err'); }
+    else if (pw && pw.length < 6) return toast('Mật khẩu ít nhất 6 ký tự', 'err');
+    if (u && u.role === 'admin' && u.active && (role !== 'admin' || !active) && admins() <= 1) return toast('Phải còn ít nhất 1 quản lý hoạt động', 'err');
+    let x = u; if (!u) { x = { id: uid(), username: user, created: Date.now() }; S.users.push(x); }
+    Object.assign(x, { name, role: self ? x.role : role, active: self ? true : active });
+    if (pw) { await setPw(x, pw); if (!self) x.mustChange = true; }
+    save('users'); closeModal(); toast('Đã lưu tài khoản'); refresh();
+  };
+  const del = $('#uDel', d); if (del) del.onclick = async () => { if (u.role === 'admin' && admins() <= 1) return toast('Không thể xóa quản lý cuối cùng', 'err'); if (!(await ask(`Xóa tài khoản <b>${esc(u.name)}</b>?`, 'Xóa', true))) return; S.users = S.users.filter(x => x !== u); save('users'); closeModal(); refresh(); };
+}
+async function restore(e) {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const d = JSON.parse(await file.text());
+    if (d.app !== 'vlxd-pos' || !d.data || !Array.isArray(d.data.users) || !d.data.users.length) throw new Error('File không đúng định dạng');
+    if (!(await ask(`Khôi phục: ${d.data.products.length} mặt hàng, ${d.data.orders.length} hóa đơn, ${d.data.users.length} tài khoản (sao lưu ${ddmmyy(d.at)}).<br><b>Toàn bộ dữ liệu hiện tại sẽ bị thay thế</b> và bạn cần đăng nhập lại.`, 'Khôi phục', true))) return;
+    for (const k of COLS) await IDB.set(k, d.data[k] ?? defaults()[k]);
+    sessSet(null); location.reload();
+  } catch (err) { toast('Không khôi phục được: ' + err.message, 'err'); }
+}
+
+/* ================= DỮ LIỆU MẪU ================= */
+const DEMO_PRODUCTS = [
+  // [nhóm, tên, quy cách, ĐVT, ĐV quy đổi, hệ số, giá lẻ, giá sỉ, định mức]
+  ['Thép xây dựng', 'Thép cuộn Φ6 Hòa Phát', 'CB240-T', 'kg', 'cuộn', 200, 16800, 16200, 500],
+  ['Thép xây dựng', 'Thép cuộn Φ8 Hòa Phát', 'CB240-T', 'kg', 'cuộn', 200, 16800, 16200, 500],
+  ['Thép xây dựng', 'Thép thanh vằn D10 Hòa Phát', 'cây 11.7m · CB300', 'cây', 'bó', 10, 112000, 108000, 50],
+  ['Thép xây dựng', 'Thép thanh vằn D12 Hòa Phát', 'cây 11.7m · CB300', 'cây', 'bó', 10, 158000, 153000, 50],
+  ['Thép xây dựng', 'Thép thanh vằn D16 Hòa Phát', 'cây 11.7m · CB400', 'cây', 'bó', 5, 285000, 276000, 30],
+  ['Thép xây dựng', 'Thép thanh vằn D20 Hòa Phát', 'cây 11.7m · CB400', 'cây', 'bó', 5, 448000, 435000, 20],
+  ['Thép hình - Ống thép', 'Thép hộp mạ kẽm 40x80', 'dày 1.4mm · cây 6m', 'cây', '', 0, 285000, 272000, 20],
+  ['Thép hình - Ống thép', 'Thép V50x50x5', 'cây 6m', 'cây', '', 0, 265000, 255000, 15],
+  ['Thép hình - Ống thép', 'Ống thép mạ kẽm Φ42', 'dày 2mm · cây 6m', 'cây', '', 0, 215000, 205000, 15],
+  ['Tôn - Xà gồ', 'Tôn lạnh màu 0.45mm', 'khổ 1.07m', 'm', '', 0, 98000, 92000, 100],
+  ['Tôn - Xà gồ', 'Xà gồ C100x50 mạ kẽm', 'dày 1.8mm', 'm', '', 0, 72000, 68000, 100],
+  ['Đinh - Vít - Bu lông', 'Đinh 5cm', '', 'kg', 'thùng', 25, 28000, 26000, 50],
+  ['Đinh - Vít - Bu lông', 'Đinh 7cm', '', 'kg', 'thùng', 25, 27000, 25500, 50],
+  ['Đinh - Vít - Bu lông', 'Vít bắn tôn 5cm', 'đầu lục giác', 'hộp', '', 0, 85000, 80000, 10],
+  ['Đinh - Vít - Bu lông', 'Bu lông M12x50', 'mạ kẽm, kèm tán', 'con', 'hộp', 50, 4500, 4000, 200],
+  ['Đinh - Vít - Bu lông', 'Kẽm buộc 1mm', '', 'kg', '', 0, 32000, 30000, 30],
+  ['Xi măng', 'Xi măng PCB40 Hà Tiên', 'bao 50kg', 'bao', 'tấn', 20, 92000, 88000, 100],
+  ['Xi măng', 'Xi măng INSEE Đa Dụng', 'bao 50kg', 'bao', 'tấn', 20, 95000, 91000, 100],
+  ['Cát - Đá - Gạch', 'Cát xây tô', '', 'm³', '', 0, 280000, 260000, 10],
+  ['Cát - Đá - Gạch', 'Đá 1x2', '', 'm³', '', 0, 380000, 360000, 10],
+  ['Cát - Đá - Gạch', 'Gạch ống 8x8x18', 'Tuynel', 'viên', 'xe', 2000, 1350, 1250, 5000],
+  ['Cát - Đá - Gạch', 'Gạch thẻ 4x8x18', 'Tuynel', 'viên', 'xe', 2000, 1250, 1150, 5000],
+  ['Ống nước - Điện', 'Ống PVC Bình Minh Φ21', 'cây 4m', 'cây', '', 0, 32000, 30000, 30],
+  ['Ống nước - Điện', 'Ống PVC Bình Minh Φ90', 'cây 4m', 'cây', '', 0, 215000, 205000, 10],
+  ['Sơn - Chống thấm', 'Sơn ngoại thất 18L', 'màu trắng', 'thùng', '', 0, 1850000, 1760000, 5],
+  ['Sơn - Chống thấm', 'Chống thấm Sika Latex', 'can 2L', 'cái', '', 0, 165000, 155000, 10],
+  ['Dụng cụ - Phụ kiện', 'Que hàn 2.5ly', 'hộp 2kg', 'hộp', '', 0, 110000, 102000, 10],
+  ['Dụng cụ - Phụ kiện', 'Đá cắt 100mm', '', 'cái', 'hộp', 50, 9000, 8000, 50]
+];
+function seedDemo(admin) {
+  let seed = 23; const rnd = n => { seed = (seed * 9301 + 49297) % 233280; return Math.floor(seed / 233280 * n); };
+  S.products = DEMO_PRODUCTS.map(([cat, name, spec, unit, unit2, rate2, price, priceSi, min]) => ({ id: uid() + rnd(9999), code: 'VT' + pad(++S.seq.prod, 4), cat, name, spec, unit, unit2, rate2, price, priceSi, cost: 0, min, stock: 0, active: true, created: Date.now() }));
+  S.suppliers = [['Đại lý Thép Hòa Phát Miền Nam', '0283911222', 'KCN Tân Tạo'], ['Công ty Xi măng & VLXD Phú Hưng', '0283777888', 'Q. Bình Tân'], ['Kim khí Thành Đạt', '0909555666', 'Q.5']]
+    .map(([name, phone, addr], i) => ({ id: uid() + i, name, phone, addr, debt: 0, bought: 0, note: '', created: Date.now() }));
+  S.customers = [['Anh Tư - Thầu xây dựng', '0903111222', 'si', 'Công trình nhà phố Q.7'], ['Cty TNHH Xây dựng An Phát', '0283999000', 'si', 'KDC Phú Mỹ'], ['Chị Hoa', '0912333444', 'le', ''], ['Anh Bình - Sửa nhà', '0987666555', 'le', 'Hẻm 12 Lê Văn Lương'], ['Đội thợ Minh Quân', '0938222111', 'si', '']]
+    .map(([name, phone, group, addr], i) => ({ id: uid() + i, name, phone, group, addr, debt: 0, spent: 0, orders: 0, note: '', created: Date.now() }));
+  const now = Date.now(), t0 = startOfDay(addDays(now, -28)) + 8 * 3600000;
+  const supFor = p => S.suppliers[p.cat.startsWith('Thép') ? 0 : p.cat === 'Xi măng' || p.cat.startsWith('Cát') ? 1 : 2];
+  S.suppliers.forEach((s, si) => {
+    const ps = S.products.filter(p => supFor(p) === s); if (!ps.length) return;
+    const lines = ps.map(p => ({ pid: p.id, qty: Math.round(p.min * (3 + rnd(4))), cost: Math.round(p.priceSi * 0.9 / 10) * 10 }));
+    const total = lines.reduce((a, l) => a + Math.round(l.qty * l.cost), 0);
+    createImport({ supplierId: s.id, lines, paid: si === 0 ? Math.round(total * 0.7) : total, note: 'Nhập hàng đầu kỳ' }, t0 + si * 600000, admin.name);
+  });
+  for (let i = 0; i < 52; i++) {
+    const t = startOfDay(addDays(now, -rnd(21))) + (7 + rnd(10)) * 3600000 + rnd(60) * 60000; if (t > now) continue;
+    const cu = rnd(3) ? S.customers[rnd(5)] : null, tk = { lines: [], customerId: cu ? cu.id : null, disc: 0, discType: '%', ship: 0 };
+    const n = 1 + rnd(3);
+    for (let j = 0; j < n; j++) { const p = S.products[rnd(S.products.length)]; if (tk.lines.some(l => l.pid === p.id)) continue;
+      const big = p.unit === 'viên' ? 500 + rnd(3) * 500 : p.unit === 'kg' ? 20 + rnd(80) : p.unit === 'bao' ? 10 + rnd(30) : p.unit === 'm' ? 10 + rnd(40) : 1 + rnd(12);
+      const qty = Math.min(big, Math.max(0, Math.floor(p.stock * 0.3))); if (!qty) continue;
+      tk.lines.push({ pid: p.id, name: p.name, code: p.code, spec: p.spec, cat: p.cat, uname: p.unit, factor: 1, qty, price: cu && cu.group === 'si' ? p.priceSi : p.price }); }
+    if (!tk.lines.length) continue;
+    tk.ship = rnd(4) === 0 ? 150000 : 0;
+    const c = tkCalc(tk), paid = cu && cu.group === 'si' && rnd(2) ? Math.round(c.total * (rnd(2) ? 0.5 : 0) / 1000) * 1000 : c.total;
+    S.tickets.push(tk);
+    createOrder(tk, c, { paid, amt: paid, change: 0, method: ['cash', 'cash', 'bank', 'card'][rnd(4)], addr: tk.ship && cu ? cu.addr || 'Giao tận công trình' : '' }, t, admin);
+  }
+  const c0 = S.customers[0]; if (c0.debt > 0) { const amt = Math.round(c0.debt / 2 / 1000) * 1000; S.payments.push({ id: uid(), code: nextCode('pay', 'PT'), time: addDays(now, -2), kind: 'thu', partyId: c0.id, partyName: c0.name, amount: amt, method: 'bank', note: 'Thu nợ đợt 1', by: admin.name, before: c0.debt }); c0.debt -= amt; }
+  const low = S.products.find(p => p.name.startsWith('Đá cắt')); if (low && low.stock > 20) move(low.id, -(low.stock - 20), 'X', 'Hao hụt (mẫu)', addDays(now, -1));
+  S.orders.sort((a, b) => a.time - b.time); S.moves.sort((a, b) => a.t - b.t); S.tickets = []; S.settings.demo = true;
+}
+
+/* ================= SỰ KIỆN ================= */
+const A = {
+  close: closeModal, go: d => { closeAllModals(); go(d.v); }, lock: () => { closeAllModals(); lockScreen(); }, logout: () => { closeAllModals(); logout(); },
+  meMenu, moreMenu, chpw: () => { closeAllModals(); changePassword(false); }, license: () => licenseModal(), copyDev: () => copyText(LIC.dev),
+  posCat: d => { posF.cat = d.v; renderCats(); renderGrid(); },
+  pick: d => pickQty(d.id), editLine: d => { const t = tkOf(), l = t && t.lines.find(x => x.lid === d.lid); if (l) pickQty(l.pid, l.lid); },
+  selTk: d => { curTk = d.id; renderStrip(); renderGrid(); renderTicket(); if (window.innerWidth < 900) $('#cartPanel').classList.add('open'); },
+  newTk: () => { pickParty('cust', c => { newTicket(c.id); vPOS(); renderShell(); }, 'Đơn mới · chọn khách hàng'); const m = $$('.modal').pop(), f = m && $('.dlg-f', m);
+    if (f) { const b = document.createElement('button'); b.className = 'btn ghost grow'; b.textContent = 'Khách lẻ'; b.onclick = () => { closeModal(); newTicket(); vPOS(); renderShell(); }; f.prepend(b); } },
+  tkCustomer: () => { const t = tkOf(); if (t) pickParty('cust', c => { t.customerId = c.id; if (c.group === 'si') t.lines.forEach(l => { const p = prodOf(l.pid); if (p && p.priceSi) l.price = l.factor > 1 ? p.priceSi * l.factor : p.priceSi; }); save('tickets'); renderTicket(); renderStrip(); renderGrid(); }); },
+  tkNoCust: (d, el, e) => { e.stopPropagation(); const t = tkOf(); if (t) { t.customerId = null; save('tickets'); renderTicket(); renderStrip(); renderGrid(); } },
+  tdt: d => { const t = tkOf(); if (t) { t.discType = d.v; save('tickets'); renderTicket(); renderStrip(); } },
+  cancelTk: async () => { const t = tkOf(); if (!t) return; if (t.lines.length && !(await ask(`Hủy đơn <b>${esc(tkName(t))}</b>?`, 'Hủy đơn', true))) return; S.tickets = S.tickets.filter(x => x !== t); curTk = null; save('tickets'); vPOS(); renderShell(); },
+  quote: () => { const t = tkOf(); if (!t) return; const c = tkCalc(t), cu = custOf(t.customerId);
+    printOrder({ code: 'BG-' + pad(t.no, 4), time: Date.now(), customerName: cu ? cu.name : '', phone: cu ? cu.phone : '', addr: cu ? cu.addr || '' : '', customerId: null, staffName: ME.name,
+      items: t.lines.map(l => ({ ...l, amount: Math.round(l.qty * l.price) })), sub: c.sub, disc: c.d, ship: c.ship, total: c.total }, true); },
+  checkout, openCart: () => $('#cartPanel').classList.add('open'), closeCart: () => $('#cartPanel').classList.remove('open'),
+  reprint: d => { const o = S.orders.find(x => x.id === d.id); if (o) printOrder(o); },
+  ordR: d => { ordF.r = d.v; vOrders(); }, order: d => orderDetail(d.id), voidOrder: d => voidOrder(d.id),
+  stTab: d => { stF.tab = d.v; vStock(); }, stLow: () => { stF.low = !stF.low; tabTon(); },
+  product: d => productDetail(d.id), editProduct: d => editProduct(d.id),
+  newImport: () => docEditor('nhap'), newIssue: () => docEditor('xuat'), newCount: () => docEditor('kiem'),
+  import: d => importDetail(d.id), printImp: d => printImport(S.imports.find(x => x.id === d.id)), issue: d => issueDetail(d.id),
+  newSup: () => editParty('sup'), sup: d => editParty('sup', d.id), newCust: () => editParty('cust'), cust: d => editParty('cust', d.id),
+  cuF: d => { cusF.f = d.v; vCustomers(); },
+  repTab: d => { repF.tab = d.v; vReports(); }, repR: d => { repF.r = d.v; vReports(); },
+  csvSales: () => { const [a, b] = rangeOf(repF.r, repF.from, repF.to);
+    const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Trạng thái', 'Người lập', 'Khách hàng', 'SĐT', 'Mã hàng', 'Tên hàng', 'Nhóm', 'SL', 'ĐVT', 'Đơn giá', 'Thành tiền', 'Giá vốn', 'Chiết khấu HĐ', 'Phí VC', 'Tổng HĐ', 'Đã trả', 'Ghi nợ', 'Thanh toán']];
+    S.orders.filter(o => o.time >= a && o.time < b).forEach(o => o.items.forEach((l, i) => rows.push([o.code, ddmmyy(o.time), hhmm(o.time), o.void ? 'Đã hủy' : 'Hoàn tất', o.staffName, o.customerName, o.phone, l.code, l.name, l.cat, l.qty, l.uname, l.price, l.amount, Math.round(l.base * l.cost), i ? '' : o.disc, i ? '' : o.ship, i ? '' : o.total, i ? '' : o.paid, i ? '' : o.debt, METHODS[o.method]])));
+    shareOrDownload(`ban-hang_${isoDate(a || Date.now())}.csv`, csv(rows), 'text/csv'); },
+  csvNXT: () => { const [a, b, R] = repNXT.cur; shareOrDownload(`nhap-xuat-ton_${isoDate(a)}_${isoDate(b - 1)}.csv`, csv([['Mã hàng', 'Tên hàng', 'Nhóm', 'ĐVT', 'Tồn đầu', 'Nhập', 'Xuất', 'Điều chỉnh', 'Tồn cuối', 'Giá vốn BQ', 'Giá trị tồn'], ...R.map(r => [r.p.code, r.p.name, r.p.cat, r.p.unit, r.start, r.nhap, r.xuat, r.kiem, r.end, r.p.cost, Math.round(r.val)])]), 'text/csv'); },
+  printNXT: () => { const [a, b, R] = repNXT.cur;
+    printDoc({ title: 'Báo cáo nhập - xuất - tồn', sub: `Từ ${ddmmyy(a)} đến ${ddmmyy(b - 1)}`, code: 'NXT-' + isoDate(b - 1), time: Date.now(), party: [['Người lập', ME.name]], cols: ['STT', 'Tên hàng', 'ĐVT', 'Tồn đầu', 'Nhập', 'Xuất', 'Đ.chỉnh', 'Tồn cuối'],
+      rows: R.map((r, i) => [i + 1, esc(r.p.name), esc(r.p.unit), fq(r.start), fq(r.nhap), fq(r.xuat), fq(r.kiem), fq(r.end)]),
+      rows80: R.map(r => [esc(r.p.name), `Đầu ${fq(r.start)} +${fq(r.nhap)} -${fq(r.xuat)}`, fq(r.end) + ' ' + esc(r.p.unit)]),
+      totals: [['Giá trị tồn cuối kỳ', fmt(R.reduce((s, r) => s + r.val, 0)), 1]], sigs: ['Thủ kho', 'Kế toán', 'Quản lý'] }); },
+  csvDebt: () => shareOrDownload(`cong-no-khach_${isoDate(Date.now())}.csv`, csv([['Khách hàng', 'SĐT', 'Địa chỉ', 'Nhóm', 'Công nợ'], ...S.customers.filter(c => c.debt).map(c => [c.name, c.phone, c.addr, c.group === 'si' ? 'Sỉ' : 'Lẻ', c.debt])]), 'text/csv'),
+  editUser: d => editUser(d.id),
+  saveShop: () => { const v = id => $('#' + id).value.trim();
+    Object.assign(S.settings, { shopName: v('sShop') || S.settings.shopName, address: v('sAddr'), phone: v('sPhone'), taxCode: v('sTax'), footer: v('sFooter'), printSize: $('#sPrint').value, lockMin: +$('#sLock').value, allowNeg: $('#sNeg').checked });
+    save('settings'); renderShell(); toast('Đã lưu thông tin cửa hàng'); },
+  addCat: () => { const v = $('#catIn').value.trim(); if (!v) return; if (S.settings.cats.includes(v)) return toast('Nhóm đã có', 'err'); S.settings.cats.push(v); save('settings'); vSettings(); },
+  delCat: d => { if (S.products.some(p => p.cat === d.v)) return toast('Nhóm đang có hàng hóa, không xóa được', 'err'); S.settings.cats = S.settings.cats.filter(c => c !== d.v); save('settings'); vSettings(); },
+  addUnit: () => { const v = $('#unitIn').value.trim(); if (!v) return; if (S.settings.units.includes(v)) return toast('ĐVT đã có', 'err'); S.settings.units.push(v); save('settings'); vSettings(); },
+  delUnit: d => { if (S.products.some(p => p.unit === d.v || p.unit2 === d.v)) return toast('ĐVT đang được dùng, không xóa được', 'err'); S.settings.units = S.settings.units.filter(c => c !== d.v); save('settings'); vSettings(); },
+  saveBank: () => { const acc = $('#sAcc').value.replace(/\s/g, '');
+    if (acc && !/^[0-9A-Za-z]{4,19}$/.test(acc)) return toast('Số tài khoản không hợp lệ', 'err'); if (acc && !$('#sBank').value) return toast('Chọn ngân hàng', 'err');
+    Object.assign(S.settings, { bankId: $('#sBank').value, bankAcc: acc, bankName: norm($('#sAccName').value.trim()).toUpperCase() }); save('settings'); toast('Đã lưu tài khoản ngân hàng'); return true; },
+  testQR: () => { if (!A.saveBank()) return; if (!hasBank()) return toast('Chọn ngân hàng và nhập số tài khoản', 'err');
+    openModal(`<div class="dlg-h"><h3>Mã QR thử · 10.000đ</h3><button class="ibtn" data-act="close">✕</button></div><div class="dlg-b"><p class="muted" style="margin-top:0">Mở app ngân hàng → Quét QR. Kiểm tra tên người nhận, <b>không cần chuyển</b>.</p>${qrBlock(10000, 'Thu QR')}</div>`, 'sm'); },
+  backup: () => shareOrDownload(`vlxd-pos_sao-luu_${isoDate(Date.now())}.json`, JSON.stringify({ app: 'vlxd-pos', v: 1, at: Date.now(), data: Object.fromEntries(COLS.map(k => [k, S[k]])) }), 'application/json'),
+  clearDemo: async () => {
+    if (!(await ask('Xóa hóa đơn, phiếu nhập/xuất, khách hàng, NCC mẫu và đưa tồn kho về 0? Danh mục hàng hóa, tài khoản và cài đặt được giữ lại.', 'Xóa dữ liệu mẫu', true))) return;
+    Object.assign(S, { customers: [], suppliers: [], orders: [], imports: [], issues: [], payments: [], moves: [], tickets: [] });
+    S.products.forEach(p => { p.stock = 0; p.cost = 0; }); Object.assign(S.seq, { order: 0, imp: 0, iss: 0, pay: 0, tk: 0 }); S.settings.demo = false; curTk = null;
+    save(...COLS); toast('Đã xóa dữ liệu mẫu'); refresh();
+  },
+  wipe: async () => {
+    if (!(await ask('Xóa <b>TOÀN BỘ</b> dữ liệu: hàng hóa, hóa đơn, kho, công nợ, tài khoản? Nên sao lưu trước.', 'Tiếp tục', true))) return;
+    if (!(await ask('Chắc chắn? Thao tác này <b>không thể hoàn tác</b>.', 'Xóa vĩnh viễn', true))) return;
+    await IDB.clear(); await licSave(); sessSet(null); location.reload();
+  }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled || !el.dataset.act) return;
+  const fn = A[el.dataset.act]; if (fn) { e.preventDefault(); fn(el.dataset, el, e); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { const ms = $$('.modal'); if (ms.length && !ms[ms.length - 1].dataset.static) closeModal(); else if ($('#cartPanel')) $('#cartPanel').classList.remove('open'); }
+  if (!ME || $$('.modal').length) return;
+  if (e.key === 'F2' && cur === 'pos') { e.preventDefault(); $('#posQ').focus(); }
+  if (e.key === 'F9' && cur === 'pos') { e.preventDefault(); checkout(); }
+});
+const netUpd = () => $('#net').classList.toggle('hidden', navigator.onLine);
+window.addEventListener('online', netUpd); window.addEventListener('offline', netUpd);
+
+/* ================= KHỞI ĐỘNG ================= */
+(async function boot() {
+  $('#bgArt').innerHTML = craneSVG('crane') + skylineSVG('sky');
+  if (!window.indexedDB || !window.crypto || !crypto.subtle) { document.body.insertAdjacentHTML('beforeend', '<div class="fatal"><h2>Trình duyệt chưa hỗ trợ</h2><p>Hãy mở bằng Safari, Chrome hoặc Edge bản mới qua địa chỉ <b>https://</b>, không dùng chế độ ẩn danh.</p></div>'); return; }
+  try { await IDB.open(); await loadAll(); }
+  catch (e) { document.body.insertAdjacentHTML('beforeend', `<div class="fatal"><h2>Không mở được bộ nhớ</h2><p>${esc(e.message)}. Hãy tắt chế độ ẩn danh hoặc thử trình duyệt khác.</p></div>`); return; }
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+  netUpd();
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  await licLoad();
+  if (!(await licCheck())) return;
+  setInterval(() => { if (LST && LST.active) licCheck(); }, 10 * 60000);
+  if (!S.users.length) return renderSetup();
+  const ss = sessGet(), u = ss && S.users.find(x => x.id === ss.uid && x.active);
+  if (u) { const m = +S.settings.lockMin; if (m > 0 && Date.now() - (ss.last || 0) > m * 60000) { ME = u; lockScreen(); } else login(u, false); }
+  else renderLogin();
+})();
+</script>
+</body>
+</html>
