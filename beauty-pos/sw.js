@@ -1,6 +1,6 @@
 // Service worker: lưu đệm giao diện để app chạy khi mất mạng.
 // Đổi số phiên bản CACHE khi cập nhật file để thiết bị tải bản mới.
-const CACHE = 'beauty-pos-v4';
+const CACHE = 'beauty-pos-v5';
 const ASSETS = ['./', './index.html', './qrcode.js', './manifest.webmanifest', './icons/icon.svg', './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 

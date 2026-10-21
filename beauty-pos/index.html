@@ -104,7 +104,7 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 
 /* ===== Đăng nhập ===== */
 #auth{position:fixed;inset:0;z-index:30;overflow-y:auto}
-.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;isolation:isolate;overflow:hidden;
+.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:1fr auto;isolation:isolate;overflow:hidden;
   background:radial-gradient(ellipse at 15% 20%,#6d2f58 0,transparent 55%),radial-gradient(ellipse at 80% 90%,#7a4a3a 0,transparent 50%),linear-gradient(150deg,#3a1d33,#24111f 70%)}
 .auth .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;z-index:-1;animation:drift 22s ease-in-out infinite alternate}
 .auth .a1{width:520px;height:520px;background:#c46a8a;top:-160px;left:10%}
@@ -140,7 +140,7 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 .auth-foot{margin-top:24px;font-size:12.5px;color:#7a6572;text-align:center}
 .link{color:var(--rose);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:899px){
-  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
   .auth-art{padding:calc(var(--st) + 30px) 24px 10px}
   .auth-art h2{font-size:30px}.brand-lg{margin-bottom:20px}.svcs{margin-top:16px}.svcs span{font-size:12.5px;padding:5px 11px}
   .auth-side{align-items:flex-start;padding-top:22px}
@@ -376,6 +376,24 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 .lic-st b{font-size:15px}
 .toast{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translateX(-50%);background:#3a1d33;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:90vw;animation:tin .2s}
 .toast.err{background:var(--err)}
+/* Bảng tên bản quyền: kính mờ, chữ rose-gold nổi */
+.credit{grid-column:1/-1;display:flex;justify-content:center;padding:0 20px 28px}
+.cr-in{display:flex;align-items:center;gap:16px;padding:14px 28px 14px 16px;border-radius:18px;
+  background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border:1px solid rgba(240,201,180,.45);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 16px 40px rgba(20,5,15,.45);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.cr-c{width:46px;height:46px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font:700 25px/1 var(--serif);color:#3a1d33;
+  background:radial-gradient(circle at 35% 30%,#fff1e4,#e9b3a8 55%,#a8667a);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),0 3px 10px rgba(0,0,0,.35)}
+.cr-t{font:500 15px var(--sans);color:#f5e6ec;letter-spacing:.2px}
+.cr-t b{font:italic 700 24px/1.15 var(--serif);margin-left:4px;letter-spacing:.3px;
+  background:linear-gradient(180deg,#fff4e8 0%,#f6dcc0 40%,#e2a99c 70%,#c07a88 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(40,10,30,.55)) drop-shadow(0 0 12px rgba(246,220,192,.25))}
+.cr-l{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:5px}
+.cr-l a{display:inline-flex;align-items:center;gap:7px;color:#fff;text-decoration:none;font:600 15px var(--sans);text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.cr-l a:hover{color:#f6dcc0}
+.cr-l svg{width:17px;height:17px;color:#f0c9b4}
+.ver .cr-s{display:block;margin-top:4px}
+.ver a{color:inherit}
+@media(max-width:899px){.credit{padding:4px 14px 26px}.cr-in{padding:12px 16px 12px 12px;gap:12px}.cr-t b{font-size:21px;display:block;margin:2px 0 0}.cr-l a{font-size:14px}}
 @keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
 .fatal{position:relative;z-index:2;padding:40px 24px;max-width:520px;margin:auto;text-align:center}
 
@@ -554,7 +572,7 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) flush
    - Mã kích hoạt = chữ ký số ECDSA P-256 trên (mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật
      trong công cụ tạo mã của nhà cung cấp. App chỉ chứa khóa công khai để kiểm tra. */
 const TRIAL_DAYS = 15;
-const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668', email: 'tnp10102014@gmail.com' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
 const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "_dmBLgL9p3ZoMWDZx-QKkUjj7Ni7_2bJ50AgVDgf_OY", "y": "4SssgIyxqTVVXkfclNCzYlJlSnrHsZSzKLJlXxeBF1g"};
 const PLANS = { T15: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
 const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -750,7 +768,10 @@ function authShell(inner, title) {
       <p>Phần mềm thu ngân, lịch hẹn và quản lý kỹ thuật viên dành cho salon làm đẹp & spa.</p>
       <div class="svcs">${['✂️ Cắt tóc', '💅 Làm nail', '👁️ Nối mi', '💋 Phun xăm', '🧖‍♀️ Chăm sóc da', '💆‍♀️ Massage'].map(x => `<span>${x}</span>`).join('')}</div>
     </section>
-    <section class="auth-side"><form class="auth-card" id="authForm" novalidate>${inner}</form></section></div>`;
+    <section class="auth-side"><form class="auth-card" id="authForm" novalidate>${inner}</form></section>
+    <footer class="credit"><div class="cr-in"><span class="cr-c">©</span><div class="cr-b"><div class="cr-t">Bản quyền thuộc về <b>${esc(VENDOR.name)}</b></div>
+      <div class="cr-l"><a href="tel:${digits(VENDOR.phone)}">${I('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>')}Mobile: ${esc(VENDOR.phone)}</a>
+      <a href="mailto:${esc(VENDOR.email)}">${I('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>')}Email: ${esc(VENDOR.email)}</a></div></div></div></footer></div>`;
   a.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
   return $('#authForm');
 }
@@ -1486,7 +1507,7 @@ function vSettings() {
       <div><b>Android:</b> Chrome → ⋮ → <b>Cài đặt ứng dụng</b>.</div>
       <div><b>Windows / Mac / Linux:</b> Chrome hoặc Edge → biểu tượng <b>⊕ Cài đặt</b> cuối thanh địa chỉ.</div>
       <div class="muted">Sau khi cài, ứng dụng chạy toàn màn hình và dùng được khi mất mạng.</div></div></div>
-  </div><div class="ver">Beauty POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}</div>`;
+  </div><div class="ver">Beauty POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}<span class="cr-s">© Bản quyền thuộc về <b>${esc(VENDOR.name)}</b> · Mobile: <a href="tel:${digits(VENDOR.phone)}">${esc(VENDOR.phone)}</a> · Email: <a href="mailto:${esc(VENDOR.email)}">${esc(VENDOR.email)}</a></span></div>`;
   const ri = $('#restoreIn'); if (ri) ri.onchange = restore;
   const bo = $('#bkOn'); if (bo) bo.onchange = e => { BK.meta.on = e.target.checked; if (!BK.meta.on) BK.meta.err = ''; bkSaveMeta(); updBk(); if (BK.meta.on) bkRun(true); };
   const bkk = $('#bkKeep'); if (bkk) bkk.onchange = e => { BK.meta.keep = +e.target.value; bkSaveMeta(); };

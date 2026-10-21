@@ -100,7 +100,7 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 
 /* ===== Đăng nhập ===== */
 #auth{position:fixed;inset:0;z-index:30;overflow-y:auto}
-.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;isolation:isolate;overflow:hidden;color:#fff;
+.auth{position:relative;min-height:100%;display:grid;grid-template-columns:1.15fr 1fr;grid-template-rows:1fr auto;isolation:isolate;overflow:hidden;color:#fff;
   background-color:#0c1f30;
   background-image:linear-gradient(rgba(130,190,250,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(130,190,250,.07) 1px,transparent 1px),
     linear-gradient(rgba(130,190,250,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(130,190,250,.13) 1px,transparent 1px),
@@ -127,7 +127,6 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 .auth-card{width:100%;max-width:420px;background:#fff;color:#1d232a;border-radius:14px;padding:0 0 26px;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}
 .auth-card>.hazard{height:10px;margin-bottom:24px}
 .auth-card>*:not(.hazard){margin-left:28px;margin-right:28px}
-.auth-card>.btn.block{display:flex;width:auto}
 .auth-card h1{font-size:36px;margin-top:0;margin-bottom:4px}
 .auth-card .lead{color:#66717d;margin-top:0;margin-bottom:22px}
 .auth-card input,.auth-card textarea{background:#fff;color:#1d232a;border-color:#d5dae0}
@@ -144,7 +143,7 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 .link{color:#c27c0e;font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .devcode{font:700 21px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:2px;text-align:center;padding:14px;border-radius:10px;background:rgba(245,183,0,.12);border:1.5px dashed #c99500;user-select:all;-webkit-user-select:all}
 @media(max-width:899px){
-  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr auto}
   .auth-art{padding:calc(var(--st) + 34px) 22px 8px}
   .auth-art h2{font-size:36px}.brand-lg{margin-bottom:18px}.svcs{margin-top:14px}.svcs span{font-size:12.5px;padding:5px 10px}
   .auth .crane{width:90%;bottom:auto;top:60px;opacity:.22}.auth .tblock{display:none}
@@ -350,6 +349,28 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 .lic-st{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;margin-bottom:12px;background:var(--surface2);border-left:4px solid var(--yel)}
 .toast{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translateX(-50%);background:#1d232a;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:90vw;animation:tin .2s;border-left:4px solid var(--yel)}
 .toast.err{background:var(--err);border-left-color:#fff}
+/* Bảng tên bản quyền: tấm biển kim loại, chữ vàng nổi */
+.credit{grid-column:1/-1;display:flex;justify-content:center;padding:0 20px 30px}
+.cr-in{display:flex;align-items:center;gap:16px;padding:14px 26px 14px 16px;border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,.04) 45%,rgba(0,0,0,.18));
+  border:1px solid rgba(245,183,0,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 0 -2px 0 rgba(0,0,0,.35),0 14px 34px rgba(0,0,0,.45);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);position:relative}
+.cr-in::before,.cr-in::after{content:"";position:absolute;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff7cf,#b88700 70%);box-shadow:0 1px 2px rgba(0,0,0,.6)}
+.cr-in::before{left:-4px}.cr-in::after{right:-4px}
+.cr-c{width:46px;height:46px;flex-shrink:0;border-radius:50%;display:grid;place-items:center;font:700 26px/1 Georgia,serif;color:#1d232a;
+  background:radial-gradient(circle at 35% 30%,#fff3b0,#f5b700 55%,#b88700);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 8px rgba(0,0,0,.45)}
+.cr-t{font:600 15px var(--sans);color:#e6edf3;letter-spacing:.2px}
+.cr-t b{font:700 25px/1.1 var(--cond);text-transform:uppercase;letter-spacing:1.2px;margin-left:4px;
+  background:linear-gradient(180deg,#fff1b8 0%,#ffd84a 40%,#f5b700 60%,#c98d00 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.55)) drop-shadow(0 0 10px rgba(245,183,0,.25))}
+.cr-l{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:5px}
+.cr-l a{display:inline-flex;align-items:center;gap:7px;color:#fff;text-decoration:none;font:600 15px var(--sans);letter-spacing:.3px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.cr-l a:hover{color:#ffd451}
+.cr-l svg{width:17px;height:17px;color:#f5b700}
+.auth-card>.btn.block{display:flex;width:calc(100% - 56px)}
+.ver .cr-s{display:block;margin-top:4px}
+.ver a{color:inherit}
+@media(max-width:899px){.credit{padding:4px 14px 26px}.cr-in{padding:12px 16px 12px 12px;gap:12px}.cr-t b{font-size:21px;display:block;margin:2px 0 0}.cr-l a{font-size:14px}.auth-card>.btn.block{width:calc(100% - 40px)}}
 @keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
 .fatal{position:relative;z-index:2;padding:40px 24px;max-width:520px;margin:auto;text-align:center}
 
@@ -618,7 +639,7 @@ function bkCard() {
    Mỗi thiết bị có "Mã máy" riêng, dùng thử TRIAL_DAYS ngày. Mã kích hoạt là chữ ký số ECDSA P-256
    trên (VL | mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật trong công cụ của nhà cung cấp. */
 const TRIAL_DAYS = 7;
-const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668', email: 'tnp10102014@gmail.com' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
 const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "uqMBhT8HA1X37oJb2-rYcJTnQY4PmYtiD4SGPoWZ9Hk", "y": "X0vFhRqyGOeNlzUpTP9lbjEG848NB_v0NDZWw_CTcos"};
 const PLANS = { T7: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
 const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -743,7 +764,10 @@ function authShell(inner, title) {
       <p>Phần mềm bán hàng, công nợ và quản lý <b>nhập – xuất – tồn kho</b> cho cửa hàng, công ty vật liệu xây dựng.</p>
       <div class="svcs">${['🏗️ Sắt thép', '🔩 Đinh vít · Bu lông', '🪨 Xi măng', '🧱 Cát đá · Gạch', '🏠 Tôn · Xà gồ', '🚰 Ống nước'].map(x => `<span>${x}</span>`).join('')}</div>
     </section>
-    <section class="auth-side"><form class="auth-card" id="authForm" novalidate><div class="hazard"></div>${inner}</form></section></div>`;
+    <section class="auth-side"><form class="auth-card" id="authForm" novalidate><div class="hazard"></div>${inner}</form></section>
+    <footer class="credit"><div class="cr-in"><span class="cr-c">©</span><div class="cr-b"><div class="cr-t">Bản quyền thuộc về <b>${esc(VENDOR.name)}</b></div>
+      <div class="cr-l"><a href="tel:${digits(VENDOR.phone)}">${I('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>')}Mobile: ${esc(VENDOR.phone)}</a>
+      <a href="mailto:${esc(VENDOR.email)}">${I('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>')}Email: ${esc(VENDOR.email)}</a></div></div></div></footer></div>`;
   a.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
   return $('#authForm');
 }
@@ -1636,7 +1660,7 @@ function vSettings() {
     <div class="card"><h3>Cài đặt ứng dụng</h3><div style="font-size:14px;display:grid;gap:8px">
       <div><b>iPhone / iPad:</b> Safari → nút Chia sẻ ⬆ → <b>Thêm vào MH chính</b>.</div><div><b>Android:</b> Chrome → ⋮ → <b>Cài đặt ứng dụng</b>.</div>
       <div><b>Windows / Mac / Linux:</b> Chrome hoặc Edge → biểu tượng <b>⊕ Cài đặt</b> cuối thanh địa chỉ.</div><div class="muted">Sau khi cài, ứng dụng chạy toàn màn hình và dùng được khi mất mạng.</div></div></div>
-  </div><div class="ver">VLXD POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}</div>`;
+  </div><div class="ver">VLXD POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}<span class="cr-s">© Bản quyền thuộc về <b>${esc(VENDOR.name)}</b> · Mobile: <a href="tel:${digits(VENDOR.phone)}">${esc(VENDOR.phone)}</a> · Email: <a href="mailto:${esc(VENDOR.email)}">${esc(VENDOR.email)}</a></span></div>`;
   const ri = $('#restoreIn'); if (ri) ri.onchange = restore;
   const bo = $('#bkOn'); if (bo) bo.onchange = e => { BK.meta.on = e.target.checked; if (!BK.meta.on) BK.meta.err = ''; bkSaveMeta(); updBk(); if (BK.meta.on) bkRun(true); };
   const bkk = $('#bkKeep'); if (bkk) bkk.onchange = e => { BK.meta.keep = +e.target.value; bkSaveMeta(); };
