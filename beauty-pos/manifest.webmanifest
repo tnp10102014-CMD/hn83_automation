@@ -1,0 +1,17 @@
+{
+  "name": "Beauty POS - Thu ngân salon & spa",
+  "short_name": "Beauty POS",
+  "description": "Thu ngân, lịch hẹn, kỹ thuật viên cho salon tóc, nail, mi, phun xăm, chăm sóc da, massage",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#3a1d33",
+  "theme_color": "#3a1d33",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
