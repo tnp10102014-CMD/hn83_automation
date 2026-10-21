@@ -28,6 +28,13 @@ Chạy trên **iPhone, iPad, Android, máy tính bảng, PC Windows / Mac / Linu
 - Thông tin liên hệ hiện trên màn hình hết hạn: sửa hằng số `VENDOR` trong `index.html`.
 - Giới hạn: đây là bảo vệ phía trình duyệt. Người rành kỹ thuật có thể sửa mã nguồn (đang công khai trên GitHub Pages) hoặc xóa sạch dữ liệu trình duyệt để dùng thử lại (khi đó mất luôn dữ liệu). Muốn chặn triệt để cần máy chủ cấp phép (online).
 
+## Tự động sao lưu (Chrome / Edge trên máy tính)
+- *Cài đặt → Tự động sao lưu → **Chọn thư mục sao lưu*** (ví dụ `E:\Backup_POS`) → bấm **Cho phép** (nên chọn *"Cho phép mỗi lần truy cập"* nếu Chrome hỏi).
+- Mỗi ngày tự ghi 1 file `beauty-pos_YYYY-MM-DD.json`; trong ngày có dữ liệu mới thì ghi đè lại tối đa mỗi giờ. Tự xóa bản cũ, giữ 7–365 bản gần nhất (mặc định 30).
+- Nhiều app dùng chung một thư mục được (tên file khác nhau). Khôi phục bằng nút *Khôi phục từ file sao lưu*.
+- Mở lại trình duyệt, Chrome có thể hỏi lại quyền: app hỏi khi đăng nhập, hoặc hiện nút **"⚠ Bấm để cho phép sao lưu"** ở góc trên.
+- Không hỗ trợ trên iPhone / iPad / Safari / Firefox → dùng nút *Sao lưu toàn bộ dữ liệu* thủ công.
+
 ## Giao diện
 Phong cách spa sang trọng: nền gradient hồng phấn – champagne chuyển động nhẹ, họa tiết hoa sen & lá line-art rose-gold, thẻ kính mờ (glassmorphism), tự đổi giao diện tối theo máy.
 
