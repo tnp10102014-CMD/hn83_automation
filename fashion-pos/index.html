@@ -1,0 +1,1589 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f2a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Thời Trang POS">
+<meta name="description" content="Phần mềm bán hàng thời trang: quần áo, giày dép cho sơ sinh, trẻ em, thanh thiếu niên và người lớn.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<title>Thời Trang POS</title>
+<style>
+:root{
+  --bg:#f6f4f0;--surface:#fff;--surface2:#f2eee7;--ink:#1c2230;--muted:#6b7280;--line:#e8e2d8;
+  --navy:#1f2a44;--navy2:#2d3b5e;--gold:#b8925a;--gold2:#d9bc8c;
+  --pri:#1f2a44;--pri-ink:#fff;--ok:#2f9e6e;--err:#d14343;--warn:#c9831a;
+  --r:14px;--sh:0 1px 2px rgba(16,24,40,.04),0 6px 20px rgba(16,24,40,.06);
+  --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);
+  --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --serif:"Playfair Display",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#0e121a;--surface:#161c27;--surface2:#1e2635;--ink:#e9e6e0;--muted:#9aa3b2;--line:#2a3446;
+    --pri:#c9a46b;--pri-ink:#141922;--sh:0 4px 18px rgba(0,0,0,.35)}
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans);overflow:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:10px 12px;width:100%;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,146,90,.18)}
+h1,h2,h3{font-family:var(--serif);font-weight:700;letter-spacing:.2px}
+.hidden{display:none!important}
+.grow{flex:1}
+.muted{color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.f{margin-bottom:12px}
+.f>label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.err-t{color:var(--err)}
+.ok-t{color:var(--ok)}
+svg.i{width:20px;height:20px;flex-shrink:0}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:11px;font-weight:600;background:var(--surface2);transition:transform .08s,filter .15s;white-space:nowrap}
+.btn:hover{filter:brightness(.97)}
+.btn:active{transform:scale(.97)}
+.btn.pri{background:var(--pri);color:var(--pri-ink)}
+.btn.gold{background:linear-gradient(135deg,#c9a46b,#a8834e);color:#fff;box-shadow:0 4px 14px rgba(168,131,78,.35)}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.danger{background:var(--err);color:#fff}
+.btn.danger.ghost{background:transparent;color:var(--err);border-color:rgba(209,67,67,.35)}
+.btn.sm{padding:7px 12px;font-size:13.5px;border-radius:9px}
+.btn.block{width:100%}
+.ibtn{width:38px;height:38px;border-radius:10px;display:inline-grid;place-items:center;background:var(--surface2)}
+kbd{font:600 11px var(--sans);background:rgba(255,255,255,.22);padding:2px 6px;border-radius:5px}
+
+/* Chips & seg */
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:7px 13px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:500}
+.chip.on{background:var(--pri);color:var(--pri-ink);border-color:var(--pri)}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.chip button{font-size:11px;opacity:.7;margin-left:2px}
+.chip-add{display:inline-flex;border:1px dashed var(--line);border-radius:999px;overflow:hidden}
+.chip-add input{border:0;padding:6px 10px;font-size:14px;width:96px;background:transparent;box-shadow:none}
+.chip-add button{padding:0 12px;font-weight:700;color:var(--gold)}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);vertical-align:-2px}
+.chip.on .sw{border:1.5px solid rgba(255,255,255,.75)}
+.seg{display:inline-flex;background:var(--surface2);border-radius:11px;padding:3px}
+.seg button{padding:8px 14px;border-radius:9px;font-size:14px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.seg.sm button{padding:5px 10px}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:7px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.tag.ok{background:rgba(47,158,110,.13);color:var(--ok)}
+.tag.err{background:rgba(209,67,67,.12);color:var(--err)}
+.tag.gold{background:rgba(184,146,90,.16);color:#9a7642}
+.tag.blue{background:rgba(59,130,246,.13);color:#2f6fd0}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--sh);padding:18px;border:1px solid var(--line)}
+.card h3{margin:0 0 12px;font-size:18px}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.empty svg{width:44px;height:44px;opacity:.4}
+
+/* ===== Auth ===== */
+#auth{position:fixed;inset:0;z-index:30;overflow-y:auto;background:var(--bg)}
+.auth{min-height:100%;display:grid;grid-template-columns:1.1fr 1fr}
+.auth-art{position:relative;background:radial-gradient(ellipse at 20% 10%,#34456e 0,transparent 55%),linear-gradient(160deg,#1f2a44,#141b2d);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.auth-art::after{content:"";position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;border:1px solid rgba(217,188,140,.25);box-shadow:0 0 0 40px rgba(217,188,140,.05),0 0 0 90px rgba(217,188,140,.035)}
+.brand-lg{display:flex;align-items:center;gap:14px;margin-bottom:44px}
+.brand-lg svg{width:56px;height:56px}
+.brand-lg .bn{font-family:var(--serif);font-size:24px;font-weight:700}
+.brand-lg .bt{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2)}
+.auth-art h2{font-size:42px;line-height:1.15;margin:0 0 14px;max-width:460px}
+.auth-art h2 em{font-style:normal;color:var(--gold2)}
+.auth-art p{margin:0;color:rgba(255,255,255,.75);font-size:16px}
+.ages{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+.ages span{border:1px solid rgba(217,188,140,.4);color:#f1e3c8;padding:7px 14px;border-radius:999px;font-size:13.5px}
+.feat{list-style:none;padding:0;margin:36px 0 0;display:grid;gap:12px;color:rgba(255,255,255,.85)}
+.feat li{display:flex;gap:10px;align-items:center}
+.feat li::before{content:"";width:22px;height:22px;border-radius:50%;background:rgba(217,188,140,.18) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d9bc8c' stroke-width='3'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E") center/13px no-repeat;flex-shrink:0}
+.auth-side{display:flex;align-items:center;justify-content:center;padding:40px 24px calc(40px + var(--sb))}
+.auth-card{width:100%;max-width:400px}
+.auth-card h1{font-size:32px;margin:0 0 6px}
+.auth-card .lead{color:var(--muted);margin:0 0 26px}
+.pw{position:relative}
+.pw input{padding-right:46px}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;display:grid;place-items:center;color:var(--muted)}
+.auth-msg{min-height:22px;font-size:14px;color:var(--err);margin:4px 0 10px}
+.check{display:flex;align-items:center;gap:9px;font-size:14px;margin:6px 0 16px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--navy)}
+.lock-user{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:16px}
+.auth-foot{margin-top:28px;font-size:12.5px;color:var(--muted);text-align:center}
+.link{color:var(--gold);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:899px){
+  .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .auth-art{padding:calc(var(--st) + 28px) 24px 30px}
+  .auth-art h2{font-size:28px}.brand-lg{margin-bottom:22px}.feat{display:none}.ages{margin-top:18px}
+  .auth-side{align-items:flex-start;padding-top:28px}
+}
+
+/* ===== App shell ===== */
+#app{display:flex;height:100dvh}
+.side{width:248px;flex-shrink:0;background:linear-gradient(180deg,#1f2a44,#172036);color:#cfd5e2;display:flex;flex-direction:column;padding:calc(var(--st) + 20px) 14px 16px}
+.brand{display:flex;align-items:center;gap:11px;padding:0 8px 24px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:14px}
+.brand svg{width:42px;height:42px;flex-shrink:0}
+.brand b{display:block;font-family:var(--serif);font-size:16.5px;color:#fff;line-height:1.2}
+.brand small{font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold2)}
+.nav{display:flex;flex-direction:column;gap:3px}
+.nav button{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;font-weight:500;color:#c3cad9;text-align:left}
+.nav button:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav button.on{background:rgba(217,188,140,.14);color:#f3e2c2}
+.nav button.on svg{color:var(--gold2)}
+.me{margin-top:auto;display:flex;align-items:center;gap:10px;padding:12px 8px 0;border-top:1px solid rgba(255,255,255,.08)}
+.me .who{flex:1;min-width:0}
+.me .who b{display:block;color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me .who small{font-size:12px;color:var(--gold2)}
+.me .ibtn{background:rgba(255,255,255,.07);color:#cfd5e2}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:14px;background:linear-gradient(135deg,#d9bc8c,#a8834e);color:#1f2a44;flex-shrink:0}
+.content{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:12px;padding:calc(var(--st) + 14px) 24px 14px;background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0}
+.topbar h1{margin:0;font-size:22px;flex:1}
+.topbar .av{width:36px;height:36px;display:none}
+.net{font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(201,131,26,.14);color:var(--warn)}
+#view{flex:1;overflow-y:auto;padding:22px 24px 30px;-webkit-overflow-scrolling:touch}
+#view.flush{padding:0;overflow:hidden}
+.tabbar{display:none}
+@media(max-width:899px){
+  .side{display:none}
+  .topbar{padding:calc(var(--st) + 10px) 16px 10px;background:linear-gradient(135deg,#1f2a44,#2d3b5e);color:#fff;border:0}
+  .topbar h1{font-size:19px}
+  .topbar .av{display:grid}
+  #view{padding:14px 14px 22px}
+  .tabbar{display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:var(--sb);flex-shrink:0}
+  .tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:10.5px;font-weight:500;color:var(--muted)}
+  .tabbar button.on{color:var(--pri);font-weight:700}
+  .tabbar svg{width:23px;height:23px}
+  .g2,.g3{grid-template-columns:1fr}
+}
+
+/* ===== Toolbar ===== */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.search{position:relative;flex:1;min-width:200px}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);width:18px;height:18px}
+.search input{padding-left:38px;background:var(--surface)}
+.sum-line{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--muted);margin:0 2px 12px}
+.sum-line b{color:var(--ink)}
+
+/* ===== POS ===== */
+.pos{display:grid;grid-template-columns:1fr 390px;height:100%}
+.pos-l{display:flex;flex-direction:column;min-width:0;min-height:0}
+.pos-tools{padding:16px 20px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line);background:var(--bg)}
+.pgrid{flex:1;overflow-y:auto;padding:16px 20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:14px;align-content:start;grid-auto-rows:max-content}
+.pcard{display:block;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;text-align:left;padding:0;transition:transform .1s,box-shadow .15s}
+.pcard:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.pcard:active{transform:scale(.98)}
+.pimg{position:relative;display:block;width:100%;aspect-ratio:1/1;background:var(--surface2);overflow:hidden}
+.pimg>img,.pimg>.ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.pimg>.ph{display:grid}
+.ph{width:100%;height:100%;display:grid;place-items:center;background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.55),transparent 60%),linear-gradient(150deg,var(--c),#1f2a44 140%)}
+.ph span{font-size:46px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.18))}
+.age-b{position:absolute;left:8px;top:8px;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.92);color:#1f2a44;display:flex;align-items:center;gap:5px}
+.age-b::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c)}
+.oos{position:absolute;inset:0;background:rgba(20,25,35,.55);color:#fff;display:grid;place-items:center;font-weight:700;letter-spacing:.5px}
+.pinfo{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px}
+.pname{font-weight:600;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.psub{font-size:12px;color:var(--muted)}
+.pprice{font-weight:700;color:var(--gold);margin-top:auto;padding-top:4px;font-size:15px}
+.pos-r{background:var(--surface);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.cart-h{display:flex;align-items:center;gap:10px;padding:16px 18px 10px}
+.cart-h h2{margin:0;font-size:21px}
+.cart-h small{color:var(--muted)}
+.cust{display:flex;align-items:center;gap:10px;margin:0 18px 8px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);cursor:pointer;text-align:left}
+.cust:hover{border-color:var(--gold)}
+.cust svg{color:var(--gold)}
+.cust b{display:block;font-size:14px}
+.cust small{color:var(--muted);font-size:12px}
+.cust .x{margin-left:auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--surface2);font-size:12px}
+.cart-lines{flex:1;overflow-y:auto;padding:0 18px}
+.cline{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.cthumb{width:44px;height:44px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.cthumb .ph span{font-size:20px}
+.cthumb img{width:100%;height:100%;object-fit:cover}
+.cmain{flex:1;min-width:0}
+.cname{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmeta{font-size:12px;color:var(--muted)}
+.camt{width:82px;text-align:right;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+.qty{display:flex;align-items:center;background:var(--surface2);border-radius:9px}
+.qty button{width:30px;height:30px;font-size:17px;font-weight:700;color:var(--gold)}
+.qty b{min-width:22px;text-align:center;font-size:14px;font-variant-numeric:tabular-nums}
+.cart-f{padding:12px 18px calc(16px + var(--sb));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:9px;background:var(--surface)}
+.cart-f .row b{font-variant-numeric:tabular-nums}
+.cart-f .disc input{width:96px;padding:7px 10px;text-align:right}
+.cart-f .total{font-size:15px;font-weight:600;border-top:1px dashed var(--line);padding-top:10px}
+.cart-f .total b{font-size:24px;color:var(--gold);font-family:var(--serif)}
+.cartbar{display:none}
+.only-m{display:none!important}
+@media(max-width:899px){
+  .pos{grid-template-columns:1fr}
+  .pos-tools{padding:12px 14px 8px}
+  .pgrid{padding:12px 14px 20px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .pos-r{position:fixed;inset:0;z-index:40;border:0;transform:translateY(102%);transition:transform .24s ease;padding-top:var(--st)}
+  .pos-r.open{transform:none}
+  .cartbar{display:flex;align-items:center;gap:10px;margin:0 12px 10px;padding:12px 16px;border-radius:14px;background:linear-gradient(135deg,#1f2a44,#2d3b5e);color:#fff;font-weight:600;box-shadow:0 6px 18px rgba(31,42,68,.35)}
+  .cartbar .ct{margin-left:auto;color:var(--gold2);font-family:var(--serif);font-size:18px}
+  .only-m{display:inline-grid!important}
+}
+
+/* ===== Lists ===== */
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.li{display:grid;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);width:100%;text-align:left}
+.li:last-child{border-bottom:0}
+.li:hover{background:var(--surface2)}
+.li small{display:block;color:var(--muted);font-size:12px;font-weight:400}
+.li .r{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.li-o{grid-template-columns:130px 1fr auto 120px}
+.li-p{grid-template-columns:52px 1fr 150px 110px 80px}
+.li-c{grid-template-columns:40px 1fr 120px 120px}
+.li-u{grid-template-columns:40px 1fr auto auto}
+.thumb{width:52px;height:52px;border-radius:10px;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .ph span{font-size:24px}
+.lo{color:var(--warn);font-weight:700}.z{color:var(--err);font-weight:700}
+@media(max-width:699px){
+  .li-o{grid-template-columns:1fr auto}.li-o .hm{display:none}
+  .li-p{grid-template-columns:48px 1fr auto}.li-p .hm{display:none}
+  .li-c{grid-template-columns:40px 1fr auto}.li-c .hm{display:none}
+}
+
+/* ===== Modal ===== */
+.modal{position:fixed;inset:0;background:rgba(12,16,26,.55);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity .15s}
+.modal.show{opacity:1}
+.dlg{background:var(--surface);border-radius:20px;width:100%;max-width:540px;max-height:calc(100dvh - 40px);display:flex;flex-direction:column;box-shadow:0 24px 70px rgba(0,0,0,.3);transform:translateY(12px);transition:transform .2s}
+.modal.show .dlg{transform:none}
+.dlg.sm{max-width:420px}.dlg.lg{max-width:880px}
+.dlg-h{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-h h3{margin:0;flex:1;font-size:20px}
+.dlg-b{padding:18px 20px;overflow-y:auto;flex:1}
+.dlg-f{display:flex;gap:10px;align-items:center;padding:14px 20px calc(14px + var(--sb));border-top:1px solid var(--line);flex-wrap:wrap}
+@media(max-width:699px){
+  .modal{padding:0;align-items:flex-end}
+  .dlg,.dlg.lg,.dlg.sm{max-width:none;border-radius:20px 20px 0 0;max-height:94dvh}
+  .dlg-f .btn{flex:1}
+}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:5px 0;font-variant-numeric:tabular-nums}
+.kv.big{font-size:22px;font-weight:700;border-top:1px dashed var(--line);margin-top:6px;padding-top:12px}
+.kv.big span:last-child{color:var(--gold);font-family:var(--serif)}
+.vp-top{display:flex;gap:14px;margin-bottom:14px}
+.vp-top .thumb{width:84px;height:84px;border-radius:14px}
+.vp-top .thumb .ph span{font-size:36px}
+.opt{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+.opt button{min-width:52px;padding:9px 12px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2}
+.opt button small{font-size:10.5px;font-weight:500;color:var(--muted)}
+.opt button.on{border-color:var(--gold);background:rgba(184,146,90,.1)}
+.opt button.no{opacity:.4;text-decoration:line-through}
+.sec-l{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.cashbtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.cashbtns button{padding:10px 4px;border-radius:10px;border:1px solid var(--line);font-weight:600;font-size:14px}
+.qrbox{background:#fff;color:#111;border-radius:16px;padding:12px;margin-top:10px;text-align:center;border:1px solid var(--line)}
+.qrbox svg{display:block;width:220px;max-width:70vw;height:auto;margin:0 auto}
+.qrbox .qa{font-size:22px;font-weight:800;color:#1f2a44;font-family:var(--serif)}
+.qrbox .qi{font-size:13px;color:#555}
+.warn{background:rgba(201,131,26,.12);color:#8a5a10;border-radius:12px;padding:11px 13px;font-size:13.5px}
+@media (prefers-color-scheme:dark){.warn{color:#f0c27a}}
+.success{text-align:center;padding:10px 0}
+.success .ck{width:72px;height:72px;border-radius:50%;margin:0 auto 12px;background:rgba(47,158,110,.14);color:var(--ok);display:grid;place-items:center}
+.success .ck svg{width:38px;height:38px}
+.success h3{font-size:24px;margin:0 0 4px}
+
+/* Product editor */
+.pe-top{display:grid;grid-template-columns:190px 1fr;gap:18px}
+.pe-img{position:relative;display:block;aspect-ratio:1/1;border-radius:16px;overflow:hidden;border:1.5px dashed var(--line);cursor:pointer;background:var(--surface2)}
+.pe-img img{width:100%;height:100%;object-fit:cover}
+.pe-ph{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted);font-size:13px}
+.pe-ph svg{width:34px;height:34px}
+.pe-rm{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;font-size:12px}
+.pe-sec{border-top:1px solid var(--line);padding:14px 0 6px;margin-top:4px}
+.pe-sh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.pe-sh select{width:auto;padding:6px 10px;font-size:14px;margin-left:auto}
+.sgrid-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.sgrid{border-collapse:collapse;width:100%;font-size:14px}
+.sgrid th,.sgrid td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+.sgrid thead th{background:var(--surface2);font-size:12.5px;font-weight:600}
+.sgrid tbody th{text-align:left;font-weight:700;background:var(--surface2)}
+.sgrid tr:last-child td,.sgrid tr:last-child th{border-bottom:0}
+.sgrid input{width:68px;padding:6px 8px;text-align:center;font-size:15px}
+@media(max-width:699px){.pe-top{grid-template-columns:1fr}.pe-img{width:150px;margin:0 auto}}
+
+/* Reports */
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.kpi span{font-size:12.5px;color:var(--muted);font-weight:500}
+.kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi small{font-size:12px;color:var(--muted)}
+.kpi.hero{background:linear-gradient(135deg,#1f2a44,#2d3b5e);color:#fff;border:0}
+.kpi.hero span,.kpi.hero small{color:rgba(255,255,255,.75)}
+.kpi.hero b{font-family:var(--serif);font-size:28px;color:var(--gold2)}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.bars{display:flex;align-items:flex-end;gap:4px;height:170px;padding-top:6px}
+.bars .bc{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0}
+.bars .b{width:100%;max-width:30px;background:linear-gradient(180deg,#d9bc8c,#a8834e);border-radius:5px 5px 2px 2px;min-height:2px}
+.bars .bl{font-size:10px;color:var(--muted);margin-top:5px;white-space:nowrap}
+.hb{margin-bottom:11px}
+.hb .row{font-size:13.5px}
+.hb .tr{height:8px;border-radius:4px;background:var(--surface2);margin-top:5px;overflow:hidden}
+.hb .tr i{display:block;height:100%;border-radius:4px;background:var(--c,var(--gold))}
+
+/* Settings */
+.sgrid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start}
+.set-actions{display:grid;gap:9px}
+.ver{text-align:center;font-size:12px;color:var(--muted);margin-top:20px}
+
+.toast{position:fixed;left:50%;bottom:calc(var(--sb) + 84px);transform:translateX(-50%);background:#1f2a44;color:#fff;padding:11px 18px;border-radius:12px;font-size:14px;z-index:99;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:90vw;animation:tin .2s}
+.toast.err{background:var(--err)}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}}
+.fatal{padding:40px 24px;max-width:520px;margin:auto;text-align:center}
+
+/* Print */
+#print{display:none}
+@media print{
+  @page{margin:0;size:80mm auto}
+  body{overflow:visible;background:#fff;color:#000;height:auto}
+  body>*:not(#print){display:none!important}
+  #print{display:block;width:72mm;margin:0 auto;padding:4mm 0;font:12px/1.4 "Courier New",monospace;color:#000}
+  #print .c{text-align:center}
+  #print h2{font:700 17px Georgia,serif;margin:0}
+  #print table{width:100%;border-collapse:collapse}
+  #print td{padding:1px 0;vertical-align:top}
+  #print .r{text-align:right}
+  #print hr{border:0;border-top:1px dashed #000;margin:6px 0}
+  #print .t{font-size:15px;font-weight:bold}
+  #print .pqr{text-align:center;font-size:11px}
+  #print .pqr svg{width:40mm;height:40mm;display:block;margin:6px auto 2px}
+}
+</style>
+</head>
+<body>
+<div id="auth" class="hidden"></div>
+
+<div id="app" class="hidden">
+  <aside class="side">
+    <div class="brand"><span id="logoS"></span><div><b id="sbName">Thời Trang</b><small>Fashion POS</small></div></div>
+    <nav class="nav" id="sideNav"></nav>
+    <div class="me" id="sideMe"></div>
+  </aside>
+  <div class="content">
+    <header class="topbar">
+      <h1 id="vTitle"></h1>
+      <span class="net hidden" id="net">● Ngoại tuyến</span>
+      <button class="av" id="tbMe" data-act="meMenu" aria-label="Tài khoản"></button>
+    </header>
+    <main id="view"></main>
+    <nav class="tabbar" id="tabNav"></nav>
+  </div>
+</div>
+<div id="print"></div>
+
+<script src="qrcode.js"></script>
+<script>
+'use strict';
+/* ================= HẰNG SỐ ================= */
+const APP_VER = '1.0';
+const DAY = 864e5;
+const AGES = [
+  { id: 'ss', name: 'Sơ sinh', sub: '0–24 tháng', c: '#d98aa5' },
+  { id: 'te', name: 'Trẻ em', sub: '2–12 tuổi', c: '#e0a03a' },
+  { id: 'tn', name: 'Thanh thiếu niên', sub: '13–18 tuổi', c: '#4f8fd1' },
+  { id: 'nl', name: 'Người lớn', sub: 'Trên 18 tuổi', c: '#56688f' }
+];
+const DEFAULT_CATS = ['Áo', 'Quần', 'Váy - Đầm', 'Đồ bộ', 'Đồ sơ sinh', 'Giày', 'Dép - Sandal', 'Phụ kiện'];
+const CAT_ICON = { 'Áo': '👕', 'Quần': '👖', 'Váy - Đầm': '👗', 'Đồ bộ': '🩳', 'Đồ sơ sinh': '🍼', 'Giày': '👟', 'Dép - Sandal': '👡', 'Phụ kiện': '🧢' };
+const GENDERS = ['Unisex', 'Nam', 'Nữ'];
+const SIZE_PRESETS = {
+  'Sơ sinh (tháng)': ['NB', '0-3M', '3-6M', '6-9M', '9-12M', '12-18M', '18-24M'],
+  'Trẻ em (tuổi)': ['2', '3', '4', '5', '6', '7', '8', '10', '12'],
+  'Áo chữ (XS–XXL)': ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+  'Quần số (28–34)': ['28', '29', '30', '31', '32', '33', '34'],
+  'Giày sơ sinh (16–22)': ['16', '17', '18', '19', '20', '21', '22'],
+  'Giày trẻ em (23–34)': ['23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '33', '34'],
+  'Giày người lớn (35–44)': ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44'],
+  'Freesize': ['Free']
+};
+const COLORS = [['Trắng', '#ffffff'], ['Đen', '#1a1a1a'], ['Xám', '#9ca3af'], ['Be', '#e8dcc4'], ['Nâu', '#8b5e3c'], ['Đỏ', '#d64545'],
+  ['Hồng', '#f4a6c0'], ['Cam', '#f08a3c'], ['Vàng', '#f2c94c'], ['Xanh lá', '#4caf7a'], ['Xanh dương', '#3b82f6'], ['Xanh navy', '#1f2a44'], ['Tím', '#8b5cf6']];
+const METHODS = { cash: 'Tiền mặt', bank: 'Chuyển khoản', card: 'Thẻ / POS' };
+const BANKS = [
+  ['970436', 'VCB', 'Vietcombank'], ['970415', 'ICB', 'VietinBank'], ['970418', 'BIDV', 'BIDV'],
+  ['970405', 'VBA', 'Agribank'], ['970422', 'MB', 'MB Bank'], ['970407', 'TCB', 'Techcombank'],
+  ['970416', 'ACB', 'ACB'], ['970432', 'VPB', 'VPBank'], ['970423', 'TPB', 'TPBank'],
+  ['970403', 'STB', 'Sacombank'], ['970437', 'HDB', 'HDBank'], ['970441', 'VIB', 'VIB'],
+  ['970443', 'SHB', 'SHB'], ['970426', 'MSB', 'MSB'], ['970448', 'OCB', 'OCB'],
+  ['970431', 'EIB', 'Eximbank'], ['970440', 'SEAB', 'SeABank'], ['970449', 'LPB', 'LPBank'],
+  ['970428', 'NAB', 'Nam A Bank'], ['970409', 'BAB', 'Bac A Bank'], ['970425', 'ABB', 'ABBank'],
+  ['970452', 'KLB', 'KienlongBank'], ['970427', 'VAB', 'VietABank'], ['970412', 'PVCB', 'PVcomBank'],
+  ['970438', 'BVB', 'BaoViet Bank'], ['970419', 'NCB', 'NCB'], ['970424', 'SHBVN', 'Shinhan Bank'], ['546034', 'CAKE', 'CAKE by VPBank']
+];
+const LOGO = `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#1f2a44"/><rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#d9bc8c" stroke-opacity=".35"/><path d="M27 21a5 5 0 1 1 5 5v4" fill="none" stroke="#d9bc8c" stroke-width="3.2" stroke-linecap="round"/><path d="M32 30 13 44h38z" fill="none" stroke="#d9bc8c" stroke-width="3.2" stroke-linejoin="round"/></svg>`;
+const I = (d, cls = 'i') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICON = {
+  pos: I('<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>'),
+  orders: I('<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/>'),
+  products: I('<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="8" cy="8" r="1.5"/>'),
+  customers: I('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6 6 0 0 1 3.5 6"/>'),
+  reports: I('<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>'),
+  settings: I('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>'),
+  search: I('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'),
+  user: I('<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>'),
+  logout: I('<path d="M15 4h4v16h-4M10 16l4-4-4-4M14 12H3"/>'),
+  lock: I('<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>'),
+  eye: I('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+  camera: I('<path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>'),
+  bag: I('<path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/>'),
+  check: I('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 'i'),
+  print: I('<path d="M7 9V3h10v6M7 17H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-3"/><path d="M7 14h10v7H7z"/>'),
+  plus: I('<path d="M12 5v14M5 12h14"/>')
+};
+const NAV = [
+  { id: 'pos', label: 'Bán hàng', admin: false },
+  { id: 'orders', label: 'Đơn hàng', admin: false },
+  { id: 'products', label: 'Sản phẩm', admin: false },
+  { id: 'customers', label: 'Khách hàng', admin: false },
+  { id: 'reports', label: 'Báo cáo', admin: true },
+  { id: 'settings', label: 'Cài đặt', admin: false }
+];
+
+/* ================= TIỆN ÍCH ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const fmt = n => (Math.round(n) || 0).toLocaleString('vi-VN') + 'đ';
+const num = n => (Math.round(n) || 0).toLocaleString('vi-VN');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+const pad = (n, l = 2) => String(n).padStart(l, '0');
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const hhmm = t => { const d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); };
+const ddmm = t => { const d = new Date(t); return pad(d.getDate()) + '/' + pad(d.getMonth() + 1); };
+const ddmmyy = t => ddmm(t) + '/' + new Date(t).getFullYear();
+const isoDate = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+const startOfDay = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); return +d; };
+const initials = n => String(n || '?').trim().split(/\s+/).slice(-2).map(w => w[0]).join('').toUpperCase();
+const ageOf = id => AGES.find(a => a.id === id) || AGES[3];
+const colorHex = n => (COLORS.find(x => x[0].toLowerCase() === String(n).toLowerCase()) || [0, '#c7c2b8'])[1];
+const bankLabel = bin => { const b = BANKS.find(x => x[0] === bin); return b ? b[2] : 'Mã ' + bin; };
+function toast(msg, type) {
+  $$('.toast').forEach(t => t.remove());
+  const el = document.createElement('div'); el.className = 'toast' + (type === 'err' ? ' err' : ''); el.textContent = msg;
+  document.body.appendChild(el); setTimeout(() => el.remove(), type === 'err' ? 2800 : 1800);
+}
+const buzz = () => { try { navigator.vibrate && navigator.vibrate(10); } catch (e) {} };
+
+/* ================= LƯU TRỮ (IndexedDB) ================= */
+const IDB = (() => {
+  let db;
+  const open = () => new Promise((res, rej) => {
+    const r = indexedDB.open('fashion-pos', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('kv'); r.result.createObjectStore('img'); };
+    r.onsuccess = () => { db = r.result; res(); };
+    r.onerror = () => rej(r.error || new Error('IndexedDB'));
+  });
+  const tx = (store, mode, fn) => new Promise((res, rej) => {
+    const t = db.transaction(store, mode); const r = fn(t.objectStore(store));
+    t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+  });
+  return {
+    open,
+    get: (s, k) => tx(s, 'readonly', st => st.get(k)),
+    set: (s, k, v) => tx(s, 'readwrite', st => st.put(v, k)),
+    del: (s, k) => tx(s, 'readwrite', st => st.delete(k)),
+    keys: s => tx(s, 'readonly', st => st.getAllKeys()),
+    all: s => tx(s, 'readonly', st => st.getAll()),
+    clear: s => tx(s, 'readwrite', st => st.clear())
+  };
+})();
+const COLS = ['settings', 'users', 'products', 'customers', 'orders', 'stocklog', 'seq'];
+function defaults() {
+  return {
+    settings: { shopName: 'Thời Trang Gia Đình', address: '', phone: '', footer: 'Cảm ơn quý khách! Đổi hàng trong 7 ngày kèm hóa đơn.',
+      bankId: '', bankAcc: '', bankName: '', lockMin: 15, pointPer: 10000, lowStock: 2, cats: DEFAULT_CATS.slice(), demo: false },
+    users: [], products: [], customers: [], orders: [], stocklog: [], seq: { order: 0, prod: 0 }
+  };
+}
+let S = defaults();
+const IMG = {};
+async function loadAll() {
+  const d = defaults();
+  for (const k of COLS) { const v = await IDB.get('kv', k); S[k] = v ?? d[k]; }
+  S.settings = { ...d.settings, ...S.settings }; S.seq = { ...d.seq, ...S.seq };
+  const keys = await IDB.keys('img'), vals = await IDB.all('img');
+  keys.forEach((k, i) => IMG[k] = vals[i]);
+}
+const dirty = new Set(); let saveT;
+function save(...keys) { keys.forEach(k => dirty.add(k)); clearTimeout(saveT); saveT = setTimeout(flush, 150); }
+async function flush() {
+  const ks = [...dirty]; dirty.clear();
+  try { for (const k of ks) await IDB.set('kv', k, S[k]); }
+  catch (e) { toast('Lỗi lưu dữ liệu: ' + e.message, 'err'); }
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', flush);
+
+/* ================= BẢO MẬT / ĐĂNG NHẬP ================= */
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+const newSalt = () => hex(crypto.getRandomValues(new Uint8Array(16)));
+async function hashPw(pw, salt) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256));
+}
+async function verifyPw(u, pw) { return (await hashPw(pw, u.salt)) === u.hash; }
+async function setPw(u, pw) { u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); }
+let ME = null;
+const isAdmin = () => ME && ME.role === 'admin';
+const SESS = 'fpos-session';
+const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
+const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
+let lastAct = Date.now(), fails = 0, lockUntil = 0;
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, () => {
+  lastAct = Date.now(); if (ME) sessSet({ uid: ME.id, last: lastAct });
+}, { passive: true }));
+setInterval(() => {
+  const m = +S.settings.lockMin;
+  if (ME && m > 0 && Date.now() - lastAct > m * 60000) lockScreen();
+}, 15000);
+
+function authShell(inner, artTitle) {
+  $('#app').classList.add('hidden');
+  const a = $('#auth'); a.classList.remove('hidden');
+  a.innerHTML = `<div class="auth">
+    <section class="auth-art">
+      <div class="brand-lg">${LOGO}<div><div class="bn">${esc(S.settings.shopName)}</div><div class="bt">Fashion · Family</div></div></div>
+      <h2>${artTitle || 'Thời trang cho <em>cả gia đình</em>'}</h2>
+      <p>Quần áo · Giày dép · Phụ kiện</p>
+      <div class="ages">${AGES.map(x => `<span>${x.name}</span>`).join('')}</div>
+      <ul class="feat"><li>Bán hàng nhanh, hỗ trợ máy quét mã vạch</li><li>Quản lý size, màu sắc và tồn kho chi tiết</li><li>Báo cáo doanh thu, lợi nhuận theo nhóm tuổi</li><li>Thanh toán chuyển khoản bằng mã QR</li></ul>
+    </section>
+    <section class="auth-side"><form class="auth-card" id="authForm" novalidate>${inner}</form></section>
+  </div>`;
+  a.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
+  return $('#authForm');
+}
+const pwField = (id, label, ac = 'current-password', ph = '') => `<div class="f"><label for="${id}">${label}</label><div class="pw"><input id="${id}" type="password" autocomplete="${ac}" placeholder="${ph}"><button type="button" aria-label="Hiện mật khẩu">${ICON.eye}</button></div></div>`;
+const authMsg = (m, ok) => { const e = $('#authMsg'); e.textContent = m; e.style.color = ok ? 'var(--ok)' : ''; };
+
+function renderSetup() {
+  const f = authShell(`<h1>Thiết lập lần đầu</h1><p class="lead">Tạo tài khoản <b>Quản lý</b> để bắt đầu sử dụng.</p>
+    <div class="f"><label for="suShop">Tên cửa hàng</label><input id="suShop" value="${esc(S.settings.shopName)}"></div>
+    <div class="f"><label for="suName">Họ tên quản lý</label><input id="suName" autocomplete="name" placeholder="VD: Trần Văn A"></div>
+    <div class="f"><label for="suUser">Tên đăng nhập</label><input id="suUser" autocomplete="username" autocapitalize="none" placeholder="VD: admin"></div>
+    ${pwField('suPw', 'Mật khẩu (ít nhất 6 ký tự)', 'new-password')}
+    ${pwField('suPw2', 'Nhập lại mật khẩu', 'new-password')}
+    <label class="check"><input type="checkbox" id="suDemo" checked> Tạo sẵn dữ liệu mẫu để dùng thử</label>
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn gold block" type="submit">Tạo tài khoản & bắt đầu</button>
+    <div class="auth-foot">Dữ liệu được lưu an toàn ngay trên thiết bị này.</div>`, 'Chào mừng đến với <em>Thời Trang POS</em>');
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const name = $('#suName').value.trim(), user = $('#suUser').value.trim().toLowerCase(), pw = $('#suPw').value;
+    if (!name) return authMsg('Nhập họ tên quản lý');
+    if (!/^[a-z0-9._]{3,20}$/.test(user)) return authMsg('Tên đăng nhập 3–20 ký tự: chữ không dấu, số, dấu . hoặc _');
+    if (pw.length < 6) return authMsg('Mật khẩu phải có ít nhất 6 ký tự');
+    if (pw !== $('#suPw2').value) return authMsg('Hai mật khẩu không khớp');
+    const u = { id: uid(), username: user, name, role: 'admin', active: true, created: Date.now() };
+    await setPw(u, pw);
+    S.users.push(u); S.settings.shopName = $('#suShop').value.trim() || S.settings.shopName;
+    if ($('#suDemo').checked) seedDemo(u);
+    save('users', 'settings', 'products', 'customers', 'orders', 'stocklog', 'seq'); await flush();
+    login(u);
+  };
+}
+function renderLogin(msg) {
+  let last = ''; try { last = localStorage.getItem('fpos-lastuser') || ''; } catch (e) {}
+  const f = authShell(`<h1>Đăng nhập</h1><p class="lead">Vui lòng đăng nhập để vào hệ thống bán hàng.</p>
+    <div class="f"><label for="liUser">Tên đăng nhập</label><input id="liUser" autocomplete="username" autocapitalize="none" value="${esc(last)}"></div>
+    ${pwField('liPw', 'Mật khẩu')}
+    <label class="check"><input type="checkbox" id="liRem" ${last ? 'checked' : ''}> Ghi nhớ tên đăng nhập</label>
+    <div class="auth-msg" id="authMsg">${esc(msg || '')}</div>
+    <button class="btn gold block" type="submit">Đăng nhập</button>
+    <div class="auth-foot">Quên mật khẩu? Liên hệ quản lý cửa hàng để đặt lại.</div>`);
+  setTimeout(() => (last ? $('#liPw') : $('#liUser')).focus(), 50);
+  f.onsubmit = async e => {
+    e.preventDefault();
+    if (Date.now() < lockUntil) return authMsg(`Đăng nhập sai nhiều lần. Thử lại sau ${Math.ceil((lockUntil - Date.now()) / 1000)} giây.`);
+    const name = $('#liUser').value.trim().toLowerCase(), pw = $('#liPw').value;
+    const u = S.users.find(x => x.username === name);
+    if (!u || !(await verifyPw(u, pw))) {
+      if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; }
+      $('#liPw').value = ''; return authMsg('Sai tên đăng nhập hoặc mật khẩu');
+    }
+    if (!u.active) return authMsg('Tài khoản đã bị khóa. Liên hệ quản lý.');
+    fails = 0;
+    try { $('#liRem').checked ? localStorage.setItem('fpos-lastuser', name) : localStorage.removeItem('fpos-lastuser'); } catch (e) {}
+    login(u);
+  };
+}
+function lockScreen() {
+  if (!ME) return;
+  const u = ME; ME = null; sessSet(null); closeAllModals();
+  const f = authShell(`<h1>Màn hình đã khóa</h1><p class="lead">Phiên làm việc tạm khóa để bảo mật. Nhập mật khẩu để tiếp tục.</p>
+    <div class="lock-user"><span class="av">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><br><small class="muted">@${esc(u.username)} · ${u.role === 'admin' ? 'Quản lý' : 'Nhân viên'}</small></div></div>
+    ${pwField('lkPw', 'Mật khẩu')}
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn gold block" type="submit">Mở khóa</button>
+    <div class="auth-foot"><a href="#" class="link" id="lkOther">Đăng nhập tài khoản khác</a></div>`);
+  setTimeout(() => $('#lkPw').focus(), 50);
+  $('#lkOther').onclick = e => { e.preventDefault(); cart = newCart(); renderLogin(); };
+  f.onsubmit = async e => {
+    e.preventDefault();
+    if (Date.now() < lockUntil) return authMsg('Thử lại sau ít phút.');
+    if (!(await verifyPw(u, $('#lkPw').value))) { if (++fails >= 5) { lockUntil = Date.now() + 30000; fails = 0; } $('#lkPw').value = ''; return authMsg('Mật khẩu không đúng'); }
+    fails = 0; login(u, true);
+  };
+}
+function login(u, resume) {
+  ME = u; lastAct = Date.now(); sessSet({ uid: u.id, last: lastAct });
+  if (!resume) cart = newCart();
+  $('#auth').classList.add('hidden'); $('#auth').innerHTML = '';
+  $('#app').classList.remove('hidden');
+  renderShell(); go(resume ? cur : (location.hash.slice(2) || 'pos'));
+  if (u.mustChange) changePassword(true);
+  else if (!resume) toast(`Xin chào, ${u.name}!`);
+}
+async function logout() {
+  if (cart.items.length && !(await ask('Đơn hàng đang bán dở sẽ bị hủy. Đăng xuất?', 'Đăng xuất', true))) return;
+  ME = null; sessSet(null); closeAllModals(); cart = newCart(); renderLogin();
+}
+function changePassword(force) {
+  const d = openModal(`<div class="dlg-h"><h3>${force ? 'Đặt mật khẩu mới' : 'Đổi mật khẩu'}</h3>${force ? '' : '<button class="ibtn" data-act="close">✕</button>'}</div>
+    <div class="dlg-b">${force ? '<div class="warn" style="margin-bottom:14px">Quản lý vừa đặt lại mật khẩu cho bạn. Hãy đặt mật khẩu riêng để tiếp tục.</div>' : ''}
+      ${pwField('cpOld', force ? 'Mật khẩu tạm' : 'Mật khẩu hiện tại')}
+      ${pwField('cpNew', 'Mật khẩu mới (ít nhất 6 ký tự)', 'new-password')}
+      ${pwField('cpNew2', 'Nhập lại mật khẩu mới', 'new-password')}
+      <div class="auth-msg" id="cpMsg"></div></div>
+    <div class="dlg-f">${force ? '' : '<button class="btn ghost" data-act="close">Hủy</button>'}<button class="btn pri grow" id="cpOk">Lưu mật khẩu</button></div>`, 'sm', force);
+  d.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
+  const msg = m => $('#cpMsg', d).textContent = m;
+  $('#cpOk', d).onclick = async () => {
+    const o = $('#cpOld', d).value, n = $('#cpNew', d).value;
+    if (!(await verifyPw(ME, o))) return msg('Mật khẩu hiện tại không đúng');
+    if (n.length < 6) return msg('Mật khẩu mới phải có ít nhất 6 ký tự');
+    if (n !== $('#cpNew2', d).value) return msg('Hai mật khẩu mới không khớp');
+    if (n === o) return msg('Mật khẩu mới phải khác mật khẩu cũ');
+    await setPw(ME, n); delete ME.mustChange; save('users'); closeModal(); toast('Đã đổi mật khẩu');
+  };
+}
+
+/* ================= MODAL ================= */
+function openModal(html, size = '', isStatic = false) {
+  const m = document.createElement('div'); m.className = 'modal';
+  if (isStatic) m.dataset.static = '1';
+  m.innerHTML = `<div class="dlg ${size}" role="dialog" aria-modal="true">${html}</div>`;
+  m.addEventListener('mousedown', e => { if (e.target === m && !m.dataset.static) closeModal(); });
+  document.body.appendChild(m); requestAnimationFrame(() => m.classList.add('show'));
+  return m.firstElementChild;
+}
+function closeModal() { const ms = $$('.modal'); const m = ms[ms.length - 1]; if (m) m.remove(); }
+function closeAllModals() { $$('.modal').forEach(m => m.remove()); }
+function ask(msg, ok = 'Đồng ý', danger = false) {
+  return new Promise(res => {
+    const d = openModal(`<div class="dlg-b" style="padding-top:22px"><h3 style="margin:0 0 8px">Xác nhận</h3><p style="margin:0">${msg}</p></div>
+      <div class="dlg-f"><button class="btn ghost grow" data-x="0">Hủy</button><button class="btn ${danger ? 'danger' : 'pri'} grow" data-x="1">${ok}</button></div>`, 'sm', true);
+    d.addEventListener('click', e => { const b = e.target.closest('[data-x]'); if (!b) return; closeModal(); res(b.dataset.x === '1'); });
+  });
+}
+
+/* ================= KHUNG ỨNG DỤNG ================= */
+let cur = 'pos';
+function renderShell() {
+  const items = NAV.filter(n => !n.admin || isAdmin());
+  const nav = id => items.map(n => `<button data-act="go" data-v="${n.id}" class="${n.id === cur ? 'on' : ''}">${ICON[n.id]}<span>${n.label}</span></button>`).join('');
+  $('#logoS').innerHTML = LOGO;
+  $('#sbName').textContent = S.settings.shopName;
+  $('#sideNav').innerHTML = nav(); $('#tabNav').innerHTML = nav();
+  $('#sideMe').innerHTML = `<span class="av">${esc(initials(ME.name))}</span><div class="who"><b>${esc(ME.name)}</b><small>${ME.role === 'admin' ? 'Quản lý' : 'Nhân viên'}</small></div>
+    <button class="ibtn" data-act="lock" title="Khóa màn hình">${ICON.lock}</button><button class="ibtn" data-act="logout" title="Đăng xuất">${ICON.logout}</button>`;
+  $('#tbMe').textContent = initials(ME.name);
+}
+const VIEWS = { pos: vPOS, orders: vOrders, products: vProducts, customers: vCustomers, reports: vReports, settings: vSettings };
+function go(v) {
+  const n = NAV.find(x => x.id === v);
+  if (!n || (n.admin && !isAdmin())) v = 'pos';
+  cur = v; history.replaceState(null, '', '#/' + v);
+  $$('#sideNav button,#tabNav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('#vTitle').textContent = NAV.find(x => x.id === v).label;
+  const view = $('#view'); view.className = ''; view.scrollTop = 0;
+  VIEWS[v]();
+}
+const refresh = () => { if (ME) VIEWS[cur](); };
+function meMenu() {
+  openModal(`<div class="dlg-h"><h3>Tài khoản</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="lock-user" style="margin:0"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><br><small class="muted">@${esc(ME.username)} · ${ME.role === 'admin' ? 'Quản lý' : 'Nhân viên'}</small></div></div></div>
+    <div class="dlg-f" style="flex-direction:column;align-items:stretch">
+      <button class="btn ghost" data-act="chpw">${ICON.lock} Đổi mật khẩu</button>
+      <button class="btn ghost" data-act="lock">${ICON.lock} Khóa màn hình</button>
+      <button class="btn danger ghost" data-act="logout">${ICON.logout} Đăng xuất</button></div>`, 'sm');
+}
+
+/* ================= SẢN PHẨM: HÀM CHUNG ================= */
+const sizesOf = p => p.sizes.length ? p.sizes : [''];
+const colorsOf = p => p.colors.length ? p.colors : [''];
+const vkey = (s, c) => s + '|' + c;
+const vlabel = (s, c) => [s && 'Size ' + s, c].filter(Boolean).join(' · ') || 'Mặc định';
+const stockOf = (p, s, c) => p.stock[vkey(s, c)] || 0;
+function totalStock(p) { let t = 0; for (const s of sizesOf(p)) for (const c of colorsOf(p)) t += stockOf(p, s, c); return t; }
+const catIcon = c => CAT_ICON[c] || '🏷️';
+function pImg(p) {
+  const im = p && IMG[p.id];
+  return im ? `<img src="${im}" alt="" loading="lazy">` : `<div class="ph" style="--c:${ageOf(p && p.age).c}"><span>${catIcon(p && p.cat)}</span></div>`;
+}
+function genSku(age) {
+  const pre = { ss: 'SS', te: 'TE', tn: 'TN', nl: 'NL' }[age] || 'SP'; let sku;
+  do { sku = pre + pad(++S.seq.prod, 4); } while (S.products.some(p => p.sku === sku));
+  save('seq'); return sku;
+}
+function logStock(pid, key, d, type, ref) {
+  S.stocklog.push({ t: Date.now(), pid, key, d, type, ref: ref || '', by: ME ? ME.name : '' });
+  if (S.stocklog.length > 5000) S.stocklog.splice(0, S.stocklog.length - 5000);
+}
+function readImage(file) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(file); const im = new Image();
+    im.onload = () => {
+      const s = Math.min(1, 520 / Math.max(im.width, im.height));
+      const c = document.createElement('canvas'); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Không đọc được ảnh')); };
+    im.src = url;
+  });
+}
+
+/* ================= BÁN HÀNG (POS) ================= */
+let cart = newCart();
+function newCart() { return { items: [], customerId: null, disc: 0, discType: '%' }; }
+const posF = { q: '', age: 'all', cat: 'all' };
+const cartQty = (pid, key) => cart.items.filter(l => l.pid === pid && l.key === key).reduce((a, l) => a + l.qty, 0);
+function cartCalc() {
+  const sub = cart.items.reduce((a, l) => a + l.price * l.qty, 0);
+  const d = cart.discType === '%' ? Math.round(sub * Math.min(cart.disc, 100) / 100) : Math.min(cart.disc, sub);
+  return { sub, d, total: sub - d, qty: cart.items.reduce((a, l) => a + l.qty, 0) };
+}
+function vPOS() {
+  const view = $('#view'); view.className = 'flush';
+  view.innerHTML = `<div class="pos">
+    <section class="pos-l">
+      <div class="pos-tools">
+        <div class="search">${ICON.search}<input id="posQ" type="search" placeholder="Tìm tên, mã SP hoặc quét mã vạch… (F2)" autocomplete="off" value="${esc(posF.q)}"></div>
+        <div class="chips" id="posAge"></div>
+        <div class="chips" id="posCat"></div>
+      </div>
+      <div class="pgrid" id="posGrid"></div>
+      <button class="cartbar" data-act="openCart" id="cartBar"></button>
+    </section>
+    <aside class="pos-r" id="cartPanel"></aside>
+  </div>`;
+  const q = $('#posQ');
+  q.addEventListener('input', () => { posF.q = q.value; renderPosGrid(); });
+  q.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const v = q.value.trim().toUpperCase(); if (!v) return;
+    const list = posList(); const exact = S.products.find(p => p.sku.toUpperCase() === v);
+    const p = exact || (list.length === 1 ? list[0] : null);
+    if (p) { pick(p.id); q.value = ''; posF.q = ''; renderPosGrid(); } else toast('Không tìm thấy mã: ' + q.value, 'err');
+  });
+  renderPosFilters(); renderPosGrid(); renderCart();
+  if (window.innerWidth >= 900) q.focus();
+}
+function renderPosFilters() {
+  $('#posAge').innerHTML = [['all', 'Tất cả', ''], ...AGES.map(a => [a.id, a.name, a.c])].map(([v, l, c]) =>
+    `<button class="chip ${posF.age === v ? 'on' : ''}" data-act="posAge" data-v="${v}">${c ? `<span class="dot" style="--c:${c}"></span>` : ''}${l}</button>`).join('');
+  $('#posCat').innerHTML = ['all', ...S.settings.cats].map(c =>
+    `<button class="chip ${posF.cat === c ? 'on' : ''}" data-act="posCat" data-v="${esc(c)}">${c === 'all' ? 'Mọi danh mục' : catIcon(c) + ' ' + esc(c)}</button>`).join('');
+}
+function posList() {
+  const q = norm(posF.q.trim());
+  return S.products.filter(p => (posF.age === 'all' || p.age === posF.age) && (posF.cat === 'all' || p.cat === posF.cat)
+    && (!q || norm(p.name).includes(q) || norm(p.sku).includes(q)));
+}
+function renderPosGrid() {
+  const list = posList();
+  $('#posGrid').innerHTML = list.map(p => {
+    const st = totalStock(p), a = ageOf(p.age);
+    return `<button class="pcard" data-act="pick" data-id="${p.id}">
+      <div class="pimg">${pImg(p)}<span class="age-b" style="--c:${a.c}">${a.name}</span>${st <= 0 ? '<span class="oos">HẾT HÀNG</span>' : ''}</div>
+      <div class="pinfo"><div class="pname">${esc(p.name)}</div><div class="psub">${esc(p.sku)} · Còn <span class="${st <= S.settings.lowStock ? 'lo' : ''}">${st}</span></div><div class="pprice">${fmt(p.price)}</div></div>
+    </button>`;
+  }).join('') || `<div class="empty" style="grid-column:1/-1">${ICON.products}<p>Không có sản phẩm phù hợp.${isAdmin() && !S.products.length ? '<br><button class="btn pri sm" style="margin-top:10px" data-act="go" data-v="products">Thêm sản phẩm</button>' : ''}</p></div>`;
+}
+function pick(pid) {
+  const p = S.products.find(x => x.id === pid); if (!p) return;
+  if (!p.sizes.length && !p.colors.length) return addToCart(p, '', '', 1);
+  const sel = { s: p.sizes.length === 1 ? p.sizes[0] : (p.sizes.length ? null : ''), c: p.colors.length === 1 ? p.colors[0] : (p.colors.length ? null : ''), q: 1 };
+  const d = openModal(`<div class="dlg-h"><h3>Chọn phân loại</h3><button class="ibtn" data-act="close">✕</button></div><div class="dlg-b" id="vpB"></div><div class="dlg-f" id="vpF"></div>`, 'md');
+  const avail = (s, c) => stockOf(p, s, c) - cartQty(p.id, vkey(s, c));
+  const sumS = s => colorsOf(p).reduce((a, c) => a + (sel.c === null || sel.c === c ? Math.max(0, avail(s, c)) : 0), 0);
+  const sumC = c => sizesOf(p).reduce((a, s) => a + (sel.s === null || sel.s === s ? Math.max(0, avail(s, c)) : 0), 0);
+  const draw = () => {
+    const ok = sel.s !== null && sel.c !== null; const av = ok ? avail(sel.s, sel.c) : 0;
+    if (ok && sel.q > av) sel.q = Math.max(1, av);
+    $('#vpB', d).innerHTML = `<div class="vp-top"><div class="thumb">${pImg(p)}</div><div><b style="font-size:17px">${esc(p.name)}</b><div class="muted" style="font-size:13px">${esc(p.sku)} · ${ageOf(p.age).name} · ${esc(p.cat)}</div><div style="font-size:20px;font-weight:700;color:var(--gold);margin-top:4px">${fmt(p.price)}</div></div></div>
+      ${p.sizes.length ? `<div class="sec-l">Size</div><div class="opt">${p.sizes.map(s => { const n = sumS(s); return `<button data-vs="${esc(s)}" class="${sel.s === s ? 'on' : ''} ${n <= 0 ? 'no' : ''}">${esc(s)}<small>còn ${n}</small></button>`; }).join('')}</div>` : ''}
+      ${p.colors.length ? `<div class="sec-l">Màu sắc</div><div class="opt">${p.colors.map(c => { const n = sumC(c); return `<button data-vc="${esc(c)}" class="${sel.c === c ? 'on' : ''} ${n <= 0 ? 'no' : ''}"><span><span class="sw" style="background:${colorHex(c)}"></span> ${esc(c)}</span><small>còn ${n}</small></button>`; }).join('')}</div>` : ''}
+      <div class="row"><span class="sec-l grow">Số lượng ${ok ? `<span class="muted" style="text-transform:none;font-weight:500">(còn ${av})</span>` : ''}</span>
+        <div class="qty"><button data-vq="-1">−</button><b>${sel.q}</b><button data-vq="1">+</button></div></div>`;
+    $('#vpF', d).innerHTML = `<div class="grow"><small class="muted">Thành tiền</small><div style="font-weight:700;font-size:18px">${fmt(p.price * sel.q)}</div></div>
+      <button class="btn gold" data-vadd ${ok && av >= sel.q && av > 0 ? '' : 'disabled'}>${!ok ? 'Chọn ' + (sel.s === null ? 'size' : 'màu') : av <= 0 ? 'Hết hàng' : 'Thêm vào đơn'}</button>`;
+  };
+  d.addEventListener('click', e => {
+    const b = e.target.closest('[data-vs],[data-vc],[data-vq],[data-vadd]'); if (!b || b.disabled) return;
+    if (b.dataset.vs !== undefined) sel.s = b.dataset.vs;
+    else if (b.dataset.vc !== undefined) sel.c = b.dataset.vc;
+    else if (b.dataset.vq) sel.q = Math.max(1, sel.q + +b.dataset.vq);
+    else { closeModal(); addToCart(p, sel.s, sel.c, sel.q); return; }
+    draw();
+  });
+  draw();
+}
+function addToCart(p, s, c, q) {
+  const key = vkey(s, c), av = stockOf(p, s, c) - cartQty(p.id, key);
+  if (av < q) return toast(av > 0 ? `Chỉ còn ${av} sản phẩm` : 'Sản phẩm đã hết hàng', 'err');
+  const l = cart.items.find(x => x.pid === p.id && x.key === key);
+  if (l) l.qty += q; else cart.items.push({ pid: p.id, key, size: s, color: c, name: p.name, sku: p.sku, price: p.price, cost: p.cost || 0, age: p.age, cat: p.cat, qty: q });
+  buzz(); renderCart(); renderPosGrid();
+  if (window.innerWidth < 900) toast('Đã thêm: ' + p.name);
+}
+function renderCart() {
+  const panel = $('#cartPanel'); if (!panel) return;
+  const c = cartCalc(), cu = S.customers.find(x => x.id === cart.customerId);
+  panel.innerHTML = `
+    <div class="cart-h"><div class="grow"><h2>Đơn hàng</h2><small>${c.qty} sản phẩm</small></div><button class="ibtn only-m" data-act="closeCart">✕</button></div>
+    <div class="cust" data-act="pickCustomer">${ICON.user}<div>${cu ? `<b>${esc(cu.name)}</b><small>${esc(cu.phone)} · ${num(cu.points)} điểm</small>` : '<b>Khách lẻ</b><small>Chọn khách hàng để tích điểm</small>'}</div>${cu ? '<span class="x" data-act="clearCustomer">✕</span>' : ''}</div>
+    <div class="cart-lines">${cart.items.map((l, i) => {
+      const p = S.products.find(x => x.id === l.pid);
+      return `<div class="cline"><div class="cthumb">${pImg(p || l)}</div>
+        <div class="cmain"><div class="cname">${esc(l.name)}</div><div class="cmeta">${esc(vlabel(l.size, l.color))} · ${fmt(l.price)}</div></div>
+        <div class="qty"><button data-act="cq" data-i="${i}" data-d="-1">−</button><b>${l.qty}</b><button data-act="cq" data-i="${i}" data-d="1">+</button></div>
+        <div class="camt">${fmt(l.price * l.qty)}</div></div>`;
+    }).join('') || `<div class="empty">${ICON.bag}<p>Chưa có sản phẩm<br><small>Chọn sản phẩm để thêm vào đơn</small></p></div>`}</div>
+    <div class="cart-f">
+      <div class="row"><span class="grow muted">Tạm tính</span><b id="cSub">${fmt(c.sub)}</b></div>
+      <div class="row disc"><span class="grow muted">Giảm giá</span><input id="cDisc" type="number" inputmode="numeric" min="0" placeholder="0" value="${cart.disc || ''}">
+        <div class="seg sm">${['%', 'đ'].map(t => `<button data-act="cdt" data-v="${t}" class="${cart.discType === t ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+      <div class="row total"><span class="grow">Khách cần trả</span><b id="cTotal">${fmt(c.total)}</b></div>
+      <div class="row"><button class="btn ghost" data-act="clearCart" ${cart.items.length ? '' : 'disabled'}>Hủy đơn</button>
+        <button class="btn gold grow" data-act="checkout" ${cart.items.length ? '' : 'disabled'}>Thanh toán <kbd>F9</kbd></button></div>
+    </div>`;
+  $('#cDisc').addEventListener('input', e => { cart.disc = Math.max(0, +e.target.value || 0); updateCartTotals(); });
+  updateCartBar();
+}
+function updateCartTotals() { const c = cartCalc(); $('#cSub').textContent = fmt(c.sub); $('#cTotal').textContent = fmt(c.total); updateCartBar(); }
+function updateCartBar() {
+  const b = $('#cartBar'); if (!b) return; const c = cartCalc();
+  b.innerHTML = `${ICON.bag}<span>${c.qty ? c.qty + ' sản phẩm · Xem đơn' : 'Chưa có sản phẩm'}</span><span class="ct">${fmt(c.total)}</span>`;
+}
+function pickCustomer() {
+  const d = openModal(`<div class="dlg-h"><h3>Chọn khách hàng</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="search" style="margin-bottom:12px">${ICON.search}<input id="pcQ" type="search" inputmode="search" placeholder="Tìm số điện thoại hoặc tên…" autocomplete="off"></div>
+    <div class="list" id="pcL"></div></div>
+    <div class="dlg-f"><button class="btn ghost grow" data-act="close">Đóng</button><button class="btn pri grow" id="pcNew">${ICON.plus} Khách mới</button></div>`, 'md');
+  const draw = () => {
+    const q = norm($('#pcQ', d).value.trim());
+    const list = S.customers.filter(c => !q || norm(c.name).includes(q) || c.phone.includes(q)).slice(0, 50);
+    $('#pcL', d).innerHTML = list.map(c => `<button class="li li-u" data-pc="${c.id}"><span class="av" style="width:36px;height:36px">${esc(initials(c.name))}</span><span>${esc(c.name)}<small>${esc(c.phone)}</small></span><span class="tag gold">${num(c.points)} điểm</span><span></span></button>`).join('')
+      || '<div class="empty" style="padding:24px">Không tìm thấy. Bấm "Khách mới" để thêm.</div>';
+  };
+  $('#pcQ', d).addEventListener('input', draw);
+  d.addEventListener('click', e => { const b = e.target.closest('[data-pc]'); if (b) { cart.customerId = b.dataset.pc; closeModal(); renderCart(); } });
+  $('#pcNew', d).onclick = () => editCustomer(null, c => { cart.customerId = c.id; closeModal(); renderCart(); }, $('#pcQ', d).value.trim());
+  draw(); setTimeout(() => $('#pcQ', d).focus(), 60);
+}
+
+/* ---- Thanh toán ---- */
+function checkout() {
+  if (!cart.items.length) return;
+  for (const l of cart.items) {
+    const p = S.products.find(x => x.id === l.pid);
+    if (!p || stockOf(p, l.size, l.color) < l.qty) return toast(`"${l.name}" không đủ tồn kho`, 'err');
+  }
+  const c = cartCalc(); const pay = { method: 'cash', given: 0 };
+  const d = openModal(`<div class="dlg-h"><h3>Thanh toán</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="kv"><span class="muted">${c.qty} sản phẩm</span><span>${fmt(c.sub)}</span></div>
+      ${c.d ? `<div class="kv"><span class="muted">Giảm giá</span><span>−${fmt(c.d)}</span></div>` : ''}
+      <div class="kv big"><span>Khách cần trả</span><span>${fmt(c.total)}</span></div>
+      <div class="sec-l" style="margin:16px 0 8px">Hình thức thanh toán</div>
+      <div class="seg" style="display:flex">${Object.entries(METHODS).map(([k, v]) => `<button class="grow ${k === 'cash' ? 'on' : ''}" data-pm="${k}">${v}</button>`).join('')}</div>
+      <div id="pmBox" style="margin-top:14px"></div>
+    </div>
+    <div class="dlg-f"><button class="btn ghost" data-act="close">Hủy</button><span class="grow"></span>
+      <button class="btn pri" id="payOk">${ICON.check} Hoàn tất</button><button class="btn gold" id="payPrint">${ICON.print} Hoàn tất & In</button></div>`, 'md');
+  const draw = () => {
+    const box = $('#pmBox', d);
+    if (pay.method === 'cash') {
+      const sug = new Set([c.total]); [10000, 50000, 100000, 200000, 500000].forEach(s => { const v = Math.ceil(c.total / s) * s; if (v > c.total) sug.add(v); });
+      box.innerHTML = `<div class="f" style="margin:0"><label>Tiền khách đưa</label><input id="pmGiven" type="number" inputmode="numeric" min="0" placeholder="${num(c.total)}" value="${pay.given || ''}"></div>
+        <div class="cashbtns">${[...sug].sort((a, b) => a - b).slice(0, 6).map((v, i) => `<button data-given="${v}">${i === 0 ? 'Đủ ' : ''}${num(v / 1000)}k</button>`).join('')}</div>
+        <div class="kv" style="font-size:18px"><span>Tiền thối lại</span><b id="pmChange"></b></div>`;
+      const upd = () => { const g = pay.given; const e = $('#pmChange', d); e.textContent = !g ? '0đ' : g >= c.total ? fmt(g - c.total) : 'Thiếu ' + fmt(c.total - g); e.className = g && g < c.total ? 'err-t' : 'ok-t'; };
+      $('#pmGiven', d).addEventListener('input', e => { pay.given = Math.max(0, +e.target.value || 0); upd(); });
+      upd();
+    } else if (pay.method === 'bank') {
+      box.innerHTML = hasBank() ? qrBlock(c.total, 'TT ' + S.settings.shopName.slice(0, 12))
+        : `<div class="warn">Chưa cài tài khoản ngân hàng nên chưa tạo được mã QR.${isAdmin() ? ' Vào <b>Cài đặt → Chuyển khoản QR</b> để nhập.' : ' Nhờ quản lý cài đặt.'}<br>Vẫn có thể hoàn tất nếu khách đã chuyển khoản.</div>`;
+    } else box.innerHTML = '<div class="warn">Quẹt thẻ trên máy POS ngân hàng, sau khi giao dịch thành công bấm <b>Hoàn tất</b>.</div>';
+  };
+  d.addEventListener('click', e => {
+    const m = e.target.closest('[data-pm]'); if (m) { pay.method = m.dataset.pm; $$('[data-pm]', d).forEach(b => b.classList.toggle('on', b === m)); draw(); return; }
+    const g = e.target.closest('[data-given]'); if (g) { pay.given = +g.dataset.given; $('#pmGiven', d).value = pay.given; $('#pmGiven', d).dispatchEvent(new Event('input')); }
+  });
+  const done = print => {
+    if (pay.method === 'cash' && pay.given && pay.given < c.total) return toast('Khách đưa chưa đủ tiền', 'err');
+    const o = completeSale(c, pay); closeModal(); saleDone(o); if (print) printReceipt(o);
+  };
+  $('#payOk', d).onclick = () => done(false);
+  $('#payPrint', d).onclick = () => done(true);
+  draw();
+}
+function completeSale(c, pay) {
+  const cu = S.customers.find(x => x.id === cart.customerId);
+  const o = {
+    id: uid(), no: ++S.seq.order, code: 'HD' + pad(S.seq.order, 6), time: Date.now(),
+    staffId: ME.id, staffName: ME.name, customerId: cu ? cu.id : null, customerName: cu ? cu.name : '', customerPhone: cu ? cu.phone : '',
+    items: cart.items.map(l => ({ ...l, returned: 0 })), sub: c.sub, disc: c.d, total: c.total,
+    method: pay.method, given: pay.method === 'cash' ? (pay.given || c.total) : c.total, change: pay.method === 'cash' ? Math.max(0, (pay.given || c.total) - c.total) : 0,
+    points: 0, returns: []
+  };
+  for (const l of o.items) {
+    const p = S.products.find(x => x.id === l.pid);
+    if (p) { p.stock[l.key] = Math.max(0, (p.stock[l.key] || 0) - l.qty); logStock(p.id, l.key, -l.qty, 'Bán hàng', o.code); }
+  }
+  if (cu) { o.points = Math.floor(o.total / (S.settings.pointPer || 10000)); cu.points = (cu.points || 0) + o.points; cu.spent = (cu.spent || 0) + o.total; cu.orders = (cu.orders || 0) + 1; cu.lastBuy = o.time; }
+  S.orders.push(o); cart = newCart();
+  save('orders', 'products', 'customers', 'stocklog', 'seq');
+  return o;
+}
+function saleDone(o) {
+  if (cur === 'pos') { renderCart(); renderPosGrid(); $('#cartPanel').classList.remove('open'); }
+  openModal(`<div class="dlg-b"><div class="success"><div class="ck">${ICON.check}</div><h3>Thanh toán thành công</h3>
+      <p class="muted" style="margin:0 0 14px">${o.code} · ${METHODS[o.method]}${o.customerName ? ' · ' + esc(o.customerName) : ''}</p>
+      <div class="kv big" style="border:0;margin:0"><span>Tổng tiền</span><span>${fmt(o.total)}</span></div>
+      ${o.method === 'cash' && o.change ? `<div class="kv" style="font-size:18px"><span>Tiền thối lại</span><b class="ok-t">${fmt(o.change)}</b></div>` : ''}
+      ${o.points ? `<div class="kv"><span>Điểm tích lũy</span><b>+${o.points}</b></div>` : ''}</div></div>
+    <div class="dlg-f"><button class="btn ghost grow" data-act="reprint" data-id="${o.id}">${ICON.print} In hóa đơn</button><button class="btn gold grow" data-act="close">Đơn mới</button></div>`, 'sm');
+}
+
+/* ---- VietQR ---- */
+const tlv = (id, v) => id + String(v.length).padStart(2, '0') + v;
+function crc16(str) {
+  let c = 0xFFFF;
+  for (const b of new TextEncoder().encode(str)) { c ^= b << 8; for (let i = 0; i < 8; i++) c = c & 0x8000 ? ((c << 1) ^ 0x1021) & 0xFFFF : (c << 1) & 0xFFFF; }
+  return c.toString(16).toUpperCase().padStart(4, '0');
+}
+function vietQRPayload(bin, acc, amount, info) {
+  const mai = tlv('00', 'A000000727') + tlv('01', tlv('00', bin) + tlv('01', acc)) + tlv('02', 'QRIBFTTA');
+  const memo = norm(info || '').toUpperCase().replace(/[^A-Z0-9 ]/g, '').trim().slice(0, 25);
+  const s = tlv('00', '01') + tlv('01', amount ? '12' : '11') + tlv('38', mai) + tlv('53', '704')
+    + (amount ? tlv('54', String(Math.round(amount))) : '') + tlv('58', 'VN') + (memo ? tlv('62', tlv('08', memo)) : '') + '6304';
+  return s + crc16(s);
+}
+const hasBank = () => !!(S.settings.bankId && S.settings.bankAcc);
+function qrSvg(amount, info) { const q = qrcode(0, 'M'); q.addData(vietQRPayload(S.settings.bankId, S.settings.bankAcc, amount, info)); q.make(); return q.createSvgTag({ cellSize: 4, margin: 4, scalable: true }); }
+function qrBlock(amount, info) {
+  const s = S.settings;
+  return `<div class="qrbox">${qrSvg(amount, info)}<div class="qa">${fmt(amount)}</div>
+    <div class="qi"><b>${esc(bankLabel(s.bankId))}</b> · ${esc(s.bankAcc)}<br>${esc(s.bankName)}</div></div>`;
+}
+
+/* ---- In hóa đơn ---- */
+function printReceipt(o) {
+  const s = S.settings;
+  const retAmt = (o.returns || []).reduce((a, r) => a + r.amount, 0);
+  $('#print').innerHTML = `
+    <div class="c"><h2>${esc(s.shopName)}</h2>${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}</div><hr>
+    <div class="c t">HÓA ĐƠN BÁN HÀNG</div>
+    <div>Số: ${o.code}<br>Ngày: ${ddmmyy(o.time)} ${hhmm(o.time)}<br>Thu ngân: ${esc(o.staffName)}${o.customerName ? '<br>Khách: ' + esc(o.customerName) + ' - ' + esc(o.customerPhone) : ''}</div><hr>
+    <table>${o.items.map(l => `<tr><td colspan="2">${esc(l.name)}<br><small>${esc(vlabel(l.size, l.color))}</small></td></tr>
+      <tr><td>${l.qty} x ${num(l.price)}</td><td class="r">${num(l.qty * l.price)}</td></tr>`).join('')}</table><hr>
+    <table><tr><td>Tạm tính</td><td class="r">${fmt(o.sub)}</td></tr>
+      ${o.disc ? `<tr><td>Giảm giá</td><td class="r">-${fmt(o.disc)}</td></tr>` : ''}
+      <tr class="t"><td>TỔNG CỘNG</td><td class="r">${fmt(o.total)}</td></tr>
+      <tr><td>Thanh toán</td><td class="r">${METHODS[o.method]}</td></tr>
+      ${o.method === 'cash' ? `<tr><td>Khách đưa</td><td class="r">${fmt(o.given)}</td></tr><tr><td>Tiền thối</td><td class="r">${fmt(o.change)}</td></tr>` : ''}
+      ${retAmt ? `<tr><td>Đã trả hàng</td><td class="r">-${fmt(retAmt)}</td></tr>` : ''}
+      ${o.points ? `<tr><td>Điểm tích lũy</td><td class="r">+${o.points}</td></tr>` : ''}</table>
+    ${o.method === 'bank' && hasBank() ? `<div class="pqr">${qrSvg(o.total, o.code)}Thanh toán chuyển khoản<br>${esc(bankLabel(s.bankId))} · ${esc(s.bankAcc)}</div>` : ''}
+    <hr><div class="c">${esc(s.footer)}</div>`;
+  setTimeout(() => window.print(), 150);
+}
+
+/* ================= ĐƠN HÀNG ================= */
+const ordF = { q: '', r: 'today' };
+function rangeOf(r, from, to) {
+  const d0 = startOfDay(Date.now()), n = new Date();
+  switch (r) {
+    case 'today': return [d0, d0 + DAY];
+    case 'yest': return [d0 - DAY, d0];
+    case '7d': return [d0 - 6 * DAY, d0 + DAY];
+    case '30d': return [d0 - 29 * DAY, d0 + DAY];
+    case 'month': return [+new Date(n.getFullYear(), n.getMonth(), 1), d0 + DAY];
+    case 'lmonth': return [+new Date(n.getFullYear(), n.getMonth() - 1, 1), +new Date(n.getFullYear(), n.getMonth(), 1)];
+    case 'custom': return [startOfDay(new Date(from + 'T00:00:00')), startOfDay(new Date(to + 'T00:00:00')) + DAY];
+    default: return [0, Infinity];
+  }
+}
+const RANGES = [['today', 'Hôm nay'], ['yest', 'Hôm qua'], ['7d', '7 ngày'], ['month', 'Tháng này'], ['lmonth', 'Tháng trước'], ['all', 'Tất cả']];
+const retTotal = o => (o.returns || []).reduce((a, r) => a + r.amount, 0);
+function vOrders() {
+  $('#view').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="oQ" type="search" placeholder="Tìm mã hóa đơn, tên hoặc SĐT khách…" value="${esc(ordF.q)}"></div></div>
+    <div class="chips" style="margin-bottom:12px">${RANGES.map(([v, l]) => `<button class="chip ${ordF.r === v ? 'on' : ''}" data-act="ordR" data-v="${v}">${l}</button>`).join('')}</div>
+    <div class="sum-line" id="oSum"></div><div class="list" id="oList"></div>`;
+  $('#oQ').addEventListener('input', e => { ordF.q = e.target.value; drawOrders(); });
+  drawOrders();
+}
+function drawOrders() {
+  const [a, b] = rangeOf(ordF.r); const q = norm(ordF.q.trim());
+  const list = S.orders.filter(o => o.time >= a && o.time < b && (!q || norm(o.code).includes(q) || norm(o.customerName).includes(q) || (o.customerPhone || '').includes(q))).slice().reverse();
+  const tot = list.reduce((s, o) => s + o.total - retTotal(o), 0);
+  $('#oSum').innerHTML = `<span><b>${list.length}</b> hóa đơn</span><span>Doanh thu thuần: <b>${fmt(tot)}</b></span>`;
+  $('#oList').innerHTML = list.slice(0, 300).map(o => {
+    const rt = retTotal(o);
+    return `<button class="li li-o" data-act="order" data-id="${o.id}">
+      <span><b>${o.code}</b><small>${ddmm(o.time)} · ${hhmm(o.time)}</small></span>
+      <span class="hm">${esc(o.customerName || 'Khách lẻ')}<small>Thu ngân: ${esc(o.staffName)}</small></span>
+      <span class="hm"><span class="tag ${o.method === 'bank' ? 'blue' : o.method === 'card' ? 'gold' : 'ok'}">${METHODS[o.method]}</span></span>
+      <span class="r">${fmt(o.total)}${rt ? `<small class="err-t">Trả ${fmt(rt)}</small>` : `<small>${o.items.reduce((s, l) => s + l.qty, 0)} SP</small>`}</span>
+    </button>`;
+  }).join('') || `<div class="empty">${ICON.orders}<p>Chưa có hóa đơn trong khoảng thời gian này.</p></div>`;
+}
+function orderDetail(id) {
+  const o = S.orders.find(x => x.id === id); if (!o) return;
+  const rt = retTotal(o), canRet = isAdmin() && o.items.some(l => l.qty > (l.returned || 0));
+  openModal(`<div class="dlg-h"><h3>${o.code}</h3><span class="tag">${ddmmyy(o.time)} ${hhmm(o.time)}</span><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="g3" style="margin-bottom:14px;font-size:14px">
+        <div><div class="muted" style="font-size:12px">Khách hàng</div><b>${esc(o.customerName || 'Khách lẻ')}</b>${o.customerPhone ? '<br>' + esc(o.customerPhone) : ''}</div>
+        <div><div class="muted" style="font-size:12px">Thu ngân</div><b>${esc(o.staffName)}</b></div>
+        <div><div class="muted" style="font-size:12px">Thanh toán</div><b>${METHODS[o.method]}</b></div>
+      </div>
+      <div class="list">${o.items.map(l => `<div class="li" style="grid-template-columns:1fr auto auto"><span><b>${esc(l.name)}</b><small>${esc(l.sku)} · ${esc(vlabel(l.size, l.color))}${l.returned ? ` · <span class="err-t">đã trả ${l.returned}</span>` : ''}</small></span><span class="muted">${l.qty} × ${num(l.price)}</span><span class="r">${fmt(l.qty * l.price)}</span></div>`).join('')}</div>
+      <div style="margin-top:12px">
+        <div class="kv"><span class="muted">Tạm tính</span><span>${fmt(o.sub)}</span></div>
+        ${o.disc ? `<div class="kv"><span class="muted">Giảm giá</span><span>−${fmt(o.disc)}</span></div>` : ''}
+        <div class="kv big"><span>Tổng cộng</span><span>${fmt(o.total)}</span></div>
+        ${o.method === 'cash' ? `<div class="kv"><span class="muted">Khách đưa / Tiền thối</span><span>${fmt(o.given)} / ${fmt(o.change)}</span></div>` : ''}
+        ${rt ? `<div class="kv err-t"><span>Đã hoàn trả</span><b>−${fmt(rt)}</b></div><div class="kv"><span>Doanh thu thuần</span><b>${fmt(o.total - rt)}</b></div>` : ''}
+      </div>
+      ${(o.returns || []).map(r => `<div class="warn" style="margin-top:10px">↩ ${ddmm(r.time)} ${hhmm(r.time)} · ${esc(r.by)} trả ${r.items.reduce((s, x) => s + x.qty, 0)} SP, hoàn ${fmt(r.amount)}${r.reason ? ' · Lý do: ' + esc(r.reason) : ''}</div>`).join('')}
+    </div>
+    <div class="dlg-f">${canRet ? `<button class="btn danger ghost" data-act="returnOrder" data-id="${o.id}">↩ Trả hàng</button>` : ''}<span class="grow"></span>
+      <button class="btn pri" data-act="reprint" data-id="${o.id}">${ICON.print} In lại hóa đơn</button></div>`, 'lg');
+}
+function returnOrder(id) {
+  const o = S.orders.find(x => x.id === id); if (!o) return;
+  const q = o.items.map(() => 0); const ratio = o.sub ? o.total / o.sub : 1;
+  const d = openModal(`<div class="dlg-h"><h3>Trả hàng · ${o.code}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><p class="muted" style="margin-top:0">Chọn số lượng khách trả lại. Hàng sẽ được cộng lại vào tồn kho.</p><div class="list" id="rtL"></div>
+      <div class="f" style="margin-top:12px"><label>Lý do</label><input id="rtWhy" placeholder="VD: Không vừa size, lỗi đường may…"></div>
+      <div class="kv big"><span>Hoàn tiền cho khách</span><span id="rtAmt">0đ</span></div>${o.disc ? '<small class="muted">Đã tính theo tỷ lệ giảm giá của hóa đơn.</small>' : ''}</div>
+    <div class="dlg-f"><button class="btn ghost grow" data-act="close">Hủy</button><button class="btn danger grow" id="rtOk">Xác nhận trả hàng</button></div>`, 'md');
+  const amt = () => Math.round(o.items.reduce((s, l, i) => s + l.price * q[i], 0) * ratio);
+  const draw = () => {
+    $('#rtL', d).innerHTML = o.items.map((l, i) => { const max = l.qty - (l.returned || 0); return `<div class="li" style="grid-template-columns:1fr auto"><span><b>${esc(l.name)}</b><small>${esc(vlabel(l.size, l.color))} · có thể trả ${max}</small></span>
+      <div class="qty"><button data-rq="${i}" data-d="-1">−</button><b>${q[i]}</b><button data-rq="${i}" data-d="1" ${q[i] >= max ? 'disabled' : ''}>+</button></div></div>`; }).join('');
+    $('#rtAmt', d).textContent = fmt(amt());
+  };
+  d.addEventListener('click', e => { const b = e.target.closest('[data-rq]'); if (!b || b.disabled) return; const i = +b.dataset.rq, l = o.items[i]; q[i] = Math.min(l.qty - (l.returned || 0), Math.max(0, q[i] + +b.dataset.d)); draw(); });
+  $('#rtOk', d).onclick = async () => {
+    if (!q.some(Boolean)) return toast('Chọn sản phẩm cần trả', 'err');
+    const amount = amt();
+    if (!(await ask(`Xác nhận trả hàng và hoàn <b>${fmt(amount)}</b> cho khách?`, 'Trả hàng', true))) return;
+    const r = { time: Date.now(), by: ME.name, reason: $('#rtWhy', d).value.trim(), amount, items: [] };
+    q.forEach((n, i) => {
+      if (!n) return; const l = o.items[i]; l.returned = (l.returned || 0) + n; r.items.push({ i, qty: n });
+      const p = S.products.find(x => x.id === l.pid); if (p) { p.stock[l.key] = (p.stock[l.key] || 0) + n; logStock(p.id, l.key, n, 'Trả hàng', o.code); }
+    });
+    o.returns = o.returns || []; o.returns.push(r);
+    const cu = S.customers.find(x => x.id === o.customerId);
+    if (cu) { cu.spent = Math.max(0, (cu.spent || 0) - amount); cu.points = Math.max(0, (cu.points || 0) - Math.floor(amount / (S.settings.pointPer || 10000))); }
+    save('orders', 'products', 'customers', 'stocklog');
+    closeModal(); closeModal(); toast('Đã trả hàng, hoàn ' + fmt(amount)); refresh(); orderDetail(o.id);
+  };
+  draw();
+}
+
+/* ================= SẢN PHẨM ================= */
+const prodF = { q: '', age: 'all', cat: 'all', low: false };
+function vProducts() {
+  $('#view').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="prQ" type="search" placeholder="Tìm tên hoặc mã sản phẩm…" value="${esc(prodF.q)}"></div>
+      <select id="prCat" style="width:auto"><option value="all">Mọi danh mục</option>${S.settings.cats.map(c => `<option ${prodF.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+      ${isAdmin() ? `<button class="btn gold" data-act="editProduct">${ICON.plus} Thêm sản phẩm</button>` : ''}</div>
+    <div class="chips" style="margin-bottom:12px">${[['all', 'Tất cả nhóm tuổi', ''], ...AGES.map(a => [a.id, a.name, a.c])].map(([v, l, c]) => `<button class="chip ${prodF.age === v ? 'on' : ''}" data-act="prAge" data-v="${v}">${c ? `<span class="dot" style="--c:${c}"></span>` : ''}${l}</button>`).join('')}
+      <button class="chip ${prodF.low ? 'on' : ''}" data-act="prLow">⚠ Sắp hết hàng</button></div>
+    <div class="sum-line" id="prSum"></div><div class="list" id="prList"></div>`;
+  $('#prQ').addEventListener('input', e => { prodF.q = e.target.value; drawProducts(); });
+  $('#prCat').addEventListener('change', e => { prodF.cat = e.target.value; drawProducts(); });
+  drawProducts();
+}
+function drawProducts() {
+  const q = norm(prodF.q.trim()), low = S.settings.lowStock;
+  const list = S.products.filter(p => (prodF.age === 'all' || p.age === prodF.age) && (prodF.cat === 'all' || p.cat === prodF.cat)
+    && (!q || norm(p.name).includes(q) || norm(p.sku).includes(q)) && (!prodF.low || totalStock(p) <= low));
+  const qty = list.reduce((a, p) => a + totalStock(p), 0), val = list.reduce((a, p) => a + totalStock(p) * (p.cost || 0), 0);
+  $('#prSum').innerHTML = `<span><b>${list.length}</b> mã sản phẩm</span><span>Tồn kho: <b>${num(qty)}</b> SP</span>${isAdmin() ? `<span>Giá trị vốn tồn: <b>${fmt(val)}</b></span>` : ''}`;
+  $('#prList').innerHTML = list.map(p => {
+    const st = totalStock(p), a = ageOf(p.age);
+    return `<button class="li li-p" data-act="${isAdmin() ? 'editProduct' : 'viewProduct'}" data-id="${p.id}">
+      <span class="thumb">${pImg(p)}</span>
+      <span><b>${esc(p.name)}</b><small>${esc(p.sku)} · ${esc(p.cat)} · ${p.sizes.length} size · ${p.colors.length} màu</small></span>
+      <span class="hm"><span class="tag" style="background:${a.c}22;color:${a.c}">${a.name}</span></span>
+      <span class="hm r">${fmt(p.price)}</span>
+      <span class="r ${st <= 0 ? 'z' : st <= low ? 'lo' : ''}">${num(st)}<small>tồn kho</small></span>
+    </button>`;
+  }).join('') || `<div class="empty">${ICON.products}<p>Chưa có sản phẩm.</p></div>`;
+}
+function stockGrid(p, edit) {
+  const ss = sizesOf(p), cs = colorsOf(p), low = S.settings.lowStock;
+  return `<div class="sgrid-wrap"><table class="sgrid"><thead><tr><th>${p.sizes.length ? 'Size \\ Màu' : ''}</th>${cs.map(c => `<th>${c ? `<span class="sw" style="background:${colorHex(c)}"></span> ${esc(c)}` : 'Số lượng'}</th>`).join('')}</tr></thead>
+    <tbody>${ss.map(s => `<tr><th>${s ? esc(s) : '—'}</th>${cs.map(c => { const k = vkey(s, c), v = p.stock[k] || 0;
+      return `<td>${edit ? `<input type="number" inputmode="numeric" min="0" data-sk="${esc(k)}" value="${v}">` : `<span class="${v <= 0 ? 'z' : v <= low ? 'lo' : ''}">${v}</span>`}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function viewProduct(id) {
+  const p = S.products.find(x => x.id === id); if (!p) return;
+  openModal(`<div class="dlg-h"><h3>${esc(p.name)}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="vp-top"><div class="thumb">${pImg(p)}</div><div><div class="muted">${esc(p.sku)} · ${ageOf(p.age).name} · ${esc(p.cat)} · ${esc(p.gender)}</div><div style="font-size:20px;font-weight:700;color:var(--gold)">${fmt(p.price)}</div>${p.note ? `<div class="muted" style="font-size:13px">${esc(p.note)}</div>` : ''}</div></div>
+    <div class="sec-l" style="margin-bottom:8px">Tồn kho theo size / màu</div>${stockGrid(p, false)}</div>`, 'md');
+}
+function editProduct(id) {
+  const orig = id ? S.products.find(p => p.id === id) : null;
+  const pd = orig ? JSON.parse(JSON.stringify(orig)) : { name: '', sku: '', cat: prodF.cat !== 'all' ? prodF.cat : S.settings.cats[0], age: prodF.age !== 'all' ? prodF.age : 'nl', gender: 'Unisex', price: '', cost: '', sizes: [], colors: [], stock: {}, note: '' };
+  let img = orig ? IMG[orig.id] || null : null, imgChanged = false;
+  const d = openModal(`<div class="dlg-h"><h3>${orig ? 'Sửa sản phẩm' : 'Thêm sản phẩm mới'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="pe-top">
+        <label class="pe-img" id="peImg"></label>
+        <div>
+          <div class="f"><label>Tên sản phẩm *</label><input id="peName" value="${esc(pd.name)}" placeholder="VD: Áo thun cotton bé trai"></div>
+          <div class="g2"><div class="f"><label>Mã SP / mã vạch</label><input id="peSku" value="${esc(pd.sku)}" placeholder="Tự tạo nếu để trống" autocapitalize="characters"></div>
+            <div class="f"><label>Giới tính</label><select id="peGender">${GENDERS.map(g => `<option ${g === pd.gender ? 'selected' : ''}>${g}</option>`).join('')}</select></div></div>
+          <div class="g2"><div class="f"><label>Nhóm tuổi</label><select id="peAge">${AGES.map(a => `<option value="${a.id}" ${a.id === pd.age ? 'selected' : ''}>${a.name} (${a.sub})</option>`).join('')}</select></div>
+            <div class="f"><label>Danh mục</label><select id="peCat">${S.settings.cats.map(c => `<option ${c === pd.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div></div>
+          <div class="g2"><div class="f"><label>Giá bán (đ) *</label><input id="pePrice" type="number" inputmode="numeric" min="0" value="${pd.price}"></div>
+            <div class="f"><label>Giá vốn (đ)</label><input id="peCost" type="number" inputmode="numeric" min="0" value="${pd.cost}"></div></div>
+        </div>
+      </div>
+      <div class="pe-sec"><div class="pe-sh"><b>Size</b><select id="peSP"><option value="">＋ Thêm bộ size mẫu…</option>${Object.keys(SIZE_PRESETS).map(k => `<option>${k}</option>`).join('')}</select></div><div class="chips wrap" id="peSizes"></div></div>
+      <div class="pe-sec"><div class="pe-sh"><b>Màu sắc</b><small class="muted">Chạm để chọn</small></div><div class="chips wrap" id="peColors"></div></div>
+      <div class="pe-sec"><div class="pe-sh"><b>Tồn kho</b><small class="muted grow">Số lượng hiện có theo từng size / màu</small>
+        <input id="peFill" type="number" inputmode="numeric" min="0" placeholder="SL" style="width:72px;padding:6px 8px"><button class="btn sm" data-pe="fill">Điền tất cả</button></div><div id="peStock"></div></div>
+      <div class="f" style="margin-top:12px"><label>Ghi chú</label><input id="peNote" value="${esc(pd.note || '')}" placeholder="Chất liệu, xuất xứ, mô tả…"></div>
+    </div>
+    <div class="dlg-f">${orig ? '<button class="btn danger ghost" data-pe="del">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn gold" data-pe="save">Lưu sản phẩm</button></div>`, 'lg');
+  const sync = () => $$('#peStock input', d).forEach(i => pd.stock[i.dataset.sk] = Math.max(0, Math.floor(+i.value || 0)));
+  const drawImg = () => {
+    $('#peImg', d).innerHTML = (img ? `<img src="${img}" alt="">` : `<div class="pe-ph">${ICON.camera}<span>Thêm ảnh sản phẩm</span></div>`)
+      + '<input type="file" accept="image/*" hidden id="peFile">' + (img ? '<button type="button" class="pe-rm" data-pe="rmimg">✕</button>' : '');
+    $('#peFile', d).onchange = async e => { const f = e.target.files[0]; if (!f) return; try { img = await readImage(f); imgChanged = true; drawImg(); } catch (err) { toast(err.message, 'err'); } };
+  };
+  const drawVar = () => {
+    $('#peSizes', d).innerHTML = pd.sizes.map((s, i) => `<span class="chip on">${esc(s)}<button type="button" data-pe="rs" data-i="${i}">✕</button></span>`).join('')
+      + '<span class="chip-add"><input id="peSizeIn" placeholder="Size khác"><button type="button" data-pe="as">＋</button></span>';
+    const customs = pd.colors.filter(c => !COLORS.some(x => x[0] === c));
+    $('#peColors', d).innerHTML = COLORS.map(([n, h]) => `<button type="button" class="chip ${pd.colors.includes(n) ? 'on' : ''}" data-pe="tc" data-c="${n}"><span class="sw" style="background:${h}"></span>${n}</button>`).join('')
+      + customs.map(c => `<span class="chip on"><span class="sw" style="background:${colorHex(c)}"></span>${esc(c)}<button type="button" data-pe="rc" data-c="${esc(c)}">✕</button></span>`).join('')
+      + '<span class="chip-add"><input id="peColorIn" placeholder="Màu khác"><button type="button" data-pe="ac">＋</button></span>';
+    $('#peStock', d).innerHTML = stockGrid(pd, true);
+    $('#peSizeIn', d).onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); addSize(); } };
+    $('#peColorIn', d).onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } };
+  };
+  const addSize = () => { const v = $('#peSizeIn', d).value.trim().toUpperCase(); if (!v) return; sync(); if (!pd.sizes.includes(v)) pd.sizes.push(v); drawVar(); $('#peSizeIn', d).focus(); };
+  const addColor = () => { let v = $('#peColorIn', d).value.trim(); if (!v) return; v = v[0].toUpperCase() + v.slice(1); sync(); if (!pd.colors.includes(v)) pd.colors.push(v); drawVar(); $('#peColorIn', d).focus(); };
+  $('#peSP', d).onchange = e => { const k = e.target.value; if (!k) return; sync(); SIZE_PRESETS[k].forEach(s => { if (!pd.sizes.includes(s)) pd.sizes.push(s); }); e.target.value = ''; drawVar(); };
+  d.addEventListener('click', async e => {
+    const b = e.target.closest('[data-pe]'); if (!b) return;
+    const a = b.dataset.pe;
+    if (a === 'rmimg') { e.preventDefault(); img = null; imgChanged = true; drawImg(); return; }
+    if (a === 'rs') { sync(); pd.sizes.splice(+b.dataset.i, 1); drawVar(); }
+    if (a === 'as') addSize();
+    if (a === 'tc') { sync(); const c = b.dataset.c, i = pd.colors.indexOf(c); i >= 0 ? pd.colors.splice(i, 1) : pd.colors.push(c); drawVar(); }
+    if (a === 'rc') { sync(); pd.colors = pd.colors.filter(c => c !== b.dataset.c); drawVar(); }
+    if (a === 'ac') addColor();
+    if (a === 'fill') { const v = Math.max(0, Math.floor(+$('#peFill', d).value || 0)); $$('#peStock input', d).forEach(i => i.value = v); }
+    if (a === 'del') {
+      if (!(await ask(`Xóa sản phẩm <b>${esc(orig.name)}</b>? Hóa đơn cũ vẫn được giữ nguyên.`, 'Xóa', true))) return;
+      S.products = S.products.filter(p => p.id !== orig.id); delete IMG[orig.id]; IDB.del('img', orig.id);
+      cart.items = cart.items.filter(l => l.pid !== orig.id);
+      save('products'); closeModal(); toast('Đã xóa sản phẩm'); refresh();
+    }
+    if (a === 'save') {
+      sync();
+      const name = $('#peName', d).value.trim(), priceV = $('#pePrice', d).value, price = Math.round(+priceV);
+      if (!name) return toast('Nhập tên sản phẩm', 'err');
+      if (priceV === '' || !(price >= 0)) return toast('Nhập giá bán hợp lệ', 'err');
+      const age = $('#peAge', d).value;
+      let sku = $('#peSku', d).value.trim().toUpperCase().replace(/\s+/g, '');
+      if (sku && S.products.some(p => p.sku === sku && (!orig || p.id !== orig.id))) return toast('Mã sản phẩm đã tồn tại', 'err');
+      if (!sku) sku = genSku(age);
+      const stock = {}; for (const s of sizesOf(pd)) for (const c of colorsOf(pd)) { const k = vkey(s, c); stock[k] = pd.stock[k] || 0; }
+      const data = { name, sku, price, cost: Math.max(0, Math.round(+$('#peCost', d).value || 0)), age, cat: $('#peCat', d).value, gender: $('#peGender', d).value,
+        sizes: pd.sizes.slice(), colors: pd.colors.slice(), stock, note: $('#peNote', d).value.trim() };
+      let p = orig;
+      if (orig) {
+        for (const k of new Set([...Object.keys(orig.stock), ...Object.keys(stock)])) { const dl = (stock[k] || 0) - (orig.stock[k] || 0); if (dl) logStock(orig.id, k, dl, 'Nhập / điều chỉnh kho'); }
+        Object.assign(orig, data);
+      } else {
+        p = { id: uid(), created: Date.now(), ...data }; S.products.unshift(p);
+        for (const k in stock) if (stock[k]) logStock(p.id, k, stock[k], 'Nhập kho ban đầu');
+      }
+      if (imgChanged) { if (img) { IMG[p.id] = img; await IDB.set('img', p.id, img); } else { delete IMG[p.id]; await IDB.del('img', p.id); } }
+      save('products', 'stocklog'); closeModal(); toast('Đã lưu sản phẩm'); refresh();
+    }
+  });
+  drawImg(); drawVar();
+  if (!orig) setTimeout(() => $('#peName', d).focus(), 80);
+}
+
+/* ================= KHÁCH HÀNG ================= */
+const cusF = { q: '' };
+function vCustomers() {
+  $('#view').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="cuQ" type="search" placeholder="Tìm tên hoặc số điện thoại…" value="${esc(cusF.q)}"></div>
+    <button class="btn gold" data-act="newCustomer">${ICON.plus} Thêm khách hàng</button></div><div class="sum-line" id="cuSum"></div><div class="list" id="cuList"></div>`;
+  $('#cuQ').addEventListener('input', e => { cusF.q = e.target.value; drawCustomers(); });
+  drawCustomers();
+}
+function drawCustomers() {
+  const q = norm(cusF.q.trim());
+  const list = S.customers.filter(c => !q || norm(c.name).includes(q) || c.phone.includes(q)).sort((a, b) => (b.spent || 0) - (a.spent || 0));
+  $('#cuSum').innerHTML = `<span><b>${list.length}</b> khách hàng</span>`;
+  $('#cuList').innerHTML = list.map(c => `<button class="li li-c" data-act="customer" data-id="${c.id}">
+    <span class="av">${esc(initials(c.name))}</span><span><b>${esc(c.name)}</b><small>${esc(c.phone)}${c.note ? ' · ' + esc(c.note) : ''}</small></span>
+    <span class="hm r">${num(c.orders || 0)}<small>đơn hàng</small></span><span class="r">${fmt(c.spent || 0)}<small>${num(c.points || 0)} điểm</small></span></button>`).join('')
+    || `<div class="empty">${ICON.customers}<p>Chưa có khách hàng.</p></div>`;
+}
+function editCustomer(id, onSaved, preset) {
+  const o = id ? S.customers.find(c => c.id === id) : null;
+  const isPhone = preset && /^\d+$/.test(preset);
+  const hist = o ? S.orders.filter(x => x.customerId === o.id).slice(-10).reverse() : [];
+  const d = openModal(`<div class="dlg-h"><h3>${o ? esc(o.name) : 'Thêm khách hàng'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      ${o ? `<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="kpi"><span>Đã mua</span><b>${fmt(o.spent || 0)}</b></div><div class="kpi"><span>Số đơn</span><b>${num(o.orders || 0)}</b></div><div class="kpi"><span>Điểm</span><b>${num(o.points || 0)}</b></div></div>` : ''}
+      <div class="g2"><div class="f"><label>Họ tên *</label><input id="cuName" value="${esc(o ? o.name : isPhone ? '' : preset || '')}"></div>
+        <div class="f"><label>Số điện thoại *</label><input id="cuPhone" type="tel" inputmode="tel" value="${esc(o ? o.phone : isPhone ? preset : '')}"></div></div>
+      <div class="g2"><div class="f"><label>Ngày sinh</label><input id="cuBirth" type="date" value="${esc(o ? o.birth || '' : '')}"></div>
+        <div class="f"><label>Ghi chú</label><input id="cuNote" value="${esc(o ? o.note || '' : '')}" placeholder="VD: Mẹ bé Na, size bé 6"></div></div>
+      ${hist.length ? `<div class="sec-l" style="margin:6px 0 8px">Đơn gần đây</div><div class="list">${hist.map(x => `<button class="li" style="grid-template-columns:1fr auto" data-act="order" data-id="${x.id}"><span><b>${x.code}</b><small>${ddmmyy(x.time)}</small></span><span class="r">${fmt(x.total)}</span></button>`).join('')}</div>` : ''}
+    </div>
+    <div class="dlg-f">${o && isAdmin() ? '<button class="btn danger ghost" id="cuDel">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn gold" id="cuOk">Lưu</button></div>`, 'md');
+  $('#cuOk', d).onclick = () => {
+    const name = $('#cuName', d).value.trim(), phone = $('#cuPhone', d).value.replace(/[^\d]/g, '');
+    if (!name) return toast('Nhập họ tên khách', 'err');
+    if (!/^\d{9,11}$/.test(phone)) return toast('Số điện thoại 9–11 chữ số', 'err');
+    if (S.customers.some(c => c.phone === phone && c !== o)) return toast('Số điện thoại đã có trong danh sách', 'err');
+    const data = { name, phone, birth: $('#cuBirth', d).value, note: $('#cuNote', d).value.trim() };
+    let c = o; if (o) Object.assign(o, data); else { c = { id: uid(), created: Date.now(), points: 0, spent: 0, orders: 0, ...data }; S.customers.push(c); }
+    save('customers'); closeModal(); toast('Đã lưu khách hàng');
+    if (onSaved) onSaved(c); else refresh();
+  };
+  const del = $('#cuDel', d);
+  if (del) del.onclick = async () => { if (!(await ask(`Xóa khách hàng <b>${esc(o.name)}</b>? Hóa đơn cũ vẫn giữ tên khách.`, 'Xóa', true))) return; S.customers = S.customers.filter(c => c !== o); save('customers'); closeModal(); refresh(); };
+  if (!o) setTimeout(() => $(isPhone ? '#cuName' : '#cuName', d).focus(), 80);
+}
+
+/* ================= BÁO CÁO ================= */
+const repF = { r: '7d', from: isoDate(Date.now() - 6 * DAY), to: isoDate(Date.now()) };
+function vReports() {
+  if (!isAdmin()) return go('pos');
+  const [a, b0] = rangeOf(repF.r, repF.from, repF.to);
+  const b = b0 === Infinity ? startOfDay(Date.now()) + DAY : b0;
+  const a2 = a === 0 ? (S.orders.length ? startOfDay(S.orders[0].time) : startOfDay(Date.now())) : a;
+  const R = { rev: 0, cogs: 0, orders: 0, qty: 0, ret: 0, retN: 0, age: {}, cat: {}, prod: {}, staff: {}, method: {}, ser: {} };
+  const add = (m, k, v) => m[k] = (m[k] || 0) + v;
+  const span = b - a2, mode = span <= DAY ? 'h' : span <= 62 * DAY ? 'd' : 'm';
+  const bk = t => { const d = new Date(t); return mode === 'h' ? d.getHours() : mode === 'd' ? startOfDay(t) : d.getFullYear() * 12 + d.getMonth(); };
+  for (const o of S.orders) {
+    const ratio = o.sub ? o.total / o.sub : 1;
+    if (o.time >= a2 && o.time < b) {
+      R.orders++; R.rev += o.total; add(R.staff, o.staffName, o.total); add(R.method, o.method, o.total); add(R.ser, bk(o.time), o.total);
+      for (const l of o.items) { const v = l.price * l.qty * ratio; R.cogs += l.cost * l.qty; R.qty += l.qty; add(R.age, l.age, v); add(R.cat, l.cat, v);
+        const p = R.prod[l.name] || (R.prod[l.name] = { q: 0, v: 0 }); p.q += l.qty; p.v += v; }
+    }
+    for (const r of (o.returns || [])) if (r.time >= a2 && r.time < b) {
+      R.rev -= r.amount; R.ret += r.amount; R.retN++; add(R.ser, bk(r.time), -r.amount);
+      for (const it of r.items) { const l = o.items[it.i], v = l.price * it.qty * ratio; R.cogs -= l.cost * it.qty; R.qty -= it.qty; add(R.age, l.age, -v); add(R.cat, l.cat, -v);
+        const p = R.prod[l.name]; if (p) { p.q -= it.qty; p.v -= v; } }
+    }
+  }
+  const profit = R.rev - R.cogs, margin = R.rev ? profit / R.rev * 100 : 0;
+  let bars = [];
+  if (mode === 'h') { const hs = Object.keys(R.ser).map(Number); for (let h = Math.min(8, ...hs); h <= Math.max(21, ...hs); h++) bars.push([h + 'h', R.ser[h] || 0]); }
+  else if (mode === 'd') { for (let t = startOfDay(a2); t < b; t += DAY) bars.push([ddmm(t), R.ser[startOfDay(t)] || 0]); }
+  else { const s = new Date(a2), e = new Date(b - 1); for (let m = s.getFullYear() * 12 + s.getMonth(); m <= e.getFullYear() * 12 + e.getMonth(); m++) bars.push([(m % 12 + 1) + '/' + String(Math.floor(m / 12)).slice(2), R.ser[m] || 0]); }
+  const mx = Math.max(1, ...bars.map(x => x[1]));
+  const hbars = (entries, colorFn) => { const tot = entries.reduce((s, x) => s + Math.max(0, x[1]), 0) || 1, m = Math.max(1, ...entries.map(x => x[1]));
+    return entries.map(([k, v, label]) => `<div class="hb"><div class="row"><span class="grow">${label || esc(k)}</span><b>${fmt(v)}</b><span class="muted" style="width:44px;text-align:right">${Math.round(Math.max(0, v) / tot * 100)}%</span></div><div class="tr"><i style="width:${Math.max(0, v) / m * 100}%;${colorFn ? '--c:' + colorFn(k) : ''}"></i></div></div>`).join('') || '<p class="muted">Chưa có dữ liệu.</p>'; };
+  const top = Object.entries(R.prod).filter(x => x[1].q > 0).sort((x, y) => y[1].q - x[1].q).slice(0, 10);
+  const inv = S.products.reduce((s, p) => { const q = totalStock(p); s.q += q; s.c += q * (p.cost || 0); s.v += q * p.price; if (q <= S.settings.lowStock) s.low.push([p, q]); return s; }, { q: 0, c: 0, v: 0, low: [] });
+  $('#view').innerHTML = `
+    <div class="chips" style="margin-bottom:10px">${[...RANGES, ['custom', 'Tùy chọn']].map(([v, l]) => `<button class="chip ${repF.r === v ? 'on' : ''}" data-act="repR" data-v="${v}">${l}</button>`).join('')}</div>
+    ${repF.r === 'custom' ? `<div class="row" style="margin-bottom:12px;max-width:420px"><input type="date" id="rpFrom" value="${repF.from}"><span>→</span><input type="date" id="rpTo" value="${repF.to}"></div>` : ''}
+    <div class="kpis">
+      <div class="kpi hero"><span>Doanh thu thuần</span><b>${fmt(R.rev)}</b><small>${ddmmyy(a2)} – ${ddmmyy(b - 1)}</small></div>
+      <div class="kpi"><span>Lợi nhuận gộp</span><b class="${profit < 0 ? 'err-t' : ''}">${fmt(profit)}</b><small>Biên lợi nhuận ${margin.toFixed(1)}%</small></div>
+      <div class="kpi"><span>Số hóa đơn</span><b>${num(R.orders)}</b><small>TB ${fmt(R.orders ? (R.rev + R.ret) / R.orders : 0)}/đơn</small></div>
+      <div class="kpi"><span>Sản phẩm bán ra</span><b>${num(R.qty)}</b><small>đã trừ hàng trả</small></div>
+      <div class="kpi"><span>Hàng trả lại</span><b class="${R.ret ? 'err-t' : ''}">${fmt(R.ret)}</b><small>${R.retN} lần trả</small></div>
+    </div>
+    <div class="card" style="margin-bottom:14px"><div class="row" style="margin-bottom:6px"><h3 style="margin:0" class="grow">Doanh thu theo ${mode === 'h' ? 'giờ' : mode === 'd' ? 'ngày' : 'tháng'}</h3><button class="btn sm ghost" data-act="exportCsv">⬇ Xuất Excel (CSV)</button></div>
+      <div class="bars">${bars.map(([l, v]) => `<div class="bc" title="${l}: ${fmt(v)}"><div class="b" style="height:${Math.max(0, v) / mx * 100}%"></div><span class="bl">${bars.length > 16 ? l.split('/')[0] : l}</span></div>`).join('')}</div></div>
+    <div class="rgrid">
+      <div class="card"><h3>Theo nhóm tuổi</h3>${hbars(AGES.map(x => [x.id, R.age[x.id] || 0, x.name]), k => ageOf(k).c)}</div>
+      <div class="card"><h3>Theo danh mục</h3>${hbars(Object.entries(R.cat).sort((x, y) => y[1] - x[1]).map(([k, v]) => [k, v, catIcon(k) + ' ' + esc(k)]))}</div>
+      <div class="card"><h3>Sản phẩm bán chạy</h3>${top.map(([n, x], i) => `<div class="kv"><span><b class="muted">${i + 1}.</b> ${esc(n)}</span><span><b>${x.q}</b> <small class="muted">· ${fmt(x.v)}</small></span></div>`).join('') || '<p class="muted">Chưa có dữ liệu.</p>'}</div>
+      <div class="card"><h3>Theo nhân viên</h3>${hbars(Object.entries(R.staff).sort((x, y) => y[1] - x[1]))}<h3 style="margin-top:18px">Hình thức thanh toán</h3>${hbars(Object.entries(R.method).map(([k, v]) => [k, v, METHODS[k]]))}</div>
+      <div class="card"><h3>Tồn kho hiện tại</h3>
+        <div class="kv"><span class="muted">Tổng số lượng</span><b>${num(inv.q)} SP</b></div>
+        <div class="kv"><span class="muted">Giá trị theo giá vốn</span><b>${fmt(inv.c)}</b></div>
+        <div class="kv"><span class="muted">Giá trị theo giá bán</span><b>${fmt(inv.v)}</b></div>
+        <div class="sec-l" style="margin:12px 0 6px">Sắp hết hàng (≤ ${S.settings.lowStock})</div>
+        ${inv.low.slice(0, 8).map(([p, q]) => `<div class="kv"><span>${esc(p.name)}</span><b class="${q <= 0 ? 'z' : 'lo'}">${q}</b></div>`).join('') || '<p class="muted" style="margin:0">Không có.</p>'}</div>
+    </div>`;
+  if (repF.r === 'custom') {
+    $('#rpFrom').onchange = e => { repF.from = e.target.value || repF.from; vReports(); };
+    $('#rpTo').onchange = e => { repF.to = e.target.value || repF.to; vReports(); };
+  }
+}
+async function shareOrDownload(name, text, type) {
+  const blob = new Blob([text], { type });
+  try { const file = new File([blob], name, { type }); if (navigator.canShare && navigator.canShare({ files: [file] }) && window.innerWidth < 900) { await navigator.share({ files: [file], title: name }); return; } }
+  catch (e) { if (e.name === 'AbortError') return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function exportCsv() {
+  const [a, b] = rangeOf(repF.r, repF.from, repF.to);
+  const q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Thu ngân', 'Khách hàng', 'SĐT', 'Mã SP', 'Sản phẩm', 'Nhóm tuổi', 'Danh mục', 'Size', 'Màu', 'SL', 'Đã trả', 'Đơn giá', 'Giá vốn', 'Thành tiền', 'Giảm giá HĐ', 'Tổng HĐ', 'Hoàn trả HĐ', 'Thanh toán']];
+  S.orders.filter(o => o.time >= a && o.time < b).forEach(o => o.items.forEach((l, i) => rows.push([o.code, ddmmyy(o.time), hhmm(o.time), o.staffName, o.customerName, o.customerPhone, l.sku, l.name, ageOf(l.age).name, l.cat, l.size, l.color, l.qty, l.returned || 0, l.price, l.cost, l.price * l.qty,
+    i ? '' : o.disc, i ? '' : o.total, i ? '' : retTotal(o), METHODS[o.method]])));
+  shareOrDownload(`bao-cao-ban-hang_${isoDate(a || Date.now())}.csv`, '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n'), 'text/csv');
+}
+
+/* ================= CÀI ĐẶT ================= */
+function vSettings() {
+  const s = S.settings, ad = isAdmin();
+  const f = (id, label, val, ph = '', type = 'text') => `<div class="f"><label>${label}</label><input id="${id}" type="${type}" value="${esc(val)}" placeholder="${esc(ph)}" ${type === 'number' ? 'inputmode="numeric"' : ''}></div>`;
+  $('#view').innerHTML = `<div class="sgrid2">
+    <div class="card"><h3>Tài khoản của tôi</h3>
+      <div class="lock-user"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><br><small class="muted">@${esc(ME.username)} · ${ad ? 'Quản lý' : 'Nhân viên'}</small></div></div>
+      <div class="set-actions"><button class="btn ghost" data-act="chpw">${ICON.lock} Đổi mật khẩu</button><button class="btn ghost" data-act="lock">${ICON.lock} Khóa màn hình</button><button class="btn danger ghost" data-act="logout">${ICON.logout} Đăng xuất</button></div></div>
+    ${ad ? `
+    <div class="card"><h3>Thông tin cửa hàng</h3>
+      ${f('sShop', 'Tên cửa hàng', s.shopName)}${f('sAddr', 'Địa chỉ', s.address, 'In trên hóa đơn')}${f('sPhone', 'Số điện thoại', s.phone)}
+      ${f('sFooter', 'Ghi chú cuối hóa đơn', s.footer)}
+      <div class="g2">${f('sLow', 'Cảnh báo sắp hết khi tồn ≤', s.lowStock, '2', 'number')}${f('sPoint', 'Tích 1 điểm mỗi (đ)', s.pointPer, '10000', 'number')}</div>
+      <div class="f"><label>Tự khóa màn hình khi không dùng</label><select id="sLock">${[[0, 'Không tự khóa'], [5, '5 phút'], [10, '10 phút'], [15, '15 phút'], [30, '30 phút'], [60, '60 phút']].map(([v, l]) => `<option value="${v}" ${+s.lockMin === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+      <button class="btn pri block" data-act="saveShop">Lưu thông tin</button></div>
+    <div class="card"><h3>Danh mục sản phẩm</h3><div class="chips wrap" id="catList">${s.cats.map(c => `<span class="chip">${catIcon(c)} ${esc(c)}<button data-act="delCat" data-v="${esc(c)}">✕</button></span>`).join('')}
+      <span class="chip-add"><input id="catIn" placeholder="Danh mục mới"><button data-act="addCat">＋</button></span></div></div>
+    <div class="card"><h3>Chuyển khoản bằng mã QR</h3>
+      <div class="f"><label>Ngân hàng</label><select id="sBank"><option value="">— Chọn ngân hàng —</option>${BANKS.map(b => `<option value="${b[0]}" ${b[0] === s.bankId ? 'selected' : ''}>${b[2]} (${b[1]})</option>`).join('')}</select></div>
+      ${f('sAcc', 'Số tài khoản', s.bankAcc)}${f('sAccName', 'Tên chủ tài khoản', s.bankName, 'VIET HOA KHONG DAU')}
+      <div class="row"><button class="btn pri grow" data-act="saveBank">Lưu</button><button class="btn ghost grow" data-act="testQR">Xem thử mã QR</button></div>
+      <p class="muted" style="font-size:12.5px;margin:10px 0 0">Mã QR chuẩn VietQR (NAPAS 247), tạo ngay trên máy, không cần mạng. Quét thử bằng app ngân hàng để kiểm tra đúng tên chủ tài khoản.</p></div>
+    <div class="card"><div class="row" style="margin-bottom:12px"><h3 style="margin:0" class="grow">Nhân viên & phân quyền</h3><button class="btn sm gold" data-act="editUser">${ICON.plus} Thêm</button></div>
+      <div class="list">${S.users.map(u => `<button class="li li-u" data-act="editUser" data-id="${u.id}"><span class="av">${esc(initials(u.name))}</span><span><b>${esc(u.name)}</b><small>@${esc(u.username)}</small></span>
+        <span class="tag ${u.role === 'admin' ? 'gold' : 'blue'}">${u.role === 'admin' ? 'Quản lý' : 'Nhân viên'}</span><span class="tag ${u.active ? 'ok' : 'err'}">${u.active ? 'Hoạt động' : 'Đã khóa'}</span></button>`).join('')}</div>
+      <p class="muted" style="font-size:12.5px;margin:10px 0 0"><b>Nhân viên</b>: bán hàng, xem đơn, khách hàng, xem tồn kho. <b>Quản lý</b>: toàn quyền, gồm sửa sản phẩm, trả hàng, báo cáo, cài đặt.</p></div>
+    <div class="card"><h3>Dữ liệu & sao lưu</h3>
+      ${s.demo ? `<div class="warn" style="margin-bottom:12px">Đang có <b>dữ liệu mẫu</b>. Xóa đi trước khi bán hàng thật.<br><button class="btn sm danger" style="margin-top:8px" data-act="clearDemo">Xóa dữ liệu mẫu</button></div>` : ''}
+      <p class="muted" style="font-size:13px;margin-top:0">${S.products.length} sản phẩm · ${S.customers.length} khách hàng · ${S.orders.length} hóa đơn. Dữ liệu lưu trên thiết bị này. Hãy sao lưu định kỳ.</p>
+      <div class="set-actions"><button class="btn" data-act="backup">⬇ Sao lưu toàn bộ dữ liệu</button>
+        <label class="btn">⬆ Khôi phục từ file sao lưu<input type="file" id="restoreIn" accept=".json,application/json" hidden></label>
+        <button class="btn danger ghost" data-act="wipe">Xóa toàn bộ dữ liệu</button></div></div>` : ''}
+    <div class="card"><h3>Cài đặt ứng dụng</h3><div style="font-size:14px;display:grid;gap:8px">
+      <div><b>iPhone / iPad:</b> mở bằng Safari → nút Chia sẻ ⬆ → <b>Thêm vào MH chính</b>.</div>
+      <div><b>Android:</b> Chrome → ⋮ → <b>Cài đặt ứng dụng</b>.</div>
+      <div><b>Windows / Mac / Linux:</b> Chrome hoặc Edge → biểu tượng <b>⊕ Cài đặt</b> ở cuối thanh địa chỉ.</div>
+      <div class="muted">Sau khi cài, ứng dụng chạy toàn màn hình và dùng được khi mất mạng.</div></div></div>
+  </div><div class="ver">Thời Trang POS · phiên bản ${APP_VER}</div>`;
+  const ri = $('#restoreIn'); if (ri) ri.onchange = restore;
+  const ci = $('#catIn'); if (ci) ci.onkeydown = e => { if (e.key === 'Enter') A.addCat(); };
+}
+function editUser(id) {
+  const u = id ? S.users.find(x => x.id === id) : null; const self = u && u.id === ME.id;
+  const d = openModal(`<div class="dlg-h"><h3>${u ? 'Sửa tài khoản' : 'Thêm nhân viên'}</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b">
+      <div class="f"><label>Họ tên *</label><input id="uName" value="${esc(u ? u.name : '')}"></div>
+      <div class="f"><label>Tên đăng nhập *</label><input id="uUser" value="${esc(u ? u.username : '')}" autocapitalize="none" ${u ? 'disabled' : ''}></div>
+      <div class="g2"><div class="f"><label>Vai trò</label><select id="uRole" ${self ? 'disabled' : ''}><option value="staff" ${u && u.role === 'staff' ? 'selected' : ''}>Nhân viên</option><option value="admin" ${u && u.role === 'admin' ? 'selected' : ''}>Quản lý</option></select></div>
+        <div class="f"><label>Trạng thái</label><select id="uActive" ${self ? 'disabled' : ''}><option value="1">Hoạt động</option><option value="0" ${u && !u.active ? 'selected' : ''}>Khóa tài khoản</option></select></div></div>
+      ${pwField('uPw', u ? 'Đặt lại mật khẩu (để trống nếu không đổi)' : 'Mật khẩu tạm * (ít nhất 6 ký tự)', 'new-password')}
+      ${self ? '' : '<p class="muted" style="font-size:12.5px;margin:0">Nhân viên sẽ phải đổi mật khẩu tạm ở lần đăng nhập đầu tiên.</p>'}
+    </div>
+    <div class="dlg-f">${u && !self ? '<button class="btn danger ghost" id="uDel">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn gold" id="uOk">Lưu</button></div>`, 'sm');
+  d.querySelectorAll('.pw button').forEach(b => b.onclick = () => { const i = b.previousElementSibling; i.type = i.type === 'password' ? 'text' : 'password'; });
+  const admins = () => S.users.filter(x => x.role === 'admin' && x.active).length;
+  $('#uOk', d).onclick = async () => {
+    const name = $('#uName', d).value.trim(), user = $('#uUser', d).value.trim().toLowerCase(), pw = $('#uPw', d).value;
+    const role = $('#uRole', d).value, active = $('#uActive', d).value === '1';
+    if (!name) return toast('Nhập họ tên', 'err');
+    if (!u) {
+      if (!/^[a-z0-9._]{3,20}$/.test(user)) return toast('Tên đăng nhập 3–20 ký tự: chữ không dấu, số, . hoặc _', 'err');
+      if (S.users.some(x => x.username === user)) return toast('Tên đăng nhập đã tồn tại', 'err');
+      if (pw.length < 6) return toast('Mật khẩu ít nhất 6 ký tự', 'err');
+    } else if (pw && pw.length < 6) return toast('Mật khẩu ít nhất 6 ký tự', 'err');
+    if (u && u.role === 'admin' && u.active && (role !== 'admin' || !active) && admins() <= 1) return toast('Phải còn ít nhất 1 quản lý hoạt động', 'err');
+    let x = u;
+    if (!u) { x = { id: uid(), username: user, created: Date.now() }; S.users.push(x); }
+    Object.assign(x, { name, role: self ? x.role : role, active: self ? true : active });
+    if (pw) { await setPw(x, pw); if (!self) x.mustChange = true; }
+    save('users'); closeModal(); toast('Đã lưu tài khoản'); if (self) renderShell(); refresh();
+  };
+  const del = $('#uDel', d);
+  if (del) del.onclick = async () => {
+    if (u.role === 'admin' && admins() <= 1) return toast('Không thể xóa quản lý cuối cùng', 'err');
+    if (!(await ask(`Xóa tài khoản <b>${esc(u.name)}</b>?`, 'Xóa', true))) return;
+    S.users = S.users.filter(x => x !== u); save('users'); closeModal(); refresh();
+  };
+}
+async function restore(e) {
+  const file = e.target.files[0]; if (!file) return;
+  try {
+    const d = JSON.parse(await file.text());
+    if (d.app !== 'fashion-pos' || !d.data || !Array.isArray(d.data.users) || !d.data.users.length) throw new Error('File không đúng định dạng');
+    if (!(await ask(`Khôi phục: ${d.data.products.length} sản phẩm, ${d.data.orders.length} hóa đơn, ${d.data.users.length} tài khoản (sao lưu ${ddmmyy(d.at)}).<br><b>Toàn bộ dữ liệu hiện tại sẽ bị thay thế</b> và bạn cần đăng nhập lại.`, 'Khôi phục', true))) return;
+    for (const k of COLS) await IDB.set('kv', k, d.data[k] ?? defaults()[k]);
+    await IDB.clear('img'); for (const [k, v] of Object.entries(d.images || {})) await IDB.set('img', k, v);
+    sessSet(null); location.reload();
+  } catch (err) { toast('Không khôi phục được: ' + err.message, 'err'); }
+}
+function seedDemo(admin) {
+  const P = [
+    ['Bộ body cotton sơ sinh', 'Đồ sơ sinh', 'ss', 'Unisex', 129000, 62000, ['0-3M', '3-6M', '6-9M'], ['Trắng', 'Hồng', 'Xanh dương']],
+    ['Yếm liền thân hình gấu', 'Đồ sơ sinh', 'ss', 'Unisex', 159000, 78000, ['3-6M', '6-9M', '9-12M'], ['Be', 'Vàng']],
+    ['Nón len sơ sinh', 'Phụ kiện', 'ss', 'Unisex', 59000, 24000, ['Free'], ['Trắng', 'Hồng', 'Xanh dương']],
+    ['Giày tập đi đế mềm', 'Giày', 'ss', 'Unisex', 189000, 92000, ['16', '17', '18', '19'], ['Hồng', 'Xanh navy']],
+    ['Áo thun bé trai khủng long', 'Áo', 'te', 'Nam', 119000, 52000, ['4', '6', '8', '10'], ['Xanh lá', 'Xám']],
+    ['Váy công chúa bé gái', 'Váy - Đầm', 'te', 'Nữ', 249000, 118000, ['3', '4', '5', '6', '7'], ['Hồng', 'Tím']],
+    ['Quần jean bé trai', 'Quần', 'te', 'Nam', 199000, 94000, ['4', '6', '8', '10', '12'], ['Xanh dương']],
+    ['Đồ bộ thun bé gái', 'Đồ bộ', 'te', 'Nữ', 149000, 66000, ['4', '6', '8'], ['Hồng', 'Vàng']],
+    ['Sandal bé gái quai dán', 'Dép - Sandal', 'te', 'Nữ', 159000, 70000, ['24', '25', '26', '27', '28'], ['Hồng', 'Trắng']],
+    ['Áo hoodie basic', 'Áo', 'tn', 'Unisex', 299000, 148000, ['S', 'M', 'L'], ['Đen', 'Xám', 'Be']],
+    ['Quần jogger thể thao', 'Quần', 'tn', 'Unisex', 229000, 108000, ['S', 'M', 'L', 'XL'], ['Đen', 'Xanh navy']],
+    ['Giày sneaker trắng', 'Giày', 'tn', 'Unisex', 459000, 236000, ['36', '37', '38', '39', '40', '41'], ['Trắng']],
+    ['Áo sơ mi nam công sở', 'Áo', 'nl', 'Nam', 349000, 168000, ['M', 'L', 'XL', 'XXL'], ['Trắng', 'Xanh dương']],
+    ['Đầm suông nữ', 'Váy - Đầm', 'nl', 'Nữ', 399000, 186000, ['S', 'M', 'L'], ['Đen', 'Be', 'Đỏ']],
+    ['Quần tây nam', 'Quần', 'nl', 'Nam', 379000, 178000, ['29', '30', '31', '32', '33'], ['Đen', 'Xám']],
+    ['Giày da nam', 'Giày', 'nl', 'Nam', 799000, 412000, ['39', '40', '41', '42', '43'], ['Đen', 'Nâu']],
+    ['Dép quai ngang', 'Dép - Sandal', 'nl', 'Unisex', 99000, 38000, ['38', '39', '40', '41', '42'], ['Đen', 'Trắng']],
+    ['Túi tote canvas', 'Phụ kiện', 'nl', 'Nữ', 149000, 58000, [], []]
+  ];
+  let seed = 7; const rnd = n => { seed = (seed * 9301 + 49297) % 233280; return Math.floor(seed / 233280 * n); };
+  S.products = P.map(([name, cat, age, gender, price, cost, sizes, colors]) => {
+    const p = { id: uid() + rnd(999), created: Date.now(), name, cat, age, gender, price, cost, sizes, colors, stock: {}, note: '' };
+    p.sku = genSku(age);
+    for (const s of sizesOf(p)) for (const c of colorsOf(p)) p.stock[vkey(s, c)] = rnd(9) === 0 ? 0 : 1 + rnd(8);
+    return p;
+  });
+  S.customers = [['Nguyễn Thị Lan', '0901234567', 'Mẹ bé Na'], ['Trần Minh Khoa', '0912345678', ''], ['Lê Thu Hà', '0987654321', 'Khách quen']]
+    .map(([name, phone, note]) => ({ id: uid() + rnd(999), name, phone, note, birth: '', points: 0, spent: 0, orders: 0, created: Date.now() }));
+  const now = Date.now();
+  for (let i = 0; i < 34; i++) {
+    const t = startOfDay(now - rnd(14) * DAY) + (8 + rnd(13)) * 3600000 + rnd(60) * 60000; if (t > now) continue;
+    const items = []; const n = 1 + rnd(3);
+    for (let j = 0; j < n; j++) { const p = S.products[rnd(S.products.length)], s = sizesOf(p)[rnd(sizesOf(p).length)], c = colorsOf(p)[rnd(colorsOf(p).length)];
+      items.push({ pid: p.id, key: vkey(s, c), size: s, color: c, name: p.name, sku: p.sku, price: p.price, cost: p.cost, age: p.age, cat: p.cat, qty: 1 + (rnd(4) === 0 ? 1 : 0), returned: 0 }); }
+    const sub = items.reduce((a, l) => a + l.price * l.qty, 0), disc = rnd(5) === 0 ? Math.round(sub * 0.1) : 0, total = sub - disc;
+    const cu = rnd(3) === 0 ? S.customers[rnd(3)] : null, method = ['cash', 'cash', 'bank', 'card'][rnd(4)];
+    S.orders.push({ id: uid() + i, no: 0, code: '', time: t, staffId: admin.id, staffName: admin.name, customerId: cu ? cu.id : null, customerName: cu ? cu.name : '', customerPhone: cu ? cu.phone : '',
+      items, sub, disc, total, method, given: total, change: 0, points: cu ? Math.floor(total / 10000) : 0, returns: [] });
+    if (cu) { cu.spent += total; cu.orders++; cu.points += Math.floor(total / 10000); }
+  }
+  S.orders.sort((a, b) => a.time - b.time).forEach(o => { o.no = ++S.seq.order; o.code = 'HD' + pad(o.no, 6); });
+  S.settings.demo = true;
+}
+
+/* ================= SỰ KIỆN ================= */
+const A = {
+  close: closeModal, go: d => go(d.v), lock: () => { closeAllModals(); lockScreen(); }, logout: () => { closeAllModals(); logout(); },
+  meMenu, chpw: () => { closeAllModals(); changePassword(false); },
+  posAge: d => { posF.age = d.v; renderPosFilters(); renderPosGrid(); },
+  posCat: d => { posF.cat = d.v; renderPosFilters(); renderPosGrid(); },
+  pick: d => pick(d.id),
+  cq: d => { const l = cart.items[+d.i]; if (!l) return; if (+d.d > 0) { const p = S.products.find(x => x.id === l.pid); if (!p || stockOf(p, l.size, l.color) <= cartQty(l.pid, l.key)) return toast('Không đủ tồn kho', 'err'); }
+    l.qty += +d.d; if (l.qty <= 0) cart.items.splice(+d.i, 1); renderCart(); renderPosGrid(); },
+  cdt: d => { cart.discType = d.v; renderCart(); },
+  clearCart: async () => { if (await ask('Hủy toàn bộ sản phẩm trong đơn đang bán?', 'Hủy đơn', true)) { cart = newCart(); renderCart(); renderPosGrid(); } },
+  checkout, pickCustomer, clearCustomer: (d, el, e) => { e.stopPropagation(); cart.customerId = null; renderCart(); },
+  openCart: () => $('#cartPanel').classList.add('open'), closeCart: () => $('#cartPanel').classList.remove('open'),
+  reprint: d => { const o = S.orders.find(x => x.id === d.id); if (o) printReceipt(o); },
+  ordR: d => { ordF.r = d.v; vOrders(); }, order: d => orderDetail(d.id), returnOrder: d => returnOrder(d.id),
+  prAge: d => { prodF.age = d.v; vProducts(); }, prLow: () => { prodF.low = !prodF.low; vProducts(); },
+  editProduct: d => editProduct(d.id), viewProduct: d => viewProduct(d.id),
+  newCustomer: () => editCustomer(null), customer: d => editCustomer(d.id),
+  repR: d => { repF.r = d.v; vReports(); }, exportCsv,
+  saveShop: () => {
+    const v = id => $('#' + id).value.trim();
+    Object.assign(S.settings, { shopName: v('sShop') || S.settings.shopName, address: v('sAddr'), phone: v('sPhone'), footer: v('sFooter'),
+      lowStock: Math.max(0, Math.round(+v('sLow') || 0)), pointPer: Math.max(1000, Math.round(+v('sPoint') || 10000)), lockMin: +$('#sLock').value });
+    save('settings'); renderShell(); toast('Đã lưu thông tin cửa hàng');
+  },
+  addCat: () => { const i = $('#catIn'), v = i.value.trim(); if (!v) return; if (S.settings.cats.includes(v)) return toast('Danh mục đã có', 'err'); S.settings.cats.push(v); save('settings'); vSettings(); },
+  delCat: d => { if (S.products.some(p => p.cat === d.v)) return toast('Danh mục đang có sản phẩm, không xóa được', 'err'); if (S.settings.cats.length <= 1) return; S.settings.cats = S.settings.cats.filter(c => c !== d.v); save('settings'); vSettings(); },
+  saveBank: () => {
+    const acc = $('#sAcc').value.replace(/\s/g, '');
+    if (acc && !/^[0-9A-Za-z]{4,19}$/.test(acc)) return toast('Số tài khoản không hợp lệ', 'err');
+    if (acc && !$('#sBank').value) return toast('Chọn ngân hàng', 'err');
+    Object.assign(S.settings, { bankId: $('#sBank').value, bankAcc: acc, bankName: norm($('#sAccName').value.trim()).toUpperCase() });
+    save('settings'); toast('Đã lưu tài khoản ngân hàng'); return true;
+  },
+  testQR: () => {
+    if (!A.saveBank()) return; if (!hasBank()) return toast('Chọn ngân hàng và nhập số tài khoản', 'err');
+    openModal(`<div class="dlg-h"><h3>Mã QR thử · 10.000đ</h3><button class="ibtn" data-act="close">✕</button></div><div class="dlg-b"><p class="muted" style="margin-top:0">Mở app ngân hàng → Quét QR. Kiểm tra tên người nhận và số tiền, <b>không cần chuyển</b>.</p>${qrBlock(10000, 'Thu QR')}</div>`, 'sm');
+  },
+  editUser: d => editUser(d.id),
+  backup: () => shareOrDownload(`thoi-trang-pos_sao-luu_${isoDate(Date.now())}.json`, JSON.stringify({ app: 'fashion-pos', v: 1, at: Date.now(), data: Object.fromEntries(COLS.map(k => [k, S[k]])), images: IMG }), 'application/json'),
+  clearDemo: async () => {
+    if (!(await ask('Xóa toàn bộ sản phẩm, khách hàng và hóa đơn mẫu? Tài khoản và cài đặt được giữ lại.', 'Xóa dữ liệu mẫu', true))) return;
+    S.products = []; S.customers = []; S.orders = []; S.stocklog = []; S.seq = { order: 0, prod: 0 }; S.settings.demo = false; cart = newCart();
+    for (const k of Object.keys(IMG)) delete IMG[k]; await IDB.clear('img');
+    save('products', 'customers', 'orders', 'stocklog', 'seq', 'settings'); toast('Đã xóa dữ liệu mẫu'); refresh();
+  },
+  wipe: async () => {
+    if (!(await ask('Xóa <b>TOÀN BỘ</b> dữ liệu: sản phẩm, hóa đơn, khách hàng, tài khoản? Nên sao lưu trước.', 'Tiếp tục', true))) return;
+    if (!(await ask('Chắc chắn? Thao tác này <b>không thể hoàn tác</b>.', 'Xóa vĩnh viễn', true))) return;
+    await IDB.clear('kv'); await IDB.clear('img'); sessSet(null); location.reload();
+  }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const fn = A[el.dataset.act]; if (fn) { e.preventDefault(); fn(el.dataset, el, e); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { const ms = $$('.modal'); if (ms.length && !ms[ms.length - 1].dataset.static) closeModal(); else $('#cartPanel') && $('#cartPanel').classList.remove('open'); }
+  if (!ME || $$('.modal').length) return;
+  if (e.key === 'F2' && cur === 'pos') { e.preventDefault(); $('#posQ').focus(); }
+  if (e.key === 'F9' && cur === 'pos') { e.preventDefault(); checkout(); }
+});
+const netUpd = () => $('#net').classList.toggle('hidden', navigator.onLine);
+window.addEventListener('online', netUpd); window.addEventListener('offline', netUpd);
+
+/* ================= KHỞI ĐỘNG ================= */
+(async function boot() {
+  if (!window.indexedDB || !window.crypto || !crypto.subtle) {
+    document.body.innerHTML = '<div class="fatal"><h2>Trình duyệt chưa hỗ trợ</h2><p>Hãy mở bằng Safari, Chrome hoặc Edge bản mới qua địa chỉ <b>https://</b>, không dùng chế độ ẩn danh.</p></div>'; return;
+  }
+  try { await IDB.open(); await loadAll(); }
+  catch (e) { document.body.innerHTML = `<div class="fatal"><h2>Không mở được bộ nhớ</h2><p>${esc(e.message)}. Hãy tắt chế độ ẩn danh hoặc thử trình duyệt khác.</p></div>`; return; }
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
+  netUpd();
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if (!S.users.length) return renderSetup();
+  const ss = sessGet(), u = ss && S.users.find(x => x.id === ss.uid && x.active);
+  if (u) {
+    const m = +S.settings.lockMin;
+    if (m > 0 && Date.now() - (ss.last || 0) > m * 60000) { ME = u; lockScreen(); } else login(u, false);
+  } else renderLogin();
+})();
+</script>
+</body>
+</html>
