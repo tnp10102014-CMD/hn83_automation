@@ -18,6 +18,16 @@ Chạy trên **iPhone, iPad, Android, máy tính bảng, PC Windows / Mac / Linu
 | **Báo cáo** | Doanh thu, **lợi nhuận sau vật tư & hoa hồng**, **bảng hoa hồng từng KTV**, theo nhóm dịch vụ, dịch vụ dùng nhiều, thanh toán, xuất Excel (CSV) |
 | **Dữ liệu** | Sao lưu / khôi phục, dữ liệu mẫu (29 dịch vụ, 4 KTV, lịch hẹn) |
 
+## Dùng thử 15 ngày & mã kích hoạt
+- Lần đầu mở app trên một thiết bị: tạo **Mã máy** riêng (dạng `BP-XXXX-XXXX-XXXX`) và bắt đầu **15 ngày dùng thử** (đếm ngược hiện ở góc trên).
+- Hết hạn: app khóa, hiện Mã máy + ô nhập **mã kích hoạt**. Dữ liệu vẫn giữ nguyên, vẫn tải được bản sao lưu.
+- Mã kích hoạt = **chữ ký số ECDSA P-256** trên (mã máy | ngày hết hạn | gói). App chỉ chứa **khóa công khai** (`LIC_PUB`) nên không ai tự tạo mã được; mã của máy này không dùng được cho máy khác.
+- Các gói: gia hạn thử 15 ngày, 1 / 3 / 6 tháng, 1 năm, vĩnh viễn, hoặc chọn ngày. Hết hạn gói thì app khóa lại để gia hạn.
+- Chống lùi đồng hồ: app nhớ mốc thời gian lớn nhất đã dùng.
+- Mã được tạo bằng file **`TaoMaKichHoat-BeautyPOS.html`** (chứa khóa bí mật) — nhà cung cấp giữ riêng, **không đưa lên GitHub** (đã chặn trong `.gitignore`).
+- Thông tin liên hệ hiện trên màn hình hết hạn: sửa hằng số `VENDOR` trong `index.html`.
+- Giới hạn: đây là bảo vệ phía trình duyệt. Người rành kỹ thuật có thể sửa mã nguồn (đang công khai trên GitHub Pages) hoặc xóa sạch dữ liệu trình duyệt để dùng thử lại (khi đó mất luôn dữ liệu). Muốn chặn triệt để cần máy chủ cấp phép (online).
+
 ## Giao diện
 Phong cách spa sang trọng: nền gradient hồng phấn – champagne chuyển động nhẹ, họa tiết hoa sen & lá line-art rose-gold, thẻ kính mờ (glassmorphism), tự đổi giao diện tối theo máy.
 
