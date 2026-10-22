@@ -235,6 +235,12 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.25);padding:2px 6px;b
 .cart-lines{flex:1;overflow-y:auto;padding:0 18px}
 .cline{padding:11px 0;border-bottom:1px solid var(--line)}
 .cline .r1{display:flex;align-items:center;gap:10px}
+.pe-row{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.pe-img{position:relative;width:110px;height:110px;flex-shrink:0;border-radius:16px;border:1.5px dashed var(--line);background:var(--surface2);display:grid;place-items:center;cursor:pointer;overflow:hidden;text-align:center;font-size:12px;color:var(--muted)}
+.pe-img img{width:100%;height:100%;object-fit:cover}
+.pe-img .ph b{display:block;font-size:34px;line-height:1.1}
+.sic.im{background:#fff;overflow:hidden}
+.sic.im img{width:100%;height:100%;object-fit:cover;display:block}
 .cline .sic{width:38px;height:38px;border-radius:11px;font-size:18px}
 .cmain{flex:1;min-width:0}
 .cname{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -545,12 +551,12 @@ const IDB = (() => {
   });
   return { open, get: k => tx('readonly', s => s.get(k)), set: (k, v) => tx('readwrite', s => s.put(v, k)), clear: () => tx('readwrite', s => s.clear()) };
 })();
-const COLS = ['settings', 'users', 'items', 'techs', 'customers', 'orders', 'tickets', 'appts', 'seq'];
+const COLS = ['settings', 'users', 'items', 'techs', 'customers', 'orders', 'tickets', 'appts', 'seq', 'imgs'];
 function defaults() {
   return {
     settings: { shopName: 'Beauty & Spa', address: '', phone: '', footer: 'Cảm ơn quý khách! Hẹn gặp lại để đẹp hơn mỗi ngày.',
       bankId: '', bankAcc: '', bankName: '', lockMin: 15, pointPer: 10000, lowStock: 3, cats: DEFAULT_CATS.slice(), demo: false, requireTech: true },
-    users: [], items: [], techs: [], customers: [], orders: [], tickets: [], appts: [], seq: { order: 0, ticket: 0, item: 0 }
+    users: [], items: [], techs: [], customers: [], orders: [], tickets: [], appts: [], seq: { order: 0, ticket: 0, item: 0 }, imgs: {}
   };
 }
 let S = defaults();
@@ -932,7 +938,23 @@ function meMenu() {
 const itemOf = id => S.items.find(x => x.id === id);
 const techOf = id => S.techs.find(x => x.id === id);
 const custOf = id => S.customers.find(x => x.id === id);
-const sic = (cat, extra = '') => `<span class="sic ${extra}" style="--c:${catColor(cat)}">${catIcon(cat)}</span>`;
+const sic = (cat, extra = '', id) => id && S.imgs && S.imgs[id] ? `<span class="sic im ${extra}"><img src="${S.imgs[id]}" alt="" loading="lazy"></span>` : `<span class="sic ${extra}" style="--c:${catColor(cat)}">${catIcon(cat)}</span>`;
+// Đọc ảnh sản phẩm → cắt vuông giữa, thu nhỏ 240px, nền trắng, JPEG (~10–20 KB)
+function readImage(file) {
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error('File không phải hình ảnh'));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const z = Math.min(im.width, im.height), N = 240, c = document.createElement('canvas'); c.width = c.height = N;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, N);
+      g.drawImage(im, (im.width - z) / 2, (im.height - z) / 2, z, z, 0, 0, N, N); URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Không đọc được ảnh')); };
+    im.src = url;
+  });
+}
+
 const techChip = (t, act, lid) => t ? `<button class="techchip" style="--c:${t.color}" ${act ? `data-act="${act}" data-lid="${lid}"` : ''}><i>${esc(initials(t.name))}</i>${esc(t.name)}</button>`
   : `<button class="techchip none" ${act ? `data-act="${act}" data-lid="${lid}"` : ''}>＋ Chọn KTV</button>`;
 const reservedQty = iid => S.tickets.reduce((a, t) => a + t.lines.filter(l => l.iid === iid).reduce((s, l) => s + l.qty, 0), 0);
@@ -999,7 +1021,7 @@ function posList() {
 function renderGrid() {
   const t = tkOf(); const cnt = id => t ? t.lines.filter(l => l.iid === id).reduce((a, l) => a + l.qty, 0) : 0;
   $('#posGrid').innerHTML = posList().map(i => { const n = cnt(i.id), out = i.kind === 'prod' && (i.stock || 0) - reservedQty(i.id) <= 0;
-    return `<button class="scard ${out ? 'off' : ''}" data-act="add" data-id="${i.id}">${n ? `<span class="cnt">${n}</span>` : ''}${sic(i.cat)}
+    return `<button class="scard ${out ? 'off' : ''}" data-act="add" data-id="${i.id}">${n ? `<span class="cnt">${n}</span>` : ''}${sic(i.cat, '', i.id)}
       <span class="sinfo"><span class="sname">${esc(i.name)}</span><span class="ssub">${i.kind === 'prod' ? `Sản phẩm · còn ${i.stock || 0}` : '⏱ ' + dur(i.dur || 0)}</span><span class="sprice">${fmt(i.price)}</span></span></button>`; }).join('')
     || `<div class="empty" style="grid-column:1/-1">${ICON.services}<p>Không có dịch vụ phù hợp.</p></div>`;
 }
@@ -1026,7 +1048,7 @@ function renderTicket() {
   p.innerHTML = `
     <div class="cart-h"><div class="grow"><h2>${esc(tkName(t))}</h2><small>Phiếu #${t.no} · vào lúc ${hhmm(t.created)} · ${c.qty} mục${c.dur ? ' · khoảng ' + dur(c.dur) : ''}</small></div><button class="ibtn only-m" data-act="closeCart">✕</button></div>
     <div class="cust" data-act="tkCustomer">${ICON.user}<div>${cu ? `<b>${esc(cu.name)}${isBirthMonth(cu) ? ' 🎂' : ''}</b><small>${esc(cu.phone)} · <span style="color:${t2[2]};font-weight:600">${t2[1]}</span> · ${num(cu.points)} điểm${cu.note ? ' · ' + esc(cu.note) : ''}</small>` : '<b>Khách vãng lai</b><small>Chọn khách hàng để tích điểm</small>'}</div>${cu ? '<span class="x" data-act="tkNoCust">✕</span>' : ''}</div>
-    <div class="cart-lines">${t.lines.map(l => `<div class="cline"><div class="r1">${sic(l.cat)}
+    <div class="cart-lines">${t.lines.map(l => `<div class="cline"><div class="r1">${sic(l.cat, '', l.iid)}
         <div class="cmain"><div class="cname">${esc(l.name)}</div><div class="cmeta">${fmt(l.price)}${l.kind === 'svc' ? ' · ' + dur(l.dur) : ' · sản phẩm'}</div></div>
         <div class="camt">${fmt(l.price * l.qty)}</div></div>
       <div class="r2">${l.kind === 'svc' || S.techs.length ? techChip(techOf(l.techId), 'pickTech', l.lid) : ''}
@@ -1263,7 +1285,7 @@ function orderDetail(id) {
         <div><div class="muted" style="font-size:12px">Khách hàng</div><b>${esc(o.customerName || 'Khách vãng lai')}</b>${o.customerPhone ? '<br>' + esc(o.customerPhone) : ''}</div>
         <div><div class="muted" style="font-size:12px">Thu ngân</div><b>${esc(o.staffName)}</b></div>
         <div><div class="muted" style="font-size:12px">Thanh toán</div><b>${METHODS[o.method]}</b></div></div>
-      <div class="list">${o.items.map(l => `<div class="li" style="grid-template-columns:auto 1fr auto auto">${sic(l.cat)}<span><b>${esc(l.name)}</b><small>${l.techName ? 'KTV: ' + esc(l.techName) + (isAdmin() && l.commAmt ? ` · hoa hồng ${l.commPct}% = ${fmt(l.commAmt)}` : '') : l.kind === 'prod' ? 'Sản phẩm' : ''}</small></span><span class="muted">${l.qty} × ${num(l.price)}</span><span class="r">${fmt(l.qty * l.price)}</span></div>`).join('')}</div>
+      <div class="list">${o.items.map(l => `<div class="li" style="grid-template-columns:auto 1fr auto auto">${sic(l.cat, '', l.iid)}<span><b>${esc(l.name)}</b><small>${l.techName ? 'KTV: ' + esc(l.techName) + (isAdmin() && l.commAmt ? ` · hoa hồng ${l.commPct}% = ${fmt(l.commAmt)}` : '') : l.kind === 'prod' ? 'Sản phẩm' : ''}</small></span><span class="muted">${l.qty} × ${num(l.price)}</span><span class="r">${fmt(l.qty * l.price)}</span></div>`).join('')}</div>
       <div style="margin-top:12px"><div class="kv"><span class="muted">Tạm tính</span><span>${fmt(o.sub)}</span></div>
         ${o.disc ? `<div class="kv"><span class="muted">Giảm giá</span><span>−${fmt(o.disc)}</span></div>` : ''}
         <div class="kv big"><span>Tổng cộng</span><span>${fmt(o.total)}</span></div>
@@ -1344,7 +1366,7 @@ function drawServices() {
   const q = norm(svF.q.trim());
   const groups = S.settings.cats.filter(c => svF.cat === 'all' || c === svF.cat).map(c => [c, S.items.filter(i => i.cat === c && (!q || norm(i.name).includes(q) || norm(i.code).includes(q)))]).filter(g => g[1].length);
   $('#svList').innerHTML = groups.map(([c, l]) => `<div class="grp">${catIcon(c)} ${esc(c)} <small class="muted" style="font:500 13px var(--sans)">${l.length}</small></div>
-    <div class="list">${l.map(i => `<button class="li li-s" data-act="${isAdmin() ? 'editItem' : ''}" data-id="${i.id}" ${i.active === false ? 'style="opacity:.5"' : ''}>${sic(i.cat)}
+    <div class="list">${l.map(i => `<button class="li li-s" data-act="${isAdmin() ? 'editItem' : ''}" data-id="${i.id}" ${i.active === false ? 'style="opacity:.5"' : ''}>${sic(i.cat, '', i.id)}
       <span><b>${esc(i.name)}</b>${i.active === false ? ' <span class="tag">Ngừng</span>' : ''}<small>${esc(i.code)}${i.note ? ' · ' + esc(i.note) : ''}</small></span>
       <span class="hm">${i.kind === 'prod' ? `<span class="tag ${(i.stock || 0) <= S.settings.lowStock ? 'warn' : ''}">Tồn ${i.stock || 0}</span>` : `<span class="tag">⏱ ${dur(i.dur || 0)}</span>`}</span>
       <span class="hm r">${i.comm != null && i.comm !== '' ? i.comm + '%' : '<small>theo KTV</small>'}</span><span class="r">${fmt(i.price)}</span></button>`).join('')}</div>`).join('')
@@ -1353,8 +1375,12 @@ function drawServices() {
 function editItem(id) {
   const o = id ? itemOf(id) : null;
   const it = o ? { ...o } : { name: '', code: '', cat: svF.cat !== 'all' ? svF.cat : S.settings.cats[0], kind: 'svc', price: '', cost: '', dur: 60, comm: '', stock: 0, note: '', active: true };
+  let img = o ? S.imgs[o.id] || '' : '', imgChanged = false;
   const d = openModal(`<div class="dlg-h"><h3>${o ? 'Sửa' : 'Thêm'} dịch vụ / sản phẩm</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b">
+      <div class="pe-row"><label class="pe-img" id="pImgBox"></label>
+        <div class="grow"><b>Hình ảnh</b><div class="muted" style="font-size:12.5px;margin:2px 0 8px">Bấm vào khung để chọn ảnh từ máy / chụp bằng điện thoại. Trên máy tính có thể <b>Copy ảnh rồi bấm Ctrl+V</b> trong hộp thoại này. Ảnh tự cắt vuông & thu nhỏ.</div>
+          <div class="row"><button type="button" class="btn sm ghost" id="pImgPick">📷 Chọn ảnh</button><button type="button" class="btn sm danger ghost" id="pImgDel">Xóa ảnh</button></div></div></div>
       <div class="seg" style="display:flex;margin-bottom:14px"><button class="grow ${it.kind === 'svc' ? 'on' : ''}" data-k="svc">💆‍♀️ Dịch vụ</button><button class="grow ${it.kind === 'prod' ? 'on' : ''}" data-k="prod">🧴 Sản phẩm bán lẻ</button></div>
       <div class="f"><label>Tên *</label><input id="itName" value="${esc(it.name)}" placeholder="VD: Sơn gel tay"></div>
       <div class="g2"><div class="f"><label>Danh mục</label><select id="itCat">${S.settings.cats.map(c => `<option ${c === it.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
@@ -1369,6 +1395,17 @@ function editItem(id) {
     </div>
     <div class="dlg-f">${o ? '<button class="btn danger ghost" id="itDel">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn rose" id="itOk">Lưu</button></div>`, 'md');
   const kindUI = () => { $$('.kSvc', d).forEach(e => e.classList.toggle('hidden', it.kind !== 'svc')); $$('.kProd', d).forEach(e => e.classList.toggle('hidden', it.kind !== 'prod')); };
+  const drawImg = () => {
+    $('#pImgBox', d).innerHTML = (img ? `<img src="${img}" alt="">` : `<span class="ph"><b>${catIcon($('#itCat', d).value)}</b>Thêm ảnh</span>`) + '<input type="file" accept="image/*" hidden id="pFile">';
+    $('#pImgDel', d).style.display = img ? '' : 'none';
+    $('#pFile', d).onchange = e => setImg(e.target.files[0]);
+  };
+  const setImg = async f => { if (!f) return; try { img = await readImage(f); imgChanged = true; drawImg(); } catch (err) { toast(err.message, 'err'); } };
+  $('#pImgPick', d).onclick = () => $('#pFile', d).click();
+  $('#pImgDel', d).onclick = () => { img = ''; imgChanged = true; drawImg(); };
+  d.addEventListener('paste', e => { const it = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/')); if (it) { e.preventDefault(); setImg(it.getAsFile()); } });
+  drawImg();
+  $('#itCat', d).addEventListener('change', () => { if (!img) drawImg(); });
   d.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; it.kind = b.dataset.k; $$('[data-k]', d).forEach(x => x.classList.toggle('on', x === b)); kindUI(); });
   $('#itOk', d).onclick = () => {
     const name = $('#itName', d).value.trim(), pv = $('#itPrice', d).value, price = Math.round(+pv);
@@ -1380,11 +1417,13 @@ function editItem(id) {
     const data = { name, code, cat: $('#itCat', d).value, kind: it.kind, price, cost: Math.max(0, Math.round(+$('#itCost', d).value || 0)),
       dur: it.kind === 'svc' ? Math.max(0, Math.round(+$('#itDur', d).value || 0)) : 0, stock: it.kind === 'prod' ? Math.max(0, Math.round(+$('#itStock', d).value || 0)) : 0,
       comm: cv === '' ? null : +cv, note: $('#itNote', d).value.trim(), active: $('#itActive', d).checked };
-    if (o) Object.assign(o, data); else S.items.push({ id: uid(), created: Date.now(), ...data });
+    let iid = o && o.id;
+    if (o) Object.assign(o, data); else { const ni = { id: uid(), created: Date.now(), ...data }; iid = ni.id; S.items.push(ni); }
+    if (imgChanged) { if (img) S.imgs[iid] = img; else delete S.imgs[iid]; save('imgs'); }
     save('items', 'seq'); closeModal(); toast('Đã lưu'); refresh();
   };
   const del = $('#itDel', d);
-  if (del) del.onclick = async () => { if (!(await ask(`Xóa <b>${esc(o.name)}</b>? Hóa đơn cũ vẫn được giữ.`, 'Xóa', true))) return; S.items = S.items.filter(x => x !== o); save('items'); closeModal(); refresh(); };
+  if (del) del.onclick = async () => { if (!(await ask(`Xóa <b>${esc(o.name)}</b>? Hóa đơn cũ vẫn được giữ.`, 'Xóa', true))) return; S.items = S.items.filter(x => x !== o); delete S.imgs[o.id]; save('items', 'imgs'); closeModal(); refresh(); };
   kindUI(); if (!o) setTimeout(() => $('#itName', d).focus(), 80);
 }
 

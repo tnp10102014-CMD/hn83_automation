@@ -1180,10 +1180,11 @@ function editProduct(id) {
     <div class="dlg-f">${orig ? '<button class="btn danger ghost" data-pe="del">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn gold" data-pe="save">Lưu sản phẩm</button></div>`, 'lg');
   const sync = () => $$('#peStock input', d).forEach(i => pd.stock[i.dataset.sk] = Math.max(0, Math.floor(+i.value || 0)));
   const drawImg = () => {
-    $('#peImg', d).innerHTML = (img ? `<img src="${img}" alt="">` : `<div class="pe-ph">${ICON.camera}<span>Thêm ảnh sản phẩm</span></div>`)
+    $('#peImg', d).innerHTML = (img ? `<img src="${img}" alt="">` : `<div class="pe-ph">${ICON.camera}<span>Thêm ảnh sản phẩm<br><small>hoặc Copy ảnh + Ctrl+V</small></span></div>`)
       + '<input type="file" accept="image/*" hidden id="peFile">' + (img ? '<button type="button" class="pe-rm" data-pe="rmimg">✕</button>' : '');
     $('#peFile', d).onchange = async e => { const f = e.target.files[0]; if (!f) return; try { img = await readImage(f); imgChanged = true; drawImg(); } catch (err) { toast(err.message, 'err'); } };
   };
+  d.addEventListener('paste', async e => { const it = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/')); if (!it) return; e.preventDefault(); try { img = await readImage(it.getAsFile()); imgChanged = true; drawImg(); toast('Đã dán ảnh'); } catch (err) { toast(err.message, 'err'); } });
   const drawVar = () => {
     $('#peSizes', d).innerHTML = pd.sizes.map((s, i) => `<span class="chip on">${esc(s)}<button type="button" data-pe="rs" data-i="${i}">✕</button></span>`).join('')
       + '<span class="chip-add"><input id="peSizeIn" placeholder="Size khác"><button type="button" data-pe="as">＋</button></span>';
