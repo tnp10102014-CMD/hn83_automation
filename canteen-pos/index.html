@@ -220,7 +220,15 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 .plist{flex:1;overflow-y:auto;padding:14px 20px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));grid-auto-rows:max-content;gap:10px;align-content:start}
 .pc{position:relative;display:flex;gap:11px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 12px;text-align:left;transition:transform .1s,box-shadow .15s;border-left:4px solid var(--c)}
 .pc:hover{box-shadow:var(--sh)}.pc:active{transform:scale(.985)}
-.pc-ic{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;font-size:24px;background:var(--surface2)}
+.pc-ic{width:44px;height:44px;border-radius:12px;flex-shrink:0;display:grid;place-items:center;font-size:24px;background:var(--surface2);overflow:hidden}
+.pc-ic img{width:100%;height:100%;object-fit:cover;display:block}
+.pc .pc-ic{width:58px;height:58px;font-size:28px}
+.pc-ic.big{width:84px;height:84px;font-size:40px;border-radius:16px}
+.pe-row{display:flex;gap:14px;align-items:center;margin-bottom:12px}
+.pe-img{position:relative;width:110px;height:110px;flex-shrink:0;border-radius:16px;border:1.5px dashed var(--line);background:var(--surface2);display:grid;place-items:center;cursor:pointer;overflow:hidden;text-align:center;font-size:12px;color:var(--muted)}
+.pe-img:hover{border-color:var(--yel)}
+.pe-img img{width:100%;height:100%;object-fit:cover}
+.pe-img .ph b{display:block;font-size:34px;line-height:1.1}
 .pc-b{flex:1;min-width:0}
 .pc-b b{display:block;font-size:14.5px;line-height:1.3}
 .pc-b small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -229,7 +237,8 @@ kbd{font:600 11px var(--sans);background:rgba(0,0,0,.12);padding:2px 6px;border-
 .pc-f .pr small{display:inline;color:var(--muted);font-weight:500}
 .st{font-size:12px;font-weight:600;color:var(--ok)}
 .st.lo{color:var(--warn)}.st.z{color:var(--err)}
-.pc .pc-f{padding-right:44px}
+.pc .pc-f{padding-right:44px;flex-wrap:wrap}
+.pc .pc-f .st{white-space:nowrap}
 .pc .pc-qty{position:absolute;right:7px;bottom:9px;font-size:11px;font-weight:700;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:1px 6px;background:var(--surface2)}
 .pc .pc-qty:hover{color:var(--ink);border-color:var(--yel)}
 .pc .hsd{display:inline-block;margin-top:3px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:6px;background:#fff1d6;color:#b26a00}
@@ -569,13 +578,14 @@ const IDB = (() => {
   });
   return { open, get: k => tx('readonly', s => s.get(k)), set: (k, v) => tx('readwrite', s => s.put(v, k)), clear: () => tx('readwrite', s => s.clear()) };
 })();
-const COLS = ['settings', 'users', 'products', 'customers', 'suppliers', 'orders', 'imports', 'issues', 'payments', 'moves', 'tickets', 'seq'];
+const COLS = ['settings', 'users', 'products', 'customers', 'suppliers', 'orders', 'imports', 'issues', 'payments', 'moves', 'tickets', 'seq', 'imgs'];
 function defaults() {
   return {
     settings: { shopName: 'Canteen Học Đường', address: '', phone: '', taxCode: '', footer: 'Cảm ơn bạn! Học tốt nhé ✏️', expDays: 30,
       bankId: '', bankAcc: '', bankName: '', lockMin: 15, printSize: '80', hsdWarn: 7, allowNeg: false, cats: DEFAULT_CATS.slice(), units: DEFAULT_UNITS.slice(), demo: false },
     users: [], products: [], customers: [], suppliers: [], orders: [], imports: [], issues: [], payments: [], moves: [], tickets: [],
-    seq: { order: 0, imp: 0, iss: 0, pay: 0, prod: 0, tk: 0 }
+    seq: { order: 0, imp: 0, iss: 0, pay: 0, prod: 0, tk: 0 },
+    imgs: {}
   };
 }
 let S = defaults();
@@ -942,6 +952,22 @@ const hsdLeft = p => p.exp && p.stock > 0 ? Math.round((startOfDay(+new Date(p.e
 const hsdWarn = p => { const d = hsdLeft(p); return d != null && d <= (S.settings.hsdWarn || 7); };
 const hsdDate = e => e ? ddmmyy(+new Date(e + 'T00:00:00')) : '';
 const hsdTag = p => { const d = hsdLeft(p); if (d == null || d > (S.settings.hsdWarn || 7)) return ''; return `<span class="hsd ${d < 0 ? 'x' : ''}">${d < 0 ? '⛔ Quá hạn ' + (-d) + ' ngày' : d === 0 ? '⏰ Hết hạn hôm nay' : '⏰ HSD còn ' + d + ' ngày'}</span>`; };
+const pIcon = p => p && S.imgs && S.imgs[p.id] ? `<img src="${S.imgs[p.id]}" alt="" loading="lazy">` : catIcon(p && p.cat);
+// Đọc ảnh sản phẩm → cắt vuông giữa, thu nhỏ 240px, nền trắng, JPEG (~10–20 KB)
+function readImage(file) {
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error('File không phải hình ảnh'));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const z = Math.min(im.width, im.height), N = 240, c = document.createElement('canvas'); c.width = c.height = N;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, N);
+      g.drawImage(im, (im.width - z) / 2, (im.height - z) / 2, z, z, 0, 0, N, N); URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.82));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Không đọc được ảnh')); };
+    im.src = url;
+  });
+}
 const stockTxt = p => `${fq(p.stock)} ${esc(p.unit)}${p.unit2 && p.rate2 ? ` <small>(≈${fq(p.stock / p.rate2)} ${esc(p.unit2)})</small>` : ''}`;
 const priceFor = (p, cu) => cu && cu.group === 'si' && p.priceSi ? p.priceSi : p.price;
 function move(pid, d, type, ref, t) {
@@ -1018,7 +1044,7 @@ function posList() { const q = norm(posF.q.trim()); return S.products.filter(p =
 function renderGrid() {
   const t = tkOf(), cu = t && custOf(t.customerId);
   $('#posGrid').innerHTML = posList().map(p => { const n = t ? Math.round(t.lines.filter(l => l.pid === p.id).reduce((a, l) => a + l.qty * l.factor, 0) * 1000) / 1000 : 0;
-    return `<button class="pc" style="--c:${catColor(p.cat)}" data-act="pick" data-id="${p.id}">${n ? `<span class="cnt">${n}</span>` : ''}<span class="pc-ic">${catIcon(p.cat)}</span>
+    return `<button class="pc" style="--c:${catColor(p.cat)}" data-act="pick" data-id="${p.id}">${n ? `<span class="cnt">${n}</span>` : ''}<span class="pc-ic">${pIcon(p)}</span>
       <span class="pc-qty" data-act="pickQ" data-id="${p.id}" title="Nhập số lượng / đơn vị khác">SL…</span><span class="pc-b"><b>${esc(p.name)}</b><small>${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''}</small>${hsdTag(p)}
       <span class="pc-f"><span class="pr">${fmt(priceFor(p, cu))}<small>/${esc(p.unit)}</small></span><span class="st ${stCls(p)}">Tồn ${fq(p.stock)} ${esc(p.unit)}</span></span></span></button>`; }).join('')
     || `<div class="empty" style="grid-column:1/-1">${ICON.stock}<p>Không có hàng phù hợp.</p></div>`;
@@ -1040,7 +1066,7 @@ function pickQty(pid, lid) {
   const unitP = u => u === 2 ? priceFor(p, cu) * p.rate2 : priceFor(p, cu);
   const d = openModal(`<div class="dlg-h"><h3>${line ? 'Sửa' : 'Thêm'} hàng</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b">
-      <div class="row" style="align-items:flex-start;margin-bottom:12px"><span class="pc-ic" style="background:${catColor(p.cat)}22">${catIcon(p.cat)}</span><div class="grow"><b style="font-size:16px">${esc(p.name)}</b><div class="muted" style="font-size:13px">${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''}</div>
+      <div class="row" style="align-items:flex-start;margin-bottom:12px"><span class="pc-ic big" style="background:${catColor(p.cat)}22">${pIcon(p)}</span><div class="grow"><b style="font-size:16px">${esc(p.name)}</b><div class="muted" style="font-size:13px">${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''}</div>
         <div style="font-size:13px">Tồn kho: <b class="st ${stCls(p)}">${stockTxt(p)}</b>${cu && cu.group === 'si' && p.priceSi ? ' · <span class="tag org">Giá ưu đãi GV/NV</span>' : ''} ${hsdTag(p)}</div></div></div>
       ${p.unit2 && p.rate2 ? `<div class="f"><label>Đơn vị tính</label><div class="seg" style="display:flex"><button class="grow ${st.u === 1 ? 'on' : ''}" data-u="1">${esc(p.unit)}</button><button class="grow ${st.u === 2 ? 'on' : ''}" data-u="2">${esc(p.unit2)} (= ${fq(p.rate2)} ${esc(p.unit)})</button></div></div>` : ''}
       <div class="g2"><div class="f"><label>Số lượng (<span id="qU"></span>)</label><input id="qQty" inputmode="decimal" value="${fq(st.qty)}"></div>
@@ -1310,7 +1336,7 @@ function drawTon() {
   const l = S.products.filter(p => (stF.cat === 'all' || p.cat === stF.cat) && (!stF.low || p.stock <= (p.min || 0)) && (!stF.exp || hsdWarn(p)) && (!q || norm(p.name + ' ' + p.code + ' ' + (p.spec || '')).includes(q)));
   const val = l.reduce((s, p) => s + Math.max(0, p.stock) * (p.cost || 0), 0);
   $('#tSum').innerHTML = `<span><b>${l.length}</b> mặt hàng</span><span>Dưới định mức: <b class="err-t">${l.filter(p => p.stock <= (p.min || 0)).length}</b></span><span>Sắp / quá hạn: <b class="err-t">${l.filter(hsdWarn).length}</b></span>${isAdmin() ? `<span>Giá trị tồn (giá vốn): <b>${fmt(val)}</b></span>` : ''}`;
-  $('#tList').innerHTML = l.map(p => `<button class="li li-p" data-act="product" data-id="${p.id}" ${p.active === false ? 'style="opacity:.5"' : ''}><span class="pc-ic" style="width:36px;height:36px;font-size:18px">${catIcon(p.cat)}</span>
+  $('#tList').innerHTML = l.map(p => `<button class="li li-p" data-act="product" data-id="${p.id}" ${p.active === false ? 'style="opacity:.5"' : ''}><span class="pc-ic" style="width:40px;height:40px;font-size:18px">${pIcon(p)}</span>
       <span><b>${esc(p.name)}</b><small>${esc(p.code)}${p.spec ? ' · ' + esc(p.spec) : ''} · ${esc(p.cat)}${p.exp ? ' · HSD ' + hsdDate(p.exp) : ''}</small>${hsdTag(p)}</span>
       <span class="hm r">${fmt(p.price)}<small>/${esc(p.unit)}${p.priceSi ? ' · GV/NV ' + num(p.priceSi) : ''}</small></span>
       <span class="hm r">${isAdmin() ? fmt(Math.max(0, p.stock) * (p.cost || 0)) + '<small>vốn ' + num(p.cost) + '/' + esc(p.unit) + '</small>' : '<small>Định mức ' + fq(p.min || 0) + '</small>'}</span>
@@ -1322,7 +1348,7 @@ function productDetail(id) {
   const rows = mv.slice(0, 200).map(m => { const r = `<tr><td class="l">${ddmmyy(m.t)} ${hhmm(m.t)}</td><td class="l">${MOVE_T[m.type] || m.type}<br><small class="muted">${esc(m.ref)}</small></td><td class="ok-t">${m.d > 0 ? fq(m.d) : ''}</td><td class="err-t">${m.d < 0 ? fq(-m.d) : ''}</td><td><b>${fq(bal)}</b></td></tr>`; bal = Math.round((bal - m.d) * 1000) / 1000; return r; }).join('');
   openModal(`<div class="dlg-h"><h3>${esc(p.name)}</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b">
-      <div class="kpis" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+      ${S.imgs[p.id] ? `<div class="row" style="margin-bottom:12px"><span class="pc-ic big">${pIcon(p)}</span><div class="muted" style="font-size:13px">${esc(p.code)} · ${esc(p.cat)}</div></div>` : ''}<div class="kpis" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
         <div class="kpi" style="--c:var(--yel)"><span>Tồn kho</span><b class="st ${stCls(p)}">${fq(p.stock)}</b><small>${esc(p.unit)}${p.unit2 && p.rate2 ? ' · ≈' + fq(p.stock / p.rate2) + ' ' + esc(p.unit2) : ''}</small></div>
         <div class="kpi"><span>Giá lẻ</span><b>${num(p.price)}</b><small>/${esc(p.unit)}</small></div>
         <div class="kpi"><span>Giá ưu đãi GV/NV</span><b>${num(p.priceSi || p.price)}</b><small>/${esc(p.unit)}</small></div>
@@ -1338,8 +1364,12 @@ function editProduct(id) {
   const o = id ? prodOf(id) : null, adm = can('price');
   const p = o ? { ...o } : { name: '', code: '', spec: '', cat: stF.cat !== 'all' ? stF.cat : S.settings.cats[0], unit: 'cái', unit2: '', rate2: '', price: '', priceSi: '', cost: '', min: 0, exp: '', active: true };
   const unitOpts = sel => S.settings.units.map(u => `<option ${u === sel ? 'selected' : ''}>${esc(u)}</option>`).join('');
+  let img = o ? S.imgs[o.id] || '' : '', imgChanged = false;
   const d = openModal(`<div class="dlg-h"><h3>${o ? 'Sửa hàng hóa' : 'Thêm hàng hóa'}</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b">
+      <div class="pe-row"><label class="pe-img" id="pImgBox"></label>
+        <div class="grow"><b>Hình ảnh sản phẩm</b><div class="muted" style="font-size:12.5px;margin:2px 0 8px">Bấm vào khung để chọn ảnh từ máy / chụp bằng điện thoại. Trên máy tính có thể <b>Copy ảnh rồi bấm Ctrl+V</b> trong hộp thoại này. Ảnh tự cắt vuông & thu nhỏ.</div>
+          <div class="row"><button type="button" class="btn sm ghost" id="pImgPick">📷 Chọn ảnh</button><button type="button" class="btn sm danger ghost" id="pImgDel">Xóa ảnh</button></div></div></div>
       <div class="f"><label>Tên hàng *</label><input id="pName" value="${esc(p.name)}" placeholder="VD: Sữa tươi Vinamilk có đường 180ml"></div>
       <div class="g3"><div class="f"><label>Mã hàng</label><input id="pCode" value="${esc(p.code)}" placeholder="Quét mã vạch hoặc để trống"></div>
         <div class="f"><label>Nhóm hàng</label><select id="pCat">${S.settings.cats.map(c => `<option ${c === p.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></div>
@@ -1357,6 +1387,17 @@ function editProduct(id) {
       ${o ? '<p class="muted" style="font-size:12.5px;margin:0">Muốn thay đổi số lượng tồn, dùng <b>Nhập kho</b> hoặc <b>Kiểm kho</b> để có chứng từ.</p>' : ''}
     </div>
     <div class="dlg-f">${o && isAdmin() ? '<button class="btn danger ghost" id="pDel">Xóa</button>' : ''}<span class="grow"></span><button class="btn ghost" data-act="close">Hủy</button><button class="btn yel" id="pOk">Lưu</button></div>`, 'lg');
+  const drawImg = () => {
+    $('#pImgBox', d).innerHTML = (img ? `<img src="${img}" alt="">` : `<span class="ph"><b>${catIcon($('#pCat', d).value)}</b>Thêm ảnh</span>`) + '<input type="file" accept="image/*" hidden id="pFile">';
+    $('#pImgDel', d).style.display = img ? '' : 'none';
+    $('#pFile', d).onchange = e => setImg(e.target.files[0]);
+  };
+  const setImg = async f => { if (!f) return; try { img = await readImage(f); imgChanged = true; drawImg(); } catch (err) { toast(err.message, 'err'); } };
+  $('#pImgPick', d).onclick = () => $('#pFile', d).click();
+  $('#pImgDel', d).onclick = () => { img = ''; imgChanged = true; drawImg(); };
+  $('#pCat', d).addEventListener('change', () => { if (!img) drawImg(); });
+  d.addEventListener('paste', e => { const it = [...(e.clipboardData || {}).items || []].find(x => x.type.startsWith('image/')); if (it) { e.preventDefault(); setImg(it.getAsFile()); } });
+  drawImg();
   $('#pOk', d).onclick = () => {
     const name = $('#pName', d).value.trim(), pv = $('#pPrice', d).value, price = Math.round(+pv);
     if (!name) return toast('Nhập tên hàng', 'err'); if (pv === '' || !(price >= 0)) return toast('Nhập giá bán hợp lệ', 'err');
@@ -1367,12 +1408,14 @@ function editProduct(id) {
     if (!code) do { code = 'SP' + pad(++S.seq.prod, 4); } while (S.products.some(x => x.code === code));
     const data = { name, code, cat: $('#pCat', d).value, spec: $('#pSpec', d).value.trim(), unit, unit2: unit2 || '', rate2: unit2 ? rate2 : 0, min: pq($('#pMin', d).value), exp: $('#pExp', d).value || '', active: $('#pActive', d).checked };
     if (adm || !o) Object.assign(data, { price, priceSi: Math.round(+$('#pPriceSi', d).value || 0), cost: Math.round(+$('#pCost', d).value || 0) });
+    let pid = o && o.id;
     if (o) Object.assign(o, data);
-    else { const np = { id: uid(), created: Date.now(), stock: 0, price, priceSi: 0, cost: 0, ...data }; S.products.push(np); const s0 = pq($('#pStock0', d).value); if (s0) move(np.id, s0, 'D', 'Tồn đầu kỳ'); }
+    else { const np = { id: uid(), created: Date.now(), stock: 0, price, priceSi: 0, cost: 0, ...data }; pid = np.id; S.products.push(np); const s0 = pq($('#pStock0', d).value); if (s0) move(np.id, s0, 'D', 'Tồn đầu kỳ'); }
+    if (imgChanged) { if (img) S.imgs[pid] = img; else delete S.imgs[pid]; save('imgs'); }
     save('products', 'moves', 'seq'); closeAllModals(); toast('Đã lưu hàng hóa'); refresh();
   };
   const del = $('#pDel', d);
-  if (del) del.onclick = async () => { if (S.moves.some(m => m.pid === o.id && m.type !== 'D')) return toast('Hàng đã có giao dịch, chỉ nên bỏ chọn "Đang kinh doanh"', 'err'); if (!(await ask(`Xóa <b>${esc(o.name)}</b>?`, 'Xóa', true))) return; S.products = S.products.filter(x => x !== o); S.moves = S.moves.filter(m => m.pid !== o.id); save('products', 'moves'); closeAllModals(); refresh(); };
+  if (del) del.onclick = async () => { if (S.moves.some(m => m.pid === o.id && m.type !== 'D')) return toast('Hàng đã có giao dịch, chỉ nên bỏ chọn "Đang kinh doanh"', 'err'); if (!(await ask(`Xóa <b>${esc(o.name)}</b>?`, 'Xóa', true))) return; S.products = S.products.filter(x => x !== o); S.moves = S.moves.filter(m => m.pid !== o.id); delete S.imgs[o.id]; save('products', 'moves', 'imgs'); closeAllModals(); refresh(); };
   setTimeout(() => $('#pName', d).focus(), 80);
 }
 /* ---- Phiếu nhập ---- */
