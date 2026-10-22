@@ -14,6 +14,7 @@ Chạy trên **iPhone, iPad, Android, máy tính bảng, PC Windows / Mac / Linu
 | **Nhắc hạn sử dụng** | Nhãn ⏰ *HSD còn N ngày* / ⛔ *Quá hạn* trên thẻ hàng, lọc **"Sắp / quá hạn"** ở Tồn kho, số cảnh báo trên menu Kho hàng, danh sách trong Báo cáo; số ngày cảnh báo chỉnh trong Cài đặt (3–30 ngày) |
 | **In** | Khổ **80mm** (máy in nhiệt, mặc định) hoặc **A5**: hóa đơn bán hàng, báo giá, phiếu nhập kho, phiếu thu/chi, báo cáo NXT |
 | **Báo cáo** | Doanh thu theo giờ / ngày / tháng, lãi gộp, thực thu, nhập hàng, theo nhóm hàng / mặt hàng bán chạy / khách / nhân viên; **Nhập – Xuất – Tồn** theo kỳ; công nợ phải thu / phải trả; xuất Excel (CSV) |
+| **Ảnh sản phẩm** | Kho hàng → bấm mặt hàng → *Sửa thông tin* → bấm khung ảnh (hoặc Copy ảnh + Ctrl+V trên máy tính). Ảnh tự cắt vuông, thu nhỏ còn khoảng 10–20 KB, nằm trong file sao lưu |
 | **Dữ liệu** | Sao lưu / khôi phục, **tự động sao lưu** vào thư mục; dữ liệu mẫu 45 mặt hàng canteen, 3 NCC, GV/NV, hóa đơn 3 tuần |
 
 ## Dùng thử 7 ngày & mã kích hoạt
