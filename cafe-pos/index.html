@@ -819,7 +819,7 @@ function tableMenu() {
   openModal(`<h3>${tableName(ui.table)}</h3>
     <div style="display:grid;gap:9px;margin-top:12px">
       <button class="btn" data-act="moveTable" ${has ? '' : 'disabled'}>🔀 Chuyển / Gộp bàn</button>
-      <button class="btn" data-act="printTemp" ${has ? '' : 'disabled'}>🧾 In phiếu tạm tính</button>
+      <button class="btn" data-act="printTemp" ${has ? '' : 'disabled'}>🧾 In phiếu tính tiền</button>
       <button class="btn danger" data-act="clearTable" ${has ? '' : 'disabled'}>🗑️ Hủy toàn bộ món của bàn</button>
       <button class="btn ghost" data-act="closeModal">Đóng</button>
     </div>`);
@@ -918,7 +918,7 @@ function updatePay(rebuildBtns = true) {
 }
 function printPayQR() {
   const c = payCalc(); const items = curItems();
-  printBill({ tableName: tableName(ui.table), items, sub: c.sub, disc: c.d, total: c.total, time: Date.now() }, true);
+  printBill({ tableName: tableName(ui.table), items, sub: c.sub, disc: c.d, total: c.total, time: Date.now(), staff: ME ? ME.name : '' }, true);
 }
 function confirmPay(doPrint) {
   const c = payCalc();
@@ -928,7 +928,7 @@ function confirmPay(doPrint) {
     id: ++S.seq, table: k, tableName: tableName(k), items: t.items.map(l => ({ ...l })),
     sub: c.sub, disc: c.d, total: c.total, method: pay.method,
     given: pay.method === 'cash' ? (pay.given || c.total) : c.total, change: pay.method === 'cash' ? c.change : 0,
-    openedAt: t.openedAt, time: Date.now()
+    openedAt: t.openedAt, time: Date.now(), staff: ME ? ME.name : ''
   };
   S.bills.push(bill);
   delete S.tables[k];
@@ -943,8 +943,8 @@ function printBill(b, temp = false) {
   const s = S.settings;
   $('#print').innerHTML = `
     <div class="c"><h2>${esc(s.shopName)}</h2>${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}</div>
-    <hr><div class="c t">${temp ? 'PHIẾU TẠM TÍNH' : 'HÓA ĐƠN THANH TOÁN'}</div>
-    <div>${temp ? '' : 'Số: ' + pad(b.id) + ' · '}${esc(b.tableName)}<br>Ngày: ${ddmm(b.time)} ${hhmm(b.time)}</div><hr>
+    <hr><div class="c t">${temp ? 'PHIẾU TÍNH TIỀN' : 'HÓA ĐƠN THANH TOÁN'}</div>
+    <div>${temp ? '' : 'Số: ' + pad(b.id) + ' · '}${esc(b.tableName)}<br>Ngày: ${ddmm(b.time)} ${hhmm(b.time)}${b.staff ? '<br>Nhân viên: ' + esc(b.staff) : ''}</div><hr>
     <table>${b.items.map(l => `<tr><td colspan="3">${esc(l.name)}${l.note ? ' (' + esc(l.note) + ')' : ''}</td></tr>
       <tr><td>${l.qty} x ${(l.price).toLocaleString('vi-VN')}</td><td></td><td class="r">${(l.qty * l.price).toLocaleString('vi-VN')}</td></tr>`).join('')}</table><hr>
     <table>
@@ -963,7 +963,7 @@ function printTemp() {
   const t = S.tables[ui.table]; if (!t) return;
   const sub = subtotal(t.items);
   closeModal();
-  printBill({ tableName: tableName(ui.table), items: t.items, sub, disc: 0, total: sub, time: Date.now() }, true);
+  printBill({ tableName: tableName(ui.table), items: t.items, sub, disc: 0, total: sub, time: Date.now(), staff: ME ? ME.name : '' }, true);
 }
 
 /* ================= GỬI HÓA ĐƠN QUA ZALO =================
@@ -1015,9 +1015,9 @@ const zaloBox = id => `<div class="zalo-box"><label class="f" style="margin-top:
   <button type="button" class="zalo-link" data-act="zaloPick">📇 Chọn từ danh bạ</button><div class="zalo-list hidden" id="zaloList"></div>
   <p class="muted small">Điện thoại: chọn <b>Zalo</b> trong bảng chia sẻ. Máy tính: ảnh hóa đơn được chép sẵn, mở Zalo rồi bấm <b>Ctrl+V</b>.</p></div>`;
 function billText(b, temp) {
-  const s = S.settings, L = [`🧾 ${temp ? 'PHIẾU TẠM TÍNH' : 'HÓA ĐƠN THANH TOÁN'} - ${s.shopName}`];
+  const s = S.settings, L = [`🧾 ${temp ? 'PHIẾU TÍNH TIỀN' : 'HÓA ĐƠN THANH TOÁN'} - ${s.shopName}`];
   if (s.address) L.push(s.address); if (s.phone) L.push('ĐT: ' + s.phone);
-  L.push(`${b.id ? 'Số ' + pad(b.id) + ' · ' : ''}${b.tableName} · ${ddmm(b.time)} ${hhmm(b.time)}`, '');
+  L.push(`${b.id ? 'Số ' + pad(b.id) + ' · ' : ''}${b.tableName} · ${ddmm(b.time)} ${hhmm(b.time)}`); if (b.staff) L.push('Nhân viên: ' + b.staff); L.push('');
   b.items.forEach(l => L.push(`• ${l.qty} × ${l.name}${l.note ? ' (' + l.note + ')' : ''}: ${fmt(l.qty * l.price)}`));
   L.push(''); if (b.disc) L.push(`Giảm giá: -${fmt(b.disc)}`);
   L.push(`TỔNG CỘNG: ${fmt(b.total)}`);
@@ -1045,8 +1045,9 @@ async function billImage(b, temp) {
     const sub = [s.address, s.phone && 'ĐT: ' + s.phone].filter(Boolean).join(' · ');
     y += 22; txt(sub, hx, `14px ${FAM}`, '#8a7668'); y += 22;
     hr(false);
-    y += 18; txt(temp ? 'PHIẾU TẠM TÍNH' : 'HÓA ĐƠN THANH TOÁN', W / 2, `700 18px ${FAM}`, '#6f4e37', 'center');
-    y += 24; txt(`${b.id ? 'Số ' + pad(b.id) + ' · ' : ''}${b.tableName}  ·  ${ddmm(b.time)} ${hhmm(b.time)}`, W / 2, `14px ${FAM}`, '#8a7668', 'center'); y += 6;
+    y += 18; txt(temp ? 'PHIẾU TÍNH TIỀN' : 'HÓA ĐƠN THANH TOÁN', W / 2, `700 18px ${FAM}`, '#6f4e37', 'center');
+    y += 24; txt(`${b.id ? 'Số ' + pad(b.id) + ' · ' : ''}${b.tableName}  ·  ${ddmm(b.time)} ${hhmm(b.time)}`, W / 2, `14px ${FAM}`, '#8a7668', 'center');
+    if (b.staff) { y += 20; txt('Nhân viên: ' + b.staff, W / 2, `600 14px ${FAM}`, '#6f4e37', 'center'); } y += 6;
     hr(true);
     for (const l of b.items) {
       const nm = wrapLines(l.name + (l.note ? ' (' + l.note + ')' : ''), `600 16px ${FAM}`, W - 2 * M - 120);
@@ -1080,12 +1081,12 @@ async function zaloSend(id) {
   const ph = (($('#zaloPhone') || {}).value || '').replace(/[^\d+]/g, '');
   let b, temp = false;
   if (id) { b = S.bills.find(x => x.id === +id); if (!b) return; }
-  else { const c = payCalc(); b = { tableName: tableName(ui.table), items: curItems(), sub: c.sub, disc: c.d, total: c.total, time: Date.now(), method: pay.method }; temp = true; }
+  else { const c = payCalc(); b = { tableName: tableName(ui.table), items: curItems(), sub: c.sub, disc: c.d, total: c.total, time: Date.now(), method: pay.method, staff: ME ? ME.name : '' }; temp = true; }
   if (ph.length >= 9) zaloRemember(ph, b.tableName);
   const text = billText(b, temp), key = text + (temp ? '|' + hasBank() : '');
   const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const blobP = zaloCache && zaloCache.key === key ? Promise.resolve(zaloCache.blob) : billImage(b, temp);
-  const fname = `hoa-don-${b.id ? pad(b.id) : 'tam-tinh'}.png`;
+  const fname = `hoa-don-${b.id ? pad(b.id) : 'tinh-tien'}.png`;
   try {
     if (mobile && navigator.share && navigator.canShare) {
       const blob = await blobP; zaloCache = { key, blob }; const file = new File([blob], fname, { type: 'image/png' });
@@ -1238,7 +1239,7 @@ function renderReport() {
 function billDetail(id) {
   const b = S.bills.find(x => x.id === id); if (!b) return;
   openModal(`<h3>Hóa đơn #${pad(b.id)} · ${esc(b.tableName)}</h3>
-    <p class="muted" style="margin:0 0 8px">${ddmm(b.time)} ${hhmm(b.time)} · ${b.method === 'bank' ? 'Chuyển khoản' : 'Tiền mặt'}</p>
+    <p class="muted" style="margin:0 0 8px">${ddmm(b.time)} ${hhmm(b.time)} · ${b.method === 'bank' ? 'Chuyển khoản' : 'Tiền mặt'}${b.staff ? ' · NV: ' + esc(b.staff) : ''}</p>
     <div class="card">${b.items.map(l => `<div class="kv"><span>${l.qty} × ${esc(l.name)}${l.note ? ' <small class="muted">(' + esc(l.note) + ')</small>' : ''}</span><span>${fmt(l.qty * l.price)}</span></div>`).join('')}
       ${b.disc ? `<div class="kv"><span>Giảm giá</span><span>−${fmt(b.disc)}</span></div>` : ''}
       <div class="kv big"><span>TỔNG</span><span>${fmt(b.total)}</span></div></div>
@@ -1260,8 +1261,8 @@ function exportCsv() {
   const [a, b] = reportRange();
   const bills = S.bills.filter(x => x.time >= a && x.time < b);
   const q = v => '"' + String(v).replace(/"/g, '""') + '"';
-  const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Bàn', 'Món', 'SL', 'Đơn giá', 'Thành tiền', 'Ghi chú', 'Giảm giá HĐ', 'Tổng HĐ', 'Hình thức']];
-  bills.forEach(x => x.items.forEach((l, i) => rows.push([x.id, ddmm(x.time), hhmm(x.time), x.tableName, l.name, l.qty, l.price, l.qty * l.price, l.note || '',
+  const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Bàn', 'Nhân viên', 'Món', 'SL', 'Đơn giá', 'Thành tiền', 'Ghi chú', 'Giảm giá HĐ', 'Tổng HĐ', 'Hình thức']];
+  bills.forEach(x => x.items.forEach((l, i) => rows.push([x.id, ddmm(x.time), hhmm(x.time), x.tableName, x.staff || '', l.name, l.qty, l.price, l.qty * l.price, l.note || '',
     i === 0 ? x.disc : '', i === 0 ? x.total : '', x.method === 'bank' ? 'Chuyển khoản' : 'Tiền mặt'])));
   shareOrDownload(`doanh-thu_${isoDate(a)}_${isoDate(b - 1)}.csv`, '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n'), 'text/csv');
 }

@@ -1181,7 +1181,7 @@ function printReceipt(o) {
   const s = S.settings;
   $('#print').innerHTML = `<div class="c"><h2>${esc(s.shopName)}</h2>${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}</div><hr>
     <div class="c t">HÓA ĐƠN DỊCH VỤ</div>
-    <div>Số: ${o.code}<br>Ngày: ${ddmmyy(o.time)} ${hhmm(o.time)}<br>Thu ngân: ${esc(o.staffName)}${o.customerName ? '<br>Khách: ' + esc(o.customerName) + ' - ' + esc(o.customerPhone) : ''}</div><hr>
+    <div>Số: ${o.code}<br>Ngày: ${ddmmyy(o.time)} ${hhmm(o.time)}<br>Nhân viên: ${esc(o.staffName)}${o.customerName ? '<br>Khách: ' + esc(o.customerName) + ' - ' + esc(o.customerPhone) : ''}</div><hr>
     <table>${o.items.map(l => `<tr><td colspan="2">${esc(l.name)}${l.techName ? '<br><small>KTV: ' + esc(l.techName) + '</small>' : ''}</td></tr><tr><td>${l.qty} x ${num(l.price)}</td><td class="r">${num(l.qty * l.price)}</td></tr>`).join('')}</table><hr>
     <table><tr><td>Tạm tính</td><td class="r">${fmt(o.sub)}</td></tr>${o.disc ? `<tr><td>Giảm giá</td><td class="r">-${fmt(o.disc)}</td></tr>` : ''}
       <tr class="t"><td>TỔNG CỘNG</td><td class="r">${fmt(o.total)}</td></tr><tr><td>Thanh toán</td><td class="r">${METHODS[o.method]}</td></tr>
@@ -1326,7 +1326,7 @@ function zaloDocOf(o) {
   totals.push(['TỔNG CỘNG', fmt(o.total), 1], ['Thanh toán', METHODS[o.method]]);
   if (o.method === 'cash') totals.push(['Khách đưa', fmt(o.given)], ['Tiền thối', fmt(o.change)]);
   if (o.points) totals.push(['Điểm tích lũy', '+' + o.points]);
-  return { title: o.void ? 'HÓA ĐƠN DỊCH VỤ (ĐÃ HỦY)' : 'HÓA ĐƠN DỊCH VỤ', code: o.code, time: o.time, party: [['Thu ngân', o.staffName], ...(o.customerName ? [['Khách', o.customerName + (o.customerPhone ? ' - ' + o.customerPhone : '')]] : [])],
+  return { title: o.void ? 'HÓA ĐƠN DỊCH VỤ (ĐÃ HỦY)' : 'HÓA ĐƠN DỊCH VỤ', code: o.code, time: o.time, party: [['Nhân viên', o.staffName], ...(o.customerName ? [['Khách', o.customerName + (o.customerPhone ? ' - ' + o.customerPhone : '')]] : [])],
     lines: o.items.map(l => ({ name: l.name + (l.techName ? ' · KTV ' + l.techName : ''), sub: `${l.qty} × ${num(l.price)}đ`, amount: fmt(l.qty * l.price) })), totals,
     qr: o.method === 'bank' && hasBank() ? { amount: o.total, info: o.code, label: 'Thanh toán chuyển khoản' } : null, footer: s.footer };
 }
@@ -1433,7 +1433,7 @@ function orderDetail(id) {
     <div class="dlg-b">
       <div class="g3" style="margin-bottom:14px;font-size:14px">
         <div><div class="muted" style="font-size:12px">Khách hàng</div><b>${esc(o.customerName || 'Khách vãng lai')}</b>${o.customerPhone ? '<br>' + esc(o.customerPhone) : ''}</div>
-        <div><div class="muted" style="font-size:12px">Thu ngân</div><b>${esc(o.staffName)}</b></div>
+        <div><div class="muted" style="font-size:12px">Nhân viên bán hàng</div><b>${esc(o.staffName)}</b></div>
         <div><div class="muted" style="font-size:12px">Thanh toán</div><b>${METHODS[o.method]}</b></div></div>
       <div class="list">${o.items.map(l => `<div class="li" style="grid-template-columns:auto 1fr auto auto">${sic(l.cat, '', l.iid)}<span><b>${esc(l.name)}</b><small>${l.techName ? 'KTV: ' + esc(l.techName) + (isAdmin() && l.commAmt ? ` · hoa hồng ${l.commPct}% = ${fmt(l.commAmt)}` : '') : l.kind === 'prod' ? 'Sản phẩm' : ''}</small></span><span class="muted">${l.qty} × ${num(l.price)}</span><span class="r">${fmt(l.qty * l.price)}</span></div>`).join('')}</div>
       <div style="margin-top:12px"><div class="kv"><span class="muted">Tạm tính</span><span>${fmt(o.sub)}</span></div>
@@ -1646,7 +1646,7 @@ async function shareOrDownload(name, text, type) {
 }
 function exportCsv() {
   const [a, b] = rangeOf(repF.r, repF.from, repF.to), q = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
-  const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Trạng thái', 'Thu ngân', 'Khách hàng', 'SĐT', 'Dịch vụ / SP', 'Nhóm', 'Loại', 'SL', 'Đơn giá', 'Thành tiền', 'KTV', 'Hoa hồng %', 'Hoa hồng (đ)', 'Giảm giá HĐ', 'Tổng HĐ', 'Thanh toán']];
+  const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Trạng thái', 'Nhân viên', 'Khách hàng', 'SĐT', 'Dịch vụ / SP', 'Nhóm', 'Loại', 'SL', 'Đơn giá', 'Thành tiền', 'KTV', 'Hoa hồng %', 'Hoa hồng (đ)', 'Giảm giá HĐ', 'Tổng HĐ', 'Thanh toán']];
   S.orders.filter(o => o.time >= a && o.time < b).forEach(o => o.items.forEach((l, i) => rows.push([o.code, ddmmyy(o.time), hhmm(o.time), o.void ? 'Đã hủy' : 'Hoàn tất', o.staffName, o.customerName, o.customerPhone,
     l.name, l.cat, l.kind === 'svc' ? 'Dịch vụ' : 'Sản phẩm', l.qty, l.price, l.price * l.qty, l.techName, l.commPct, l.commAmt, i ? '' : o.disc, i ? '' : o.total, METHODS[o.method]])));
   shareOrDownload(`bao-cao-salon_${isoDate(a || Date.now())}.csv`, '﻿' + rows.map(r => r.map(q).join(',')).join('\r\n'), 'text/csv');

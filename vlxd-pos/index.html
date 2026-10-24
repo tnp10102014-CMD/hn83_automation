@@ -1225,7 +1225,7 @@ function orderDoc(o, quote) {
     if (o.customerId && (o.oldDebt || o.debt)) totals.push(['Nợ cũ', fmt(o.oldDebt)], ['TỔNG NỢ HIỆN TẠI', fmt(o.oldDebt + o.debt), 1]);
   }
   return { title: quote ? 'Bảng báo giá' : o.void ? 'Phiếu xuất kho (ĐÃ HỦY)' : 'Phiếu xuất kho kiêm hóa đơn', sub: quote ? 'Báo giá có hiệu lực trong 7 ngày' : '', code: o.code, time: o.time,
-    party: [['Khách hàng', o.customerName || 'Khách lẻ'], ...(o.phone ? [['Điện thoại', o.phone]] : []), ...(o.addr ? [['Địa chỉ giao', o.addr]] : []), ...(quote ? [] : [['Người lập', o.staffName]])],
+    party: [['Khách hàng', o.customerName || 'Khách lẻ'], ...(o.phone ? [['Điện thoại', o.phone]] : []), ...(o.addr ? [['Địa chỉ giao', o.addr]] : []), ...(o.staffName ? [['Nhân viên', o.staffName]] : [])],
     cols: ['STT', 'Tên hàng - Quy cách', 'ĐVT', 'SL', 'Đơn giá', 'Thành tiền'], rows, rows80: o.items.map(l => [esc(l.name), `${fq(l.qty)} ${esc(l.uname)} x ${num(l.price)}`, num(l.amount)]),
     totals, words: o.total, note: o.note, qr: hasBank() && (quote || o.debt || o.method === 'bank') ? { amount: quote ? o.total : o.debt || o.total, info: o.code } : null,
     sigs: quote ? ['Khách hàng', 'Người báo giá'] : ['Người mua hàng', 'Người giao hàng', 'Thủ kho', 'Người lập phiếu'], footer: quote ? '' : S.settings.footer };
@@ -1418,7 +1418,7 @@ function orderDetail(id) {
       <div class="g3" style="margin-bottom:14px;font-size:14px">
         <div><div class="muted" style="font-size:12px">Khách hàng</div><b>${esc(o.customerName || 'Khách lẻ')}</b>${o.phone ? '<br>' + esc(o.phone) : ''}</div>
         <div><div class="muted" style="font-size:12px">Giao hàng</div><b>${esc(o.addr || 'Lấy tại cửa hàng')}</b></div>
-        <div><div class="muted" style="font-size:12px">Người lập</div><b>${esc(o.staffName)}</b></div></div>
+        <div><div class="muted" style="font-size:12px">Nhân viên bán hàng</div><b>${esc(o.staffName)}</b></div></div>
       <div class="tbl-w"><table class="tbl"><thead><tr><th>Hàng hóa</th><th>SL</th><th>Đơn giá</th><th>Thành tiền</th></tr></thead>
         <tbody>${o.items.map(l => `<tr><td class="l">${esc(l.name)}<br><small class="muted">${esc(l.code)}${l.spec ? ' · ' + esc(l.spec) : ''}</small></td><td>${fq(l.qty)} ${esc(l.uname)}</td><td>${num(l.price)}</td><td><b>${num(l.amount)}</b></td></tr>`).join('')}</tbody></table></div>
       <div style="margin-top:10px"><div class="kv"><span class="muted">Tiền hàng</span><span>${fmt(o.sub)}</span></div>
@@ -2006,7 +2006,7 @@ const A = {
   cuF: d => { cusF.f = d.v; vCustomers(); },
   repTab: d => { repF.tab = d.v; vReports(); }, repR: d => { repF.r = d.v; vReports(); },
   csvSales: () => { const [a, b] = rangeOf(repF.r, repF.from, repF.to);
-    const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Trạng thái', 'Người lập', 'Khách hàng', 'SĐT', 'Mã hàng', 'Tên hàng', 'Nhóm', 'SL', 'ĐVT', 'Đơn giá', 'Thành tiền', 'Giá vốn', 'Chiết khấu HĐ', 'Phí VC', 'Tổng HĐ', 'Đã trả', 'Ghi nợ', 'Thanh toán']];
+    const rows = [['Số HĐ', 'Ngày', 'Giờ', 'Trạng thái', 'Nhân viên', 'Khách hàng', 'SĐT', 'Mã hàng', 'Tên hàng', 'Nhóm', 'SL', 'ĐVT', 'Đơn giá', 'Thành tiền', 'Giá vốn', 'Chiết khấu HĐ', 'Phí VC', 'Tổng HĐ', 'Đã trả', 'Ghi nợ', 'Thanh toán']];
     S.orders.filter(o => o.time >= a && o.time < b).forEach(o => o.items.forEach((l, i) => rows.push([o.code, ddmmyy(o.time), hhmm(o.time), o.void ? 'Đã hủy' : 'Hoàn tất', o.staffName, o.customerName, o.phone, l.code, l.name, l.cat, l.qty, l.uname, l.price, l.amount, Math.round(l.base * l.cost), i ? '' : o.disc, i ? '' : o.ship, i ? '' : o.total, i ? '' : o.paid, i ? '' : o.debt, METHODS[o.method]])));
     shareOrDownload(`ban-hang_${isoDate(a || Date.now())}.csv`, csv(rows), 'text/csv'); },
   csvNXT: () => { const [a, b, R] = repNXT.cur; shareOrDownload(`nhap-xuat-ton_${isoDate(a)}_${isoDate(b - 1)}.csv`, csv([['Mã hàng', 'Tên hàng', 'Nhóm', 'ĐVT', 'Tồn đầu', 'Nhập', 'Xuất', 'Điều chỉnh', 'Tồn cuối', 'Giá vốn BQ', 'Giá trị tồn'], ...R.map(r => [r.p.code, r.p.name, r.p.cat, r.p.unit, r.start, r.nhap, r.xuat, r.kiem, r.end, r.p.cost, Math.round(r.val)])]), 'text/csv'); },
