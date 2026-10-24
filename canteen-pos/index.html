@@ -784,6 +784,7 @@ const can = act => !!ME && PERM[act].includes(ME.role);
 const isAdmin = () => !!ME && ME.role === 'admin';
 /* Hành động chỉ Quản lý (Admin) được dùng: thay đổi cài đặt, hàng hóa / sản phẩm, tài khoản, sao lưu, bản quyền… */
 const ADMIN_ACTS = new Set(['editProduct', 'voidOrder', 'editUser', 'saveShop', 'addCat', 'delCat', 'addUnit', 'delUnit', 'saveBank', 'testQR', 'backup', 'clearDemo', 'wipe', 'license', 'csvSales', 'csvNXT', 'printNXT', 'csvDebt', 'repTab', 'repR', 'bkPick', 'bkNow']);
+const COPYRIGHT_TXT = 'Bản quyền thuộc về HN83_Automation - Copyright: 2026';
 const SESS = 'cpos-session';
 const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
 const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
@@ -1232,13 +1233,13 @@ function printDoc(doc) {
       ${doc.note ? `<div>Ghi chú: ${esc(doc.note)}</div>` : ''}
       ${doc.qr ? `<div class="pqr">${qrSvg(doc.qr.amount, doc.qr.info)}Quét mã để chuyển khoản ${fmt(doc.qr.amount)}</div>` : ''}
       <div class="sig">${doc.sigs.map(x => `<div><b>${x}</b><small>(Ký, ghi rõ họ tên)</small></div>`).join('')}</div>
-      ${doc.footer ? `<div class="c" style="margin-top:8px;font-style:italic">${esc(doc.footer)}</div>` : ''}</div>`;
+      ${doc.footer ? `<div class="c" style="margin-top:8px;font-style:italic">${esc(doc.footer)}</div>` : ''}<div class="c" style="font-size:10px;opacity:.75;margin-top:5px">${COPYRIGHT_TXT}</div></div>`;
   } else {
     html = `<style>@page{size:80mm auto;margin:0}</style><div class="p80"><h2>${esc(s.shopName)}</h2><div class="c">${s.address ? esc(s.address) + '<br>' : ''}${s.phone ? 'ĐT: ' + esc(s.phone) : ''}</div><hr>
       <h1>${esc(doc.title)}</h1><div>Số: ${esc(doc.code)}<br>Ngày: ${ddmmyy(doc.time)} ${hhmm(doc.time)}${doc.party.map(([k, v]) => `<br>${k}: ${esc(v)}`).join('')}</div><hr>
       ${doc.rows ? `<table>${doc.rows80.map(r => `<tr><td colspan="2">${r[0]}</td></tr><tr><td>${r[1]}</td><td class="r">${r[2]}</td></tr>`).join('')}</table><hr>` : ''}
       <table>${doc.totals.map(([k, v, b]) => `<tr><td>${k}</td><td class="r">${b ? '<b>' + v + '</b>' : v}</td></tr>`).join('')}</table>
-      ${doc.qr ? `<div class="pqr">${qrSvg(doc.qr.amount, doc.qr.info)}Quét mã để chuyển khoản</div>` : ''}<hr><div class="c">${esc(doc.footer || '')}</div></div>`;
+      ${doc.qr ? `<div class="pqr">${qrSvg(doc.qr.amount, doc.qr.info)}Quét mã để chuyển khoản</div>` : ''}<hr><div class="c">${esc(doc.footer || '')}</div><div class="c" style="font-size:10px;opacity:.75;margin-top:5px">${COPYRIGHT_TXT}</div></div>`;
   }
   $('#print').innerHTML = html; setTimeout(() => window.print(), 150);
 }
@@ -1280,6 +1281,7 @@ function zaloText(d) {
   if (d.qr && hasBank()) L.push('', `Chuyển khoản: ${bankLabel(s.bankId)} · ${s.bankAcc} · ${s.bankName}`, `Số tiền: ${fmt(d.qr.amount)} · Nội dung: ${norm(d.qr.info).toUpperCase()}`);
   if (d.note) L.push('', 'Ghi chú: ' + d.note);
   if (d.footer) L.push('', d.footer);
+  L.push('', COPYRIGHT_TXT);
   return L.join('\n');
 }
 const zaloLoadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('img')); im.src = src; });
@@ -1318,6 +1320,7 @@ async function zaloImage(d) {
     }
     if (d.note) { y += 14; wrapLines('Ghi chú: ' + d.note, `13.5px ${FAM}`, W - 2 * M).forEach(t => { y += 18; txt(t, M, `13.5px ${FAM}`, '#555'); }); }
     if (d.footer) { y += 14; hr(false); y += 14; txt(d.footer, W / 2, `italic 14.5px ${FAM}`, AC, 'center'); }
+    y += 24; txt(COPYRIGHT_TXT, W / 2, `12px ${FAM}`, '#9a9a9a', 'center');
     return y + M;
   };
   const meas = document.createElement('canvas').getContext('2d'), H = Math.ceil(paint(meas, false));

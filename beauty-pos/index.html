@@ -767,6 +767,7 @@ let ME = null;
 const isAdmin = () => !!ME && ME.role === 'admin';
 /* Hành động chỉ Quản lý (Admin) được dùng: thay đổi cài đặt, hàng hóa / sản phẩm, tài khoản, sao lưu, bản quyền… */
 const ADMIN_ACTS = new Set(['editItem', 'editTech', 'editUser', 'saveShop', 'addCat', 'delCat', 'saveBank', 'testQR', 'backup', 'clearDemo', 'wipe', 'voidOrder', 'license', 'exportCsv', 'repR', 'bkPick', 'bkNow']);
+const COPYRIGHT_TXT = 'Bản quyền thuộc về HN83_Automation - Copyright: 2026';
 const SESS = 'bpos-session';
 const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
 const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
@@ -1191,7 +1192,7 @@ function printReceipt(o) {
       ${o.method === 'cash' ? `<tr><td>Khách đưa</td><td class="r">${fmt(o.given)}</td></tr><tr><td>Tiền thối</td><td class="r">${fmt(o.change)}</td></tr>` : ''}
       ${o.points ? `<tr><td>Điểm tích lũy</td><td class="r">+${o.points}</td></tr>` : ''}</table>
     ${o.method === 'bank' && hasBank() ? `<div class="pqr">${qrSvg(o.total, o.code)}Thanh toán chuyển khoản<br>${esc(bankLabel(s.bankId))} · ${esc(s.bankAcc)}</div>` : ''}
-    ${o.void ? '<hr><div class="c t">*** HÓA ĐƠN ĐÃ HỦY ***</div>' : ''}<hr><div class="c">${esc(s.footer)}</div>`;
+    ${o.void ? '<hr><div class="c t">*** HÓA ĐƠN ĐÃ HỦY ***</div>' : ''}<hr><div class="c">${esc(s.footer)}</div><div class="c" style="font-size:10px;opacity:.75;margin-top:5px">${COPYRIGHT_TXT}</div>`;
   setTimeout(() => window.print(), 150);
 }
 
@@ -1213,6 +1214,7 @@ function zaloText(d) {
   if (d.qr && hasBank()) L.push('', `Chuyển khoản: ${bankLabel(s.bankId)} · ${s.bankAcc} · ${s.bankName}`, `Số tiền: ${fmt(d.qr.amount)} · Nội dung: ${norm(d.qr.info).toUpperCase()}`);
   if (d.note) L.push('', 'Ghi chú: ' + d.note);
   if (d.footer) L.push('', d.footer);
+  L.push('', COPYRIGHT_TXT);
   return L.join('\n');
 }
 const zaloLoadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('img')); im.src = src; });
@@ -1251,6 +1253,7 @@ async function zaloImage(d) {
     }
     if (d.note) { y += 14; wrapLines('Ghi chú: ' + d.note, `13.5px ${FAM}`, W - 2 * M).forEach(t => { y += 18; txt(t, M, `13.5px ${FAM}`, '#555'); }); }
     if (d.footer) { y += 14; hr(false); y += 14; txt(d.footer, W / 2, `italic 14.5px ${FAM}`, AC, 'center'); }
+    y += 24; txt(COPYRIGHT_TXT, W / 2, `12px ${FAM}`, '#9a9a9a', 'center');
     return y + M;
   };
   const meas = document.createElement('canvas').getContext('2d'), H = Math.ceil(paint(meas, false));

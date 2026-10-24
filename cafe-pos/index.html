@@ -564,6 +564,7 @@ let ME = null;
 const isAdmin = () => !!ME && ME.role === 'admin';
 /* Hành động chỉ Quản lý (Admin) được dùng: thực đơn, báo cáo, cài đặt, tài khoản, sao lưu, bản quyền… */
 const ADMIN_ACTS = new Set(['editItem', 'saveItem', 'delItem', 'toggleOff', 'addCat', 'delCat', 'rpt', 'billDetail', 'delBill', 'exportCsv', 'saveSettings', 'goBankSettings', 'testQR', 'backup', 'clearBills', 'resetAll', 'license', 'editUser', 'delUser', 'logoReset']);
+const COPYRIGHT_TXT = 'Bản quyền thuộc về HN83_Automation - Copyright: 2026';
 const can = tab => tab === 'tables' || isAdmin();
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 async function hashPw(pw, salt) {
@@ -960,7 +961,7 @@ function printBill(b, temp = false) {
     </table>
     ${hasBank() && (temp || b.method === 'bank') ? `<div class="pqr">${qrSvg(b.total, b.tableName + (b.id ? ' HD' + b.id : ''))}
       ${temp ? 'Quét mã để chuyển khoản' : 'Đã thanh toán chuyển khoản'}<br>${esc(bankLabel(s.bankId))} · ${esc(s.bankAcc)}<br>${esc(s.bankName)}</div>` : ''}
-    <hr><div class="c">${esc(s.footer)}</div>`;
+    <hr><div class="c">${esc(s.footer)}</div><div class="c" style="font-size:10px;opacity:.75;margin-top:5px">${COPYRIGHT_TXT}</div>`;
   setTimeout(() => window.print(), 150);
 }
 function printTemp() {
@@ -1028,6 +1029,7 @@ function billText(b, temp) {
   if (!temp && b.method === 'bank') L.push('Đã thanh toán chuyển khoản.');
   if (hasBank() && (temp || b.method === 'bank') && temp) L.push('', `Chuyển khoản: ${bankLabel(s.bankId)} · ${s.bankAcc} · ${s.bankName}`, `Nội dung: ${norm(b.tableName + (b.id ? ' HD' + b.id : '')).toUpperCase()}`);
   if (s.footer) L.push('', s.footer);
+  L.push('', COPYRIGHT_TXT);
   return L.join('\n');
 }
 const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('img')); im.src = src; });
@@ -1072,6 +1074,7 @@ async function billImage(b, temp) {
       y += 20; txt(s.bankName || '', W / 2, `14px ${FAM}`, '#2a1d16', 'center');
     }
     if (s.footer) { y += 14; hr(false); y += 14; txt(s.footer, W / 2, `italic 14.5px ${FAM}`, '#6f4e37', 'center'); }
+    y += 24; txt(COPYRIGHT_TXT, W / 2, `12px ${FAM}`, '#9a8f84', 'center');
     return y + M;
   };
   const meas = document.createElement('canvas').getContext('2d'), H = Math.ceil(paint(meas, false));
