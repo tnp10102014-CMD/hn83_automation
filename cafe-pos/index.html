@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Cà Phê POS">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
-<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
 <title>Cà Phê POS</title>
 <style>
 :root{
@@ -202,19 +202,57 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
   #print .pqr svg{width:42mm;height:42mm;display:block;margin:6px auto 2px}
   #print .pqr{text-align:center;font-size:11px}
 }
+
+/* Logo & đăng nhập */
+.top .tl{display:flex;align-items:center;gap:11px;min-width:0}
+.top .tl>div{min-width:0}
+.logo-s{width:42px;height:42px;border-radius:11px;object-fit:cover;flex-shrink:0;background:#222544;border:1.5px solid rgba(255,255,255,.55);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.top h1,.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.who{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);padding:4px 5px 4px 11px;border-radius:20px;font-size:13px;max-width:150px}
+@media(max-width:560px){.tr .clock{display:none}.who{max-width:112px}}
+.who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.who button{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.auth{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:96px 18px 24px;overflow-y:auto;
+  background:radial-gradient(1200px 600px at 20% -10%,#6f4e37 0,transparent 60%),linear-gradient(160deg,#2a1810,#3b2418 55%,#1b100a)}
+.auth-card{width:100%;max-width:400px;background:var(--surface);border-radius:24px;padding:26px 22px 20px;box-shadow:0 24px 60px rgba(0,0,0,.45);margin:auto}
+.auth-logo{display:block;width:150px;height:150px;border-radius:26px;object-fit:cover;margin:-72px auto 10px;background:#222544;border:4px solid var(--surface);box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.auth-card h2{margin:0 0 2px;font-size:22px;text-align:center}
+.auth-card .sub2{text-align:center;color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.auth-card .pw{position:relative}
+.auth-card .pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);padding:6px 9px;font-size:18px}
+.auth-msg{min-height:20px;margin:10px 2px 0;font-size:13.5px;color:var(--danger);text-align:center}
+.auth-card .btn.pri{width:100%;margin-top:14px;padding:14px;font-size:16px}
+.auth-foot{text-align:center;font-size:11.5px;color:var(--muted);margin-top:14px}
+.urow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.urow:last-child{border:0}
+.urow .av{width:36px;height:36px;border-radius:50%;background:var(--primary);color:var(--ink);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.urow .nm{flex:1;text-align:left;min-width:0}.urow .nm small{display:block;color:var(--muted)}
+.tag2{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--surface2);color:var(--primary)}
+.logo-ed{display:flex;gap:14px;align-items:center}.logo-ed img{width:84px;height:84px;border-radius:16px;object-fit:cover;background:#222544;flex-shrink:0}
+.trialbar{background:#d98e3a;color:#2a1d16;font-size:13px;font-weight:700;text-align:center;padding:6px 10px;flex-shrink:0;width:100%}
+.trialbar.urgent{background:#d64545;color:#fff}
+.devcode{font:700 17px ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px;background:var(--surface2);border-radius:12px;padding:11px 12px;text-align:center;word-break:break-all}
+.auth-card textarea,.sheet textarea{width:100%;font:13px ui-monospace,Menlo,Consolas,monospace;border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface);color:var(--text);min-height:76px;outline:none}
+.auth-card .btn.ghost{width:100%;margin-top:8px}
+.lic-st{display:flex;gap:10px;align-items:center;background:var(--surface2);border-radius:12px;padding:11px 12px;margin-bottom:10px}
 </style>
 </head>
 <body>
 
 <header class="top">
   <div class="toprow">
-    <div>
-      <h1 id="shopName">Cà Phê POS</h1>
-      <div class="sub" id="shopSub">Quản lý bàn & tính tiền</div>
+    <div class="tl"><img class="logo-s" id="logoS" alt="Logo" src="icons/logo.jpg">
+      <div>
+        <h1 id="shopName">Cà Phê POS</h1>
+        <div class="sub" id="shopSub">Quản lý bàn & tính tiền</div>
+      </div>
     </div>
-    <div class="clock" id="clock">--:--</div>
+    <div class="tr"><div class="clock" id="clock">--:--</div>
+      <div class="who" id="who"><span id="whoName"></span><button data-act="logout" aria-label="Đăng xuất" title="Đăng xuất">⎋</button></div></div>
   </div>
 </header>
+<div class="trialbar hidden" id="trialBar" data-act="license"></div>
 
 <main id="main"></main>
 
@@ -252,6 +290,7 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
   </div>
 </section>
 
+<div id="auth" class="auth hidden"></div>
 <div id="modal" class="modal hidden"><div class="sheet" id="sheet"></div></div>
 <div id="print"></div>
 
@@ -331,11 +370,12 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 
 function defaultState() {
   return {
-    settings: { shopName: 'Cà Phê POS', address: '', phone: '', tableCount: 20, footer: 'Cảm ơn quý khách - Hẹn gặp lại!', bankId: '', bankAcc: '', bankName: '' },
+    settings: { shopName: 'Cà Phê POS', logo: '', address: '', phone: '', tableCount: 20, footer: 'Cảm ơn quý khách - Hẹn gặp lại!', bankId: '', bankAcc: '', bankName: '' },
     cats: DEFAULT_CATS.slice(),
     menu: DEFAULT_MENU.map(([name, cat, price, emoji]) => ({ id: uid() + Math.random().toString(36).slice(2, 4), name, cat, price, emoji, off: false })),
     tables: {},
     bills: [],
+    users: [],
     seq: 0
   };
 }
@@ -391,13 +431,263 @@ function toast(msg) {
 }
 const buzz = () => { try { navigator.vibrate && navigator.vibrate(12); } catch (e) {} };
 
+/* ================= LOGO ================= */
+const logoSrc = () => S.settings.logo || 'icons/logo.jpg';
+// Ảnh logo/ảnh tải lên: cắt vuông giữa, thu nhỏ 256px, JPEG
+function readImage(file) {
+  return new Promise((res, rej) => {
+    if (!file || !/^image\//.test(file.type)) return rej(new Error('File không phải hình ảnh'));
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const z = Math.min(im.width, im.height), N = 256, c = document.createElement('canvas'); c.width = c.height = N;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, N, N);
+      g.drawImage(im, (im.width - z) / 2, (im.height - z) / 2, z, z, 0, 0, N, N); URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg', 0.85));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); rej(new Error('Không đọc được ảnh')); };
+    im.src = url;
+  });
+}
+
+/* ================= BẢN QUYỀN / DÙNG THỬ =================
+   Mỗi thiết bị có "Mã máy" riêng, dùng thử TRIAL_DAYS ngày. Mã kích hoạt là chữ ký số ECDSA P-256
+   trên (CF | mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật trong công cụ của nhà cung cấp.
+   Dữ liệu bản quyền lưu riêng (không nằm trong sao lưu / đặt lại) nên khôi phục hay đặt lại app không làm mới thời gian dùng thử. */
+const TRIAL_DAYS = 15, DAY = 86400000;
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668', email: 'tnp10102014@gmail.com' };
+const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "7dQM35GfyQg-nWHq6Zcoj5ooEeXyD9110FAo19qMs3c", "y": "Z3nfcCzw1A_nJ0DntPpgC_78-cH-jeQbOMTNp1uofB0"};
+const PLANS = { T15: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
+const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', LIC_KEY = 'cafe-pos-lic';
+let LIC = null, LST = null;
+const b64uDec = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+function newDevId() { const r = crypto.getRandomValues(new Uint8Array(12)), c = [...r].map(b => B32[b & 31]).join(''); return `CF-${c.slice(0, 4)}-${c.slice(4, 8)}-${c.slice(8)}`; }
+const licDB = () => new Promise((res, rej) => { const r = indexedDB.open('cafe-pos-lic', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function idbLic(v) { try { const db = await licDB(); return await new Promise(res => { const tx = db.transaction('kv', v === undefined ? 'readonly' : 'readwrite'), st = tx.objectStore('kv'), rq = v === undefined ? st.get('lic') : st.put(v, 'lic'); rq.onsuccess = () => res(rq.result); rq.onerror = () => res(null); }); } catch (e) { return null; } }
+async function licSave() { try { await idbLic(LIC); } catch (e) {} try { localStorage.setItem(LIC_KEY, JSON.stringify(LIC)); } catch (e) {} }
+async function licLoad() {
+  let l = null, ls = null;
+  try { l = await idbLic(); } catch (e) {}
+  try { ls = JSON.parse(localStorage.getItem(LIC_KEY)); } catch (e) {}
+  if (!l && ls) l = ls;
+  if (!l) l = { dev: newDevId(), start: Date.now(), last: Date.now(), key: '' };
+  if (ls && ls.dev === l.dev) { l.start = Math.min(l.start, ls.start || l.start); l.last = Math.max(l.last || 0, ls.last || 0); if (!l.key && ls.key) l.key = ls.key; }
+  l.last = Math.max(l.last || 0, Date.now()); LIC = l; await licSave();
+}
+async function verifyKey(key) {
+  try {
+    const m = String(key).replace(/\s+/g, '').match(/^CF1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/);
+    if (!m) return { ok: false, why: 'Mã kích hoạt sai định dạng (phải bắt đầu bằng CF1.)' };
+    const payload = b64uDec(m[1]), sig = b64uDec(m[2]);
+    const pk = await crypto.subtle.importKey('jwk', LIC_PUB, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    if (!(await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pk, sig, payload))) return { ok: false, why: 'Mã kích hoạt không hợp lệ' };
+    const [tag, dev, expDays, plan] = new TextDecoder().decode(payload).split('|');
+    if (tag !== 'CF') return { ok: false, why: 'Mã kích hoạt không dành cho Cà Phê POS' };
+    if (dev !== LIC.dev) return { ok: false, why: 'Mã kích hoạt này dành cho máy khác (' + dev + ')' };
+    return { ok: true, exp: +expDays ? +expDays * DAY : 0, plan };
+  } catch (e) { return { ok: false, why: 'Mã kích hoạt không hợp lệ' }; }
+}
+async function licStatus() {
+  const now = Math.max(Date.now(), LIC.last), tamper = Date.now() < LIC.last - 2 * 3600000;
+  if (LIC.key) { const k = await verifyKey(LIC.key); if (k.ok) return { mode: 'licensed', plan: k.plan, exp: k.exp, active: !k.exp || now < k.exp, daysLeft: k.exp ? Math.ceil((k.exp - now) / DAY) : Infinity, tamper }; }
+  const left = TRIAL_DAYS - Math.floor((now - LIC.start) / DAY);
+  return { mode: 'trial', active: left > 0, daysLeft: Math.max(0, left), end: LIC.start + TRIAL_DAYS * DAY, tamper };
+}
+function updTrial() {
+  const b = $('#trialBar'); if (!b || !LST) return;
+  const show = ME && (LST.mode === 'trial' || (LST.exp && LST.daysLeft <= 10));
+  b.classList.toggle('hidden', !show); b.classList.toggle('urgent', LST.daysLeft <= 2);
+  b.textContent = LST.mode === 'trial' ? `Dùng thử · còn ${LST.daysLeft} ngày · chạm để kích hoạt` : `Bản quyền còn ${LST.daysLeft} ngày · chạm để gia hạn`;
+}
+async function licCheck() {
+  LIC.last = Math.max(LIC.last, Date.now()); await licSave(); LST = await licStatus(); updTrial();
+  if (!LST.active) { ME = null; sessSet(null); closeModal(); if (ui.table) closeOrder(); $('#trialBar').classList.add('hidden'); renderActivation(); return false; }
+  return true;
+}
+const digits = t => String(t).replace(/\D/g, '');
+const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b> · ĐT <a href="tel:${digits(VENDOR.phone)}" style="color:var(--primary)">${esc(VENDOR.phone)}</a> · Zalo <a href="https://zalo.me/${digits(VENDOR.zalo)}" target="_blank" rel="noopener" style="color:var(--primary)">${esc(VENDOR.zalo)}</a> để nhận mã kích hoạt.`;
+function copyText(t) {
+  const ok = () => toast('Đã sao chép: ' + t.slice(0, 40));
+  const fb = () => { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Hãy tự chọn và sao chép'); } a.remove(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, fb); else fb();
+}
+const licDesc = st => st.mode === 'trial' ? (st.active ? `Dùng thử · còn <b>${st.daysLeft}</b>/${TRIAL_DAYS} ngày (đến ${ddmm(st.end - 1)})` : `Đã hết ${TRIAL_DAYS} ngày dùng thử`)
+  : `${PLANS[st.plan] || 'Bản quyền'} · ${st.exp ? (st.active ? `hết hạn ${ddmm(st.exp - 1)} (còn ${st.daysLeft} ngày)` : `đã hết hạn ${ddmm(st.exp - 1)}`) : 'không giới hạn thời gian'}`;
+async function activate(key) {
+  let r; try { r = await verifyKey(key); } catch (e) { return { ok: false, why: e.message }; } if (!r.ok) return r;
+  if (r.exp && Math.max(Date.now(), LIC.last) >= r.exp) return { ok: false, why: 'Mã kích hoạt này đã hết hạn' };
+  LIC.key = String(key).replace(/\s+/g, ''); await licSave(); LST = await licStatus(); updTrial(); return r;
+}
+function renderActivation() {
+  const exp = LST.mode !== 'trial';
+  authShell(`<h2>${exp ? 'Bản quyền hết hạn' : 'Hết hạn dùng thử'}</h2>
+    <p class="sub2">${exp ? 'Thời hạn sử dụng đã kết thúc.' : `Bạn đã dùng thử ${TRIAL_DAYS} ngày.`} <b>Dữ liệu vẫn được giữ nguyên.</b> Gửi <b>Mã máy</b> cho nhà cung cấp để nhận mã kích hoạt.</p>
+    <div class="devcode">${esc(LIC.dev)}</div><button type="button" class="btn ghost" id="acCopy">Sao chép mã máy</button>
+    <p class="sub2" style="margin-top:12px">${vendorLine()}</p>
+    <label class="f">Mã kích hoạt</label><textarea id="acKey" placeholder="Dán mã kích hoạt bắt đầu bằng CF1."></textarea>
+    <div class="auth-msg" id="authMsg">${LST.tamper ? '⚠ Ngày giờ trên máy đang lùi so với lần dùng trước. Hãy chỉnh lại đúng ngày giờ.' : ''}</div>
+    <button class="btn pri" id="acOk">Kích hoạt</button>
+    <div class="auth-foot"><a href="#" id="acBackup" style="color:var(--primary)">Tải bản sao lưu dữ liệu</a></div>`);
+  $('#acCopy').onclick = () => copyText(LIC.dev);
+  $('#acBackup').onclick = e => { e.preventDefault(); A.backup(); };
+  $('#acOk').onclick = async () => {
+    const r = await activate($('#acKey').value); if (!r.ok) return $('#authMsg').textContent = r.why;
+    toast('Kích hoạt thành công!'); gate();
+  };
+}
+function licenseModal() {
+  openModal(`<h3>Bản quyền phần mềm</h3>
+    <div class="lic-st"><span style="font-size:24px">🔑</span><div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
+    <label class="f">Mã máy</label><div class="devcode">${esc(LIC.dev)}</div>
+    <p class="muted" style="font-size:13px;margin:10px 0 0">${vendorLine()}</p>
+    <label class="f">Mã kích hoạt</label><textarea id="lmKey" placeholder="Dán mã kích hoạt bắt đầu bằng CF1."></textarea>
+    <div class="auth-msg" id="lmMsg" style="text-align:left"></div>
+    <div class="row" style="margin-top:10px"><button class="btn ghost" id="lmCopy">Sao chép mã máy</button><button class="btn ghost" data-act="closeModal">Đóng</button><button class="btn pri grow" id="lmOk">Kích hoạt</button></div>`);
+  $('#lmCopy').onclick = () => copyText(LIC.dev);
+  $('#lmOk').onclick = async () => { const r = await activate($('#lmKey').value); if (!r.ok) return $('#lmMsg').textContent = r.why; closeModal(); toast('Kích hoạt thành công!'); render(); };
+}
+
+/* ================= TÀI KHOẢN & ĐĂNG NHẬP ================= */
+// Mật khẩu băm PBKDF2-SHA256 (120.000 vòng) + muối riêng từng tài khoản, không lưu mật khẩu gốc.
+// Quản lý: toàn quyền. Thu ngân: chỉ xem sơ đồ bàn, gọi món, thanh toán.
+const ROLES = { admin: 'Quản lý', staff: 'Thu ngân' };
+const SESS_KEY = 'cafe-pos-session', LASTUSER_KEY = 'cafe-pos-lastuser';
+let ME = null;
+const isAdmin = () => !!ME && ME.role === 'admin';
+const can = tab => tab === 'tables' || isAdmin();
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+async function hashPw(pw, salt) {
+  if (!(window.crypto && crypto.subtle)) throw new Error('Trình duyệt cần mở bằng https:// để đăng nhập');
+  const enc = new TextEncoder(), key = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveBits']);
+  return hex(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt: enc.encode(salt), iterations: 120000, hash: 'SHA-256' }, key, 256));
+}
+const newSalt = () => hex(crypto.getRandomValues(new Uint8Array(12)));
+const sessGet = () => { try { return sessionStorage.getItem(SESS_KEY); } catch (e) { return null; } };
+const sessSet = v => { try { v ? sessionStorage.setItem(SESS_KEY, v) : sessionStorage.removeItem(SESS_KEY); } catch (e) {} };
+const lastUser = () => { try { return localStorage.getItem(LASTUSER_KEY) || ''; } catch (e) { return ''; } };
+function authShell(inner) {
+  const a = $('#auth'); a.classList.remove('hidden');
+  a.innerHTML = `<div class="auth-card"><img class="auth-logo" src="${logoSrc()}" alt="Logo">${inner}
+    <div class="auth-foot">Cà Phê POS · © Bản quyền thuộc về Trần Hữu Nhật · 0913.193.668</div></div>`;
+}
+const pwField = (id, label) => `<label class="f">${label}</label><div class="pw"><input id="${id}" type="password" autocomplete="off"><button type="button" data-pw="${id}" aria-label="Hiện mật khẩu">👁</button></div>`;
+function bindPwToggle(root) { root.querySelectorAll('[data-pw]').forEach(b => b.onclick = () => { const i = $('#' + b.dataset.pw); i.type = i.type === 'password' ? 'text' : 'password'; }); }
+function gate() {
+  ME = null;
+  if (LST && !LST.active) return renderActivation();
+  if (!S.users.length) return authSetup();
+  const u = S.users.find(x => x.id === sessGet());
+  if (u && u.active !== false) { ME = u; $('#auth').classList.add('hidden'); $('#auth').innerHTML = ''; render(); return; }
+  sessSet(null); authLogin();
+}
+function authSetup() {
+  authShell(`<h2>Thiết lập lần đầu</h2><p class="sub2">Tạo tài khoản <b>Quản lý</b> để bảo vệ dữ liệu quán. Dữ liệu hiện có được giữ nguyên.</p>
+    <label class="f">Tên quán</label><input id="suShop" value="${esc(S.settings.shopName === 'Cà Phê POS' ? 'Coffee Sông Hậu 1' : S.settings.shopName)}">
+    <label class="f">Họ tên quản lý</label><input id="suName" placeholder="VD: Nguyễn Văn A">
+    <label class="f">Tên đăng nhập</label><input id="suUser" autocomplete="off" autocapitalize="none" placeholder="VD: admin">
+    ${pwField('suPw', 'Mật khẩu (ít nhất 6 ký tự)')}${pwField('suPw2', 'Nhập lại mật khẩu')}
+    <div class="auth-msg" id="authMsg"></div><button class="btn pri" id="suOk">Tạo tài khoản & bắt đầu</button>`);
+  bindPwToggle($('#auth'));
+  const msg = t => $('#authMsg').textContent = t;
+  $('#suOk').onclick = async () => {
+    const shop = $('#suShop').value.trim(), name = $('#suName').value.trim(), un = $('#suUser').value.trim().toLowerCase(), pw = $('#suPw').value;
+    if (!name) return msg('Nhập họ tên quản lý'); if (!/^[a-z0-9._-]{3,}$/.test(un)) return msg('Tên đăng nhập ≥ 3 ký tự, chỉ gồm chữ không dấu, số, . _ -');
+    if (pw.length < 6) return msg('Mật khẩu ít nhất 6 ký tự'); if (pw !== $('#suPw2').value) return msg('Hai mật khẩu chưa khớp');
+    $('#suOk').disabled = true; msg('');
+    try {
+      const salt = newSalt(), u = { id: uid(), name, username: un, role: 'admin', active: true, salt, hash: await hashPw(pw, salt), created: Date.now() };
+      S.users.push(u); if (shop) S.settings.shopName = shop; save(); sessSet(u.id); try { localStorage.setItem(LASTUSER_KEY, un); } catch (e) {}
+      gate(); toast('Xin chào, ' + name + '!');
+    } catch (e) { msg(e.message); $('#suOk').disabled = false; }
+  };
+  setTimeout(() => $('#suName').focus(), 100);
+}
+let failN = 0, lockUntil = 0;
+function authLogin() {
+  authShell(`<h2>${esc(S.settings.shopName || 'Cà Phê POS')}</h2><p class="sub2">Đăng nhập để sử dụng</p>
+    <label class="f">Tên đăng nhập</label><input id="liUser" autocomplete="username" autocapitalize="none" value="${esc(lastUser())}">
+    ${pwField('liPw', 'Mật khẩu')}
+    <div class="auth-msg" id="authMsg"></div><button class="btn pri" id="liOk">Đăng nhập</button>`);
+  bindPwToggle($('#auth'));
+  const go = async () => {
+    const msg = t => $('#authMsg').textContent = t, un = $('#liUser').value.trim().toLowerCase(), pw = $('#liPw').value;
+    if (Date.now() < lockUntil) return msg(`Sai quá nhiều lần, thử lại sau ${Math.ceil((lockUntil - Date.now()) / 1000)} giây`);
+    if (!un || !pw) return msg('Nhập tên đăng nhập và mật khẩu');
+    $('#liOk').disabled = true;
+    try {
+      const u = S.users.find(x => x.username === un), ok = u && u.active !== false && (await hashPw(pw, u.salt)) === u.hash;
+      if (!ok) { if (++failN >= 5) { lockUntil = Date.now() + 30000; failN = 0; } msg(u && u.active === false ? 'Tài khoản đã bị khóa' : 'Sai tên đăng nhập hoặc mật khẩu'); $('#liPw').value = ''; $('#liOk').disabled = false; return; }
+      failN = 0; sessSet(u.id); try { localStorage.setItem(LASTUSER_KEY, un); } catch (e) {}
+      ui.tab = 'tables'; gate(); toast('Xin chào, ' + u.name + '!');
+    } catch (e) { msg(e.message); $('#liOk').disabled = false; }
+  };
+  $('#liOk').onclick = go; $('#liPw').onkeydown = $('#liUser').onkeydown = e => { if (e.key === 'Enter') go(); };
+  setTimeout(() => ($('#liUser').value ? $('#liPw') : $('#liUser')).focus(), 100);
+}
+function logout() { sessSet(null); ME = null; closeModal(); if (ui.table) closeOrder(); ui.tab = 'tables'; authLogin(); }
+
+/* ---- Quản lý tài khoản (Cài đặt) ---- */
+function usersCard() {
+  return `<div class="sec-title">Tài khoản đăng nhập</div><div class="card">
+    ${S.users.map(u => `<div class="urow"><span class="av">${esc((u.name.trim()[0] || '?').toUpperCase())}</span>
+      <span class="nm"><b>${esc(u.name)}</b>${u.id === ME.id ? ' <span class="tag2">Bạn</span>' : ''}<small>${esc(u.username)} · ${ROLES[u.role]}${u.active === false ? ' · ĐÃ KHÓA' : ''}</small></span>
+      <button class="btn" style="padding:8px 12px" data-act="editUser" data-id="${u.id}">Sửa</button></div>`).join('')}
+    <div class="row" style="margin-top:12px"><button class="btn pri grow" data-act="editUser">＋ Thêm tài khoản</button><button class="btn grow" data-act="chpw">🔑 Đổi mật khẩu của tôi</button></div></div>`;
+}
+function editUser(id) {
+  const o = id ? S.users.find(x => x.id === id) : null;
+  openModal(`<h3>${o ? 'Sửa tài khoản' : 'Thêm tài khoản'}</h3>
+    <label class="f">Họ tên</label><input id="uName" value="${esc(o ? o.name : '')}">
+    <label class="f">Tên đăng nhập</label><input id="uUser" autocapitalize="none" value="${esc(o ? o.username : '')}" ${o ? 'disabled' : ''} placeholder="VD: thungan1">
+    <label class="f">Vai trò</label><select id="uRole" ${o && o.id === ME.id ? 'disabled' : ''}>${Object.entries(ROLES).map(([k, v]) => `<option value="${k}" ${o && o.role === k ? 'selected' : ''}>${v}${k === 'staff' ? ' (bán hàng)' : ' (toàn quyền)'}</option>`).join('')}</select>
+    ${pwField('uPw', o ? 'Mật khẩu mới (để trống = giữ nguyên)' : 'Mật khẩu (ít nhất 6 ký tự)')}
+    ${o && o.id !== ME.id ? `<label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="uActive" style="width:auto" ${o.active !== false ? 'checked' : ''}> Cho phép đăng nhập</label>` : ''}
+    <div class="auth-msg" id="uMsg" style="text-align:left"></div>
+    <div class="row" style="margin-top:10px">${o && o.id !== ME.id ? `<button class="btn danger" data-act="delUser" data-id="${o.id}">Xóa</button>` : ''}<button class="btn ghost grow" data-act="closeModal">Hủy</button><button class="btn pri grow" id="uOk">Lưu</button></div>`);
+  bindPwToggle($('#sheet'));
+  $('#uOk').onclick = async () => {
+    const msg = t => $('#uMsg').textContent = t, name = $('#uName').value.trim(), pw = $('#uPw').value;
+    const un = o ? o.username : $('#uUser').value.trim().toLowerCase();
+    if (!name) return msg('Nhập họ tên'); if (!o && !/^[a-z0-9._-]{3,}$/.test(un)) return msg('Tên đăng nhập ≥ 3 ký tự, chỉ gồm chữ không dấu, số, . _ -');
+    if (!o && S.users.some(x => x.username === un)) return msg('Tên đăng nhập đã tồn tại');
+    if ((!o || pw) && pw.length < 6) return msg('Mật khẩu ít nhất 6 ký tự');
+    try {
+      const u = o || { id: uid(), username: un, created: Date.now(), active: true };
+      u.name = name; if (!o || o.id !== ME.id) u.role = $('#uRole').value;
+      if ($('#uActive')) u.active = $('#uActive').checked;
+      if (pw) { u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); }
+      if (!o) S.users.push(u);
+      if (!S.users.some(x => x.role === 'admin' && x.active !== false)) return msg('Phải còn ít nhất 1 Quản lý đang hoạt động');
+      save(); closeModal(); render(); toast('Đã lưu tài khoản');
+    } catch (e) { msg(e.message); }
+  };
+}
+function changeMyPw() {
+  openModal(`<h3>Đổi mật khẩu</h3>${pwField('cpOld', 'Mật khẩu hiện tại')}${pwField('cpNew', 'Mật khẩu mới (ít nhất 6 ký tự)')}${pwField('cpNew2', 'Nhập lại mật khẩu mới')}
+    <div class="auth-msg" id="cpMsg" style="text-align:left"></div>
+    <div class="row" style="margin-top:10px"><button class="btn ghost grow" data-act="closeModal">Hủy</button><button class="btn pri grow" id="cpOk">Đổi mật khẩu</button></div>`);
+  bindPwToggle($('#sheet'));
+  $('#cpOk').onclick = async () => {
+    const msg = t => $('#cpMsg').textContent = t, nw = $('#cpNew').value;
+    try {
+      if ((await hashPw($('#cpOld').value, ME.salt)) !== ME.hash) return msg('Mật khẩu hiện tại chưa đúng');
+      if (nw.length < 6) return msg('Mật khẩu mới ít nhất 6 ký tự'); if (nw !== $('#cpNew2').value) return msg('Hai mật khẩu mới chưa khớp');
+      ME.salt = newSalt(); ME.hash = await hashPw(nw, ME.salt); save(); closeModal(); toast('Đã đổi mật khẩu');
+    } catch (e) { msg(e.message); }
+  };
+}
+
 /* ================= TRẠNG THÁI GIAO DIỆN ================= */
 const ui = { tab: 'tables', filter: 'all', table: null, cat: 'all', q: '', cartOpen: false, rpt: 'today', from: isoDate(Date.now()), to: isoDate(Date.now()) };
 let pay = null;
 
 function render() {
   document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === ui.tab));
+  if (!can(ui.tab)) ui.tab = 'tables';
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('hidden', !can(b.dataset.tab)));
   $('#shopName').textContent = S.settings.shopName || 'Cà Phê POS';
+  $('#logoS').src = logoSrc();
+  $('#who').classList.toggle('hidden', !ME); if (ME) $('#whoName').textContent = ME.name;
+  updTrial();
   $('#shopSub').textContent = S.settings.address || 'Quản lý bàn & tính tiền';
   ({ tables: renderTables, menu: renderMenuAdmin, report: renderReport, settings: renderSettings })[ui.tab]();
 }
@@ -842,6 +1132,16 @@ function renderSettings() {
       ${f('sTables', 'Số bàn', s.tableCount, '20', 'number')}
       ${f('sFooter', 'Lời cảm ơn cuối hóa đơn', s.footer)}
     </div>
+    <div class="sec-title">Logo quán</div>
+    <div class="card"><div class="logo-ed"><img src="${logoSrc()}" alt="Logo">
+      <div class="grow"><div class="muted" style="font-size:13px;margin-bottom:8px">Hiện trên màn hình đăng nhập và thanh tiêu đề. Ảnh tự cắt vuông.</div>
+        <label class="btn" style="display:inline-block;padding:9px 14px">📷 Đổi logo<input type="file" id="logoIn" accept="image/*" hidden></label>
+        ${s.logo ? '<button class="btn ghost" style="padding:9px 14px;margin-left:6px" data-act="logoReset">Dùng logo mặc định</button>' : ''}</div></div></div>
+    ${usersCard()}
+    <div class="sec-title">Bản quyền</div>
+    <div class="card"><div class="lic-st"><span style="font-size:24px">🔑</span><div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
+      <div class="row"><span class="muted" style="font-size:13px">Mã máy</span><b class="grow" style="font-family:ui-monospace,Menlo,Consolas,monospace;text-align:right">${esc(LIC.dev)}</b></div>
+      <button class="btn pri" style="width:100%;margin-top:10px" data-act="license">🔑 Nhập mã kích hoạt / gia hạn</button></div>
     <div class="sec-title">Chuyển khoản (mã QR VietQR)</div>
     <div class="card">
       <label class="f">Ngân hàng</label>
@@ -871,8 +1171,9 @@ function renderSettings() {
       <b>Android (Chrome):</b> bấm <b>⋮</b> → <b>Cài đặt ứng dụng</b> / <b>Thêm vào màn hình chính</b>.<br>
       <span class="muted">Sau khi cài, app chạy toàn màn hình và dùng được cả khi mất mạng.</span>
     </div>
-    <p class="muted" style="text-align:center;font-size:12px">Cà Phê POS · v1.1</p>`;
+    <p class="muted" style="text-align:center;font-size:12px">Cà Phê POS · v1.2 · Mã máy ${esc(LIC.dev)}</p>`;
   $('#restoreIn').addEventListener('change', restore);
+  $('#logoIn').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try { S.settings.logo = await readImage(f); save(); render(); toast('Đã đổi logo'); } catch (err) { toast(err.message); } });
 }
 function saveSettings() {
   const v = id => $('#' + id).value.trim();
@@ -894,7 +1195,10 @@ function restore(e) {
       const d = JSON.parse(r.result);
       if (!d.menu || !d.settings || !Array.isArray(d.bills)) throw new Error('sai định dạng');
       if (!confirm(`Khôi phục dữ liệu (${d.bills.length} hóa đơn, ${d.menu.length} món)? Dữ liệu hiện tại sẽ bị thay thế.`)) return;
-      S = { ...defaultState(), ...d, settings: { ...defaultState().settings, ...d.settings } }; save(); render(); toast('Đã khôi phục');
+      const keep = Array.isArray(d.users) && d.users.length ? d.users : S.users;
+      S = { ...defaultState(), ...d, users: keep, settings: { ...defaultState().settings, ...d.settings } };
+      ME = S.users.find(x => x.id === (ME && ME.id)) || null; if (!ME) { sessSet(null); save(); return gate(); }
+      save(); render(); toast('Đã khôi phục');
     } catch (err) { toast('File không hợp lệ'); }
   };
   r.readAsText(file);
@@ -907,7 +1211,7 @@ $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeM
 
 /* ================= SỰ KIỆN ================= */
 const A = {
-  tab: d => { ui.tab = d.tab; $('#main').scrollTop = 0; render(); },
+  tab: d => { if (!can(d.tab)) return; ui.tab = d.tab; $('#main').scrollTop = 0; render(); },
   filter: d => { ui.filter = d.v; renderTables(); },
   openTable: d => openTable(d.t),
   closeOrder, tableMenu, moveTable, clearTable, printTemp,
@@ -955,7 +1259,9 @@ const A = {
   },
   backup: () => shareOrDownload(`cafe-pos-backup_${isoDate(Date.now())}.json`, JSON.stringify(S, null, 1), 'application/json'),
   clearBills: () => { if (confirm('Xóa TOÀN BỘ lịch sử hóa đơn? Nên sao lưu trước.')) { S.bills = []; save(); render(); toast('Đã xóa lịch sử'); } },
-  resetAll: () => { if (confirm('Đặt lại toàn bộ (thực đơn, bàn, hóa đơn, cài đặt)?') && confirm('Chắc chắn? Không thể hoàn tác.')) { S = defaultState(); save(); render(); toast('Đã đặt lại'); } }
+  resetAll: () => { if (confirm('Đặt lại toàn bộ (thực đơn, bàn, hóa đơn, cài đặt)? Tài khoản đăng nhập được giữ lại.') && confirm('Chắc chắn? Không thể hoàn tác.')) { const u = S.users; S = defaultState(); S.users = u; save(); render(); toast('Đã đặt lại'); } },
+  license: () => licenseModal(), logout, editUser: d => editUser(d.id), chpw: () => { closeModal(); changeMyPw(); }, logoReset: () => { S.settings.logo = ''; save(); render(); toast('Đã dùng logo mặc định'); },
+  delUser: d => { const u = S.users.find(x => x.id === d.id); if (!u || u.id === ME.id) return; if (!confirm(`Xóa tài khoản "${u.name}"?`)) return; S.users = S.users.filter(x => x !== u); save(); closeModal(); render(); toast('Đã xóa tài khoản'); }
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
@@ -969,8 +1275,10 @@ function tick() {
   const d = new Date();
   $('#clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ' · ' + pad(d.getDate()) + '/' + pad(d.getMonth() + 1);
 }
-setInterval(() => { tick(); if (ui.tab === 'tables' && !ui.table && $('#modal').classList.contains('hidden')) renderTables(); }, 30000);
-tick(); render();
+setInterval(() => { tick(); if (ME && ui.tab === 'tables' && !ui.table && $('#modal').classList.contains('hidden')) renderTables(); }, 30000);
+tick();
+(async () => { try { await licLoad(); await licCheck(); } catch (e) { console.warn(e); LIC = LIC || { dev: newDevId(), start: Date.now(), last: Date.now(), key: '' }; LST = await licStatus(); }
+  if (LST.active) gate(); setInterval(() => { if (LST && LST.active) licCheck(); }, 10 * 60000); })();
 
 /* Chạy offline */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
