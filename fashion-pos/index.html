@@ -553,7 +553,9 @@ async function hashPw(pw, salt) {
 async function verifyPw(u, pw) { return (await hashPw(pw, u.salt)) === u.hash; }
 async function setPw(u, pw) { u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); }
 let ME = null;
-const isAdmin = () => ME && ME.role === 'admin';
+const isAdmin = () => !!ME && ME.role === 'admin';
+/* Hành động chỉ Quản lý (Admin) được dùng: thay đổi cài đặt, hàng hóa / sản phẩm, tài khoản, sao lưu, bản quyền… */
+const ADMIN_ACTS = new Set(['editProduct', 'returnOrder', 'saveShop', 'addCat', 'delCat', 'saveBank', 'testQR', 'editUser', 'backup', 'clearDemo', 'wipe', 'license', 'exportCsv', 'repR']);
 const SESS = 'fpos-session';
 const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
 const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
@@ -1426,6 +1428,7 @@ function viewProduct(id) {
     <div class="sec-l" style="margin-bottom:8px">Tồn kho theo size / màu</div>${stockGrid(p, false)}</div>`, 'md');
 }
 function editProduct(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const orig = id ? S.products.find(p => p.id === id) : null;
   const pd = orig ? JSON.parse(JSON.stringify(orig)) : { name: '', sku: '', cat: prodF.cat !== 'all' ? prodF.cat : S.settings.cats[0], age: prodF.age !== 'all' ? prodF.age : 'nl', gender: 'Unisex', price: '', cost: '', sizes: [], colors: [], stock: {}, note: '' };
   let img = orig ? IMG[orig.id] || null : null, imgChanged = false;
@@ -1648,6 +1651,7 @@ function vSettings() {
     <div class="card"><h3>Tài khoản của tôi</h3>
       <div class="lock-user"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><br><small class="muted">@${esc(ME.username)} · ${ad ? 'Quản lý' : 'Nhân viên'}</small></div></div>
       <div class="set-actions"><button class="btn ghost" data-act="chpw">${ICON.lock} Đổi mật khẩu</button><button class="btn ghost" data-act="lock">${ICON.lock} Khóa màn hình</button><button class="btn danger ghost" data-act="logout">${ICON.logout} Đăng xuất</button></div></div>
+    ${ad ? '' : '<div class="card"><h3>🔒 Phân quyền</h3><p class="muted" style="margin:0;font-size:14px">Bạn đang đăng nhập bằng tài khoản <b>nhân viên</b>. Chỉ <b>Quản lý (Admin)</b> mới được thay đổi cài đặt, thông tin cửa hàng, hàng hóa / sản phẩm, tài khoản người dùng, sao lưu và bản quyền.</p></div>'}
     ${ad ? `
     <div class="card"><h3>Bản quyền phần mềm</h3>
       <div class="lic-st">${ICON.lock}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
@@ -1686,6 +1690,7 @@ function vSettings() {
   const ci = $('#catIn'); if (ci) ci.onkeydown = e => { if (e.key === 'Enter') A.addCat(); };
 }
 function editUser(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const u = id ? S.users.find(x => x.id === id) : null; const self = u && u.id === ME.id;
   const d = openModal(`<div class="dlg-h"><h3>${u ? 'Sửa tài khoản' : 'Thêm nhân viên'}</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b">
@@ -1723,6 +1728,7 @@ function editUser(id) {
   };
 }
 async function restore(e) {
+  if (!isAdmin()) { e.target.value = ''; return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err'); }
   const file = e.target.files[0]; if (!file) return;
   try {
     const d = JSON.parse(await file.text());
@@ -1833,7 +1839,8 @@ const A = {
   }
 };
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const el = e.target.closest('[data-act]'); if (el && ADMIN_ACTS.has(el.dataset.act) && !isAdmin()) { e.preventDefault(); return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err'); }
+  if (!el || el.disabled) return;
   const fn = A[el.dataset.act]; if (fn) { e.preventDefault(); fn(el.dataset, el, e); }
 });
 document.addEventListener('keydown', e => {
