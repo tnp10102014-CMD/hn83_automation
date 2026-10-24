@@ -217,8 +217,8 @@ label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
 .logo-s{width:42px;height:42px;border-radius:11px;object-fit:cover;flex-shrink:0;background:#222544;border:1.5px solid rgba(255,255,255,.55);box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .top h1,.top .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tr{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.who{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);padding:4px 5px 4px 11px;border-radius:20px;font-size:13px;max-width:150px}
-@media(max-width:560px){.tr .clock{display:none}.who{max-width:112px}}
+.who{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.15);padding:4px 5px 4px 11px;border-radius:20px;font-size:13px;max-width:210px}
+@media(max-width:560px){.tr .clock{display:none}.who{max-width:150px;font-size:12px}}
 .who span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .who button{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:15px;flex-shrink:0}
 .auth{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:96px 18px 24px;overflow-y:auto;
@@ -561,6 +561,8 @@ const ROLES = { admin: 'Quản lý', staff: 'Thu ngân' };
 const SESS_KEY = 'cafe-pos-session', LASTUSER_KEY = 'cafe-pos-lastuser';
 let ME = null;
 const isAdmin = () => !!ME && ME.role === 'admin';
+/* Hành động chỉ Quản lý (Admin) được dùng: thực đơn, báo cáo, cài đặt, tài khoản, sao lưu, bản quyền… */
+const ADMIN_ACTS = new Set(['editItem', 'saveItem', 'delItem', 'toggleOff', 'addCat', 'delCat', 'rpt', 'billDetail', 'delBill', 'exportCsv', 'saveSettings', 'goBankSettings', 'testQR', 'backup', 'clearBills', 'resetAll', 'license', 'editUser', 'delUser', 'logoReset']);
 const can = tab => tab === 'tables' || isAdmin();
 const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
 async function hashPw(pw, salt) {
@@ -642,6 +644,7 @@ function usersCard() {
     <div class="row" style="margin-top:12px"><button class="btn pri grow" data-act="editUser">＋ Thêm tài khoản</button><button class="btn grow" data-act="chpw">🔑 Đổi mật khẩu của tôi</button></div></div>`;
 }
 function editUser(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)');
   const o = id ? S.users.find(x => x.id === id) : null;
   openModal(`<h3>${o ? 'Sửa tài khoản' : 'Thêm tài khoản'}</h3>
     <label class="f">Họ tên</label><input id="uName" value="${esc(o ? o.name : '')}">
@@ -694,7 +697,7 @@ function render() {
   document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('hidden', !can(b.dataset.tab)));
   $('#shopName').textContent = S.settings.shopName || 'Cà Phê POS';
   $('#logoS').src = logoSrc();
-  $('#who').classList.toggle('hidden', !ME); if (ME) $('#whoName').textContent = ME.name;
+  $('#who').classList.toggle('hidden', !ME); if (ME) $('#whoName').textContent = ME.name + ' · ' + ROLES[ME.role];
   updTrial();
   $('#shopSub').textContent = S.settings.address || 'Quản lý bàn & tính tiền';
   ({ tables: renderTables, menu: renderMenuAdmin, report: renderReport, settings: renderSettings })[ui.tab]();
@@ -1121,6 +1124,7 @@ function renderMenuAdmin() {
     }).join('')}`;
 }
 function editItem(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)');
   const m = S.menu.find(x => x.id === id) || { name: '', price: '', cat: ui.cat !== 'all' && S.cats.includes(ui.cat) ? ui.cat : S.cats[0], emoji: '' };
   openModal(`<h3>${id ? 'Sửa món' : 'Thêm món mới'}</h3>
     <label class="f">Tên món</label><input id="iName" value="${esc(m.name)}" placeholder="VD: Cà phê sữa đá">
@@ -1336,6 +1340,7 @@ function saveSettings() {
   save(); render(); toast('Đã lưu cài đặt');
 }
 function restore(e) {
+  if (!isAdmin()) { e.target.value = ''; return toast('Chức năng này chỉ dành cho Quản lý (Admin)'); }
   const file = e.target.files[0]; if (!file) return;
   const r = new FileReader();
   r.onload = () => {
@@ -1414,6 +1419,7 @@ const A = {
 };
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
+  if (el && ADMIN_ACTS.has(el.dataset.act) && !isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)');
   if (!el || el.disabled) return;
   const fn = A[el.dataset.act]; if (fn) fn(el.dataset, el, e);
 });

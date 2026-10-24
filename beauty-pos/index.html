@@ -763,7 +763,9 @@ async function hashPw(pw, salt) {
 const verifyPw = async (u, pw) => (await hashPw(pw, u.salt)) === u.hash;
 async function setPw(u, pw) { u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); }
 let ME = null;
-const isAdmin = () => ME && ME.role === 'admin';
+const isAdmin = () => !!ME && ME.role === 'admin';
+/* Hành động chỉ Quản lý (Admin) được dùng: thay đổi cài đặt, hàng hóa / sản phẩm, tài khoản, sao lưu, bản quyền… */
+const ADMIN_ACTS = new Set(['editItem', 'editTech', 'editUser', 'saveShop', 'addCat', 'delCat', 'saveBank', 'testQR', 'backup', 'clearDemo', 'wipe', 'voidOrder', 'license', 'exportCsv', 'repR', 'bkPick', 'bkNow']);
 const SESS = 'bpos-session';
 const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
 const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
@@ -1524,6 +1526,7 @@ function drawServices() {
     || `<div class="empty">${ICON.services}<p>Chưa có dịch vụ.</p></div>`;
 }
 function editItem(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const o = id ? itemOf(id) : null;
   const it = o ? { ...o } : { name: '', code: '', cat: svF.cat !== 'all' ? svF.cat : S.settings.cats[0], kind: 'svc', price: '', cost: '', dur: 60, comm: '', stock: 0, note: '', active: true };
   let img = o ? S.imgs[o.id] || '' : '', imgChanged = false;
@@ -1663,7 +1666,8 @@ function vSettings() {
     <div class="card"><h3>Bản quyền phần mềm</h3>
       <div class="lic-st">${ICON.sparkle}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
       <div class="row"><span class="muted" style="font-size:13px">Mã máy</span><b style="font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px" class="grow">${esc(LIC.dev)}</b><button class="btn sm ghost" data-act="copyDev">Sao chép</button></div>
-      <button class="btn rose block" style="margin-top:12px" data-act="license">Nhập mã kích hoạt</button></div>
+      ${ad ? '<button class="btn rose block" style="margin-top:12px" data-act="license">Nhập mã kích hoạt</button>' : ''}</div>
+    ${ad ? '' : '<div class="card"><h3>🔒 Phân quyền</h3><p class="muted" style="margin:0;font-size:14px">Bạn đang đăng nhập bằng tài khoản <b>nhân viên</b>. Chỉ <b>Quản lý (Admin)</b> mới được thay đổi cài đặt, thông tin cửa hàng, hàng hóa / sản phẩm, tài khoản người dùng, sao lưu và bản quyền.</p></div>'}
     ${ad ? `
     <div class="card"><div class="row" style="margin-bottom:12px"><h3 style="margin:0" class="grow">Kỹ thuật viên</h3><button class="btn sm rose" data-act="editTech">${ICON.plus} Thêm</button></div>
       <div class="list">${S.techs.map(t => `<button class="li li-u" data-act="editTech" data-id="${t.id}"><span class="av" style="background:${t.color};color:#fff">${esc(initials(t.name))}</span><span><b>${esc(t.name)}</b><small>${esc(t.phone || '')}${t.skills ? ' · ' + esc(t.skills) : ''}</small></span><span class="tag rose">HH ${t.comm || 0}%</span><span class="tag ${t.active !== false ? 'ok' : 'err'}">${t.active !== false ? 'Đang làm' : 'Nghỉ'}</span></button>`).join('') || '<div class="empty" style="padding:20px">Chưa có kỹ thuật viên.</div>'}</div>
@@ -1705,6 +1709,7 @@ function vSettings() {
   const rq = $('#sReqTech'); if (rq) rq.onchange = e => { S.settings.requireTech = e.target.checked; save('settings'); };
 }
 function editTech(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const o = id ? techOf(id) : null; let color = o ? o.color : PALETTE[S.techs.length % PALETTE.length];
   const d = openModal(`<div class="dlg-h"><h3>${o ? 'Sửa' : 'Thêm'} kỹ thuật viên</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b"><div class="g2"><div class="f"><label>Họ tên *</label><input id="tName" value="${esc(o ? o.name : '')}"></div><div class="f"><label>Số điện thoại</label><input id="tPhone" type="tel" value="${esc(o ? o.phone || '' : '')}"></div></div>
@@ -1728,6 +1733,7 @@ function editTech(id) {
   };
 }
 function editUser(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const u = id ? S.users.find(x => x.id === id) : null, self = u && u.id === ME.id;
   const d = openModal(`<div class="dlg-h"><h3>${u ? 'Sửa tài khoản' : 'Thêm tài khoản'}</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b"><div class="f"><label>Họ tên *</label><input id="uName" value="${esc(u ? u.name : '')}"></div>
@@ -1761,6 +1767,7 @@ function editUser(id) {
   };
 }
 async function restore(e) {
+  if (!isAdmin()) { e.target.value = ''; return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err'); }
   const file = e.target.files[0]; if (!file) return;
   try {
     const d = JSON.parse(await file.text());
@@ -1881,7 +1888,8 @@ const A = {
   }
 };
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act]'); if (!el || el.disabled || !el.dataset.act) return;
+  const el = e.target.closest('[data-act]'); if (el && ADMIN_ACTS.has(el.dataset.act) && !isAdmin()) { e.preventDefault(); return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err'); }
+  if (!el || el.disabled || !el.dataset.act) return;
   const fn = A[el.dataset.act]; if (fn) { e.preventDefault(); fn(el.dataset, el, e); }
 });
 document.addEventListener('keydown', e => {

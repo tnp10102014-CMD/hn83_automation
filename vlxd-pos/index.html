@@ -765,7 +765,9 @@ const verifyPw = async (u, pw) => (await hashPw(pw, u.salt)) === u.hash;
 async function setPw(u, pw) { u.salt = newSalt(); u.hash = await hashPw(pw, u.salt); }
 let ME = null;
 const can = act => !!ME && PERM[act].includes(ME.role);
-const isAdmin = () => ME && ME.role === 'admin';
+const isAdmin = () => !!ME && ME.role === 'admin';
+/* Hành động chỉ Quản lý (Admin) được dùng: thay đổi cài đặt, hàng hóa / sản phẩm, tài khoản, sao lưu, bản quyền… */
+const ADMIN_ACTS = new Set(['editProduct', 'voidOrder', 'editUser', 'saveShop', 'addCat', 'delCat', 'addUnit', 'delUnit', 'saveBank', 'testQR', 'backup', 'clearDemo', 'wipe', 'license', 'csvSales', 'csvNXT', 'printNXT', 'csvDebt', 'repTab', 'repR', 'bkPick', 'bkNow']);
 const SESS = 'vpos-session';
 const sessGet = () => { try { return JSON.parse(sessionStorage.getItem(SESS)); } catch (e) { return null; } };
 const sessSet = v => { try { v ? sessionStorage.setItem(SESS, JSON.stringify(v)) : sessionStorage.removeItem(SESS); } catch (e) {} };
@@ -1455,7 +1457,7 @@ function tabTon() {
   $('#stBody').innerHTML = `<div class="toolbar"><div class="search">${ICON.search}<input id="tQ" type="search" placeholder="Tìm tên, mã, quy cách…" value="${esc(stF.q)}"></div>
       <select id="tCat" style="width:auto"><option value="all">Mọi nhóm hàng</option>${S.settings.cats.map(c => `<option ${stF.cat === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
       <button class="chip ${stF.low ? 'on' : ''}" data-act="stLow">⚠ Dưới định mức</button>
-      ${can('stock') ? `<button class="btn yel" data-act="editProduct">${ICON.plus} Thêm hàng hóa</button>` : ''}</div>
+      ${isAdmin() ? `<button class="btn yel" data-act="editProduct">${ICON.plus} Thêm hàng hóa</button>` : ''}</div>
     <div class="sum-line" id="tSum"></div><div class="list" id="tList"></div>`;
   $('#tQ').addEventListener('input', e => { stF.q = e.target.value; drawTon(); });
   $('#tCat').onchange = e => { stF.cat = e.target.value; drawTon(); };
@@ -1487,9 +1489,10 @@ function productDetail(id) {
       <div class="sec-l" style="margin-bottom:8px">Thẻ kho (${mv.length} giao dịch)</div>
       <div class="tbl-w" style="max-height:340px;overflow:auto"><table class="tbl"><thead><tr><th>Thời gian</th><th class="l">Nghiệp vụ</th><th>Nhập</th><th>Xuất</th><th>Tồn</th></tr></thead><tbody>${rows || '<tr><td colspan="5" class="l muted">Chưa có giao dịch</td></tr>'}</tbody></table></div>
     </div>
-    <div class="dlg-f"><span class="grow"></span>${can('stock') ? `<button class="btn yel" data-act="editProduct" data-id="${p.id}">Sửa thông tin</button>` : ''}</div>`, 'lg');
+    <div class="dlg-f"><span class="grow"></span>${isAdmin() ? `<button class="btn yel" data-act="editProduct" data-id="${p.id}">Sửa thông tin</button>` : ''}</div>`, 'lg');
 }
 function editProduct(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const o = id ? prodOf(id) : null, adm = can('price');
   const p = o ? { ...o } : { name: '', code: '', spec: '', cat: stF.cat !== 'all' ? stF.cat : S.settings.cats[0], unit: 'cây', unit2: '', rate2: '', price: '', priceSi: '', cost: '', min: 0, active: true };
   const unitOpts = sel => S.settings.units.map(u => `<option ${u === sel ? 'selected' : ''}>${esc(u)}</option>`).join('');
@@ -1827,7 +1830,8 @@ function vSettings() {
     <div class="card"><h3>Bản quyền phần mềm</h3>
       <div class="lic-st">${ICON.key}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
       <div class="row"><span class="muted" style="font-size:13px">Mã máy</span><b style="font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px" class="grow">${esc(LIC.dev)}</b><button class="btn sm ghost" data-act="copyDev">Sao chép</button></div>
-      <button class="btn yel block" style="margin-top:12px" data-act="license">Nhập mã kích hoạt</button></div>
+      ${ad ? '<button class="btn yel block" style="margin-top:12px" data-act="license">Nhập mã kích hoạt</button>' : ''}</div>
+    ${ad ? '' : '<div class="card"><h3>🔒 Phân quyền</h3><p class="muted" style="margin:0;font-size:14px">Bạn đang đăng nhập bằng tài khoản <b>nhân viên</b>. Chỉ <b>Quản lý (Admin)</b> mới được thay đổi cài đặt, thông tin cửa hàng, hàng hóa / sản phẩm, tài khoản người dùng, sao lưu và bản quyền.</p></div>'}
     ${ad ? `
     <div class="card"><h3>Thông tin cửa hàng</h3>
       ${f('sShop', 'Tên cửa hàng / công ty', s.shopName)}${f('sAddr', 'Địa chỉ', s.address, 'In trên phiếu')}
@@ -1867,6 +1871,7 @@ function vSettings() {
   const ui = $('#unitIn'); if (ui) ui.onkeydown = e => { if (e.key === 'Enter') A.addUnit(); };
 }
 function editUser(id) {
+  if (!isAdmin()) return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err');
   const u = id ? S.users.find(x => x.id === id) : null, self = u && u.id === ME.id;
   const d = openModal(`<div class="dlg-h"><h3>${u ? 'Sửa tài khoản' : 'Thêm tài khoản'}</h3><button class="ibtn" data-act="close">✕</button></div>
     <div class="dlg-b"><div class="f"><label>Họ tên *</label><input id="uName" value="${esc(u ? u.name : '')}"></div>
@@ -1892,6 +1897,7 @@ function editUser(id) {
   const del = $('#uDel', d); if (del) del.onclick = async () => { if (u.role === 'admin' && admins() <= 1) return toast('Không thể xóa quản lý cuối cùng', 'err'); if (!(await ask(`Xóa tài khoản <b>${esc(u.name)}</b>?`, 'Xóa', true))) return; S.users = S.users.filter(x => x !== u); save('users'); closeModal(); refresh(); };
 }
 async function restore(e) {
+  if (!isAdmin()) { e.target.value = ''; return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err'); }
   const file = e.target.files[0]; if (!file) return;
   try {
     const d = JSON.parse(await file.text());
@@ -2043,7 +2049,8 @@ const A = {
   }
 };
 document.addEventListener('click', e => {
-  const el = e.target.closest('[data-act]'); if (!el || el.disabled || !el.dataset.act) return;
+  const el = e.target.closest('[data-act]'); if (el && ADMIN_ACTS.has(el.dataset.act) && !isAdmin()) { e.preventDefault(); return toast('Chức năng này chỉ dành cho Quản lý (Admin)', 'err'); }
+  if (!el || el.disabled || !el.dataset.act) return;
   const fn = A[el.dataset.act]; if (fn) { e.preventDefault(); fn(el.dataset, el, e); }
 });
 document.addEventListener('keydown', e => {
