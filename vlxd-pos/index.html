@@ -65,6 +65,11 @@ svg.i{width:20px;height:20px;flex-shrink:0}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:600;background:var(--surface2);transition:transform .08s,filter .15s;white-space:nowrap}
 .btn:hover{filter:brightness(.96)}.btn:active{transform:scale(.97)}
 .btn.pri{background:var(--pri);color:var(--pri-ink)}
+.btn.zalo{background:#0068ff;color:#fff;white-space:nowrap}
+.cart-f .row .btn kbd{display:none}
+@media(max-width:560px){.cart-f .qt{display:none}}
+.zalo-box{margin:0 20px 14px;padding:10px 12px;border-radius:14px;background:var(--surface2)}
+.zalo-box .small{font-size:12px;margin:6px 0 0}
 .btn.yel{background:linear-gradient(180deg,#ffc928,#f5b700);color:#1d232a;box-shadow:0 4px 12px rgba(245,183,0,.35)}
 .btn.ghost{background:transparent;border:1px solid var(--line)}
 .btn.danger{background:var(--err);color:#fff}
@@ -1089,7 +1094,7 @@ function renderTicket() {
       <div class="row"><span class="grow muted">Chiết khấu</span><input id="cDisc" type="number" inputmode="numeric" min="0" placeholder="0" value="${t.disc || ''}"><div class="seg sm">${['%', 'đ'].map(x => `<button data-act="tdt" data-v="${x}" class="${t.discType === x ? 'on' : ''}">${x}</button>`).join('')}</div></div>
       <div class="row"><span class="grow muted">${ICON.truck} Phí vận chuyển</span><input id="cShip" type="number" inputmode="numeric" min="0" placeholder="0" value="${t.ship || ''}"></div>
       <div class="row total"><span class="grow">Tổng cộng</span><b id="cTotal">${fmt(c.total)}</b></div>
-      <div class="row"><button class="btn ghost" data-act="cancelTk" title="Hủy đơn">Hủy</button><button class="btn ghost" data-act="quote" ${t.lines.length ? '' : 'disabled'}>${ICON.print} Báo giá</button>
+      <div class="row" style="gap:6px"><button class="btn ghost" data-act="cancelTk" title="Hủy đơn" style="padding-left:12px;padding-right:12px">Hủy</button><button class="btn ghost" data-act="quote" style="padding-left:12px;padding-right:12px" ${t.lines.length ? '' : 'disabled'}>${ICON.print}<span class="qt"> Báo giá</span></button><button class="btn zalo" data-act="quoteZalo" style="padding-left:12px;padding-right:12px" title="Gửi báo giá qua Zalo" ${t.lines.length ? '' : 'disabled'}>💬</button>
         <button class="btn yel grow" data-act="checkout" ${t.lines.length ? '' : 'disabled'}>Thanh toán <kbd>F9</kbd></button></div>
     </div>`;
   const upd = () => { const c2 = tkCalc(t); $('#cSub').textContent = fmt(c2.sub); $('#cTotal').textContent = fmt(c2.total); save('tickets'); updateBar(); renderStrip(); };
@@ -1160,6 +1165,7 @@ function saleDone(o) {
       <div class="kv big" style="border:0;margin:0"><span>Tổng cộng</span><span>${fmt(o.total)}</span></div>
       ${o.change ? `<div class="kv" style="font-size:17px"><span>Tiền thối lại</span><b class="ok-t">${fmt(o.change)}</b></div>` : ''}
       ${o.debt ? `<div class="kv" style="font-size:17px"><span>Ghi nợ</span><b class="err-t">${fmt(o.debt)}</b></div>` : ''}</div></div>
+    ${zaloBox(o.id, o.phone)}
     <div class="dlg-f"><button class="btn ghost grow" data-act="reprint" data-id="${o.id}">${ICON.print} In phiếu</button><button class="btn yel grow" data-act="close">Xong</button></div>`, 'sm');
 }
 
@@ -1201,7 +1207,7 @@ function printDoc(doc) {
   }
   $('#print').innerHTML = html; setTimeout(() => window.print(), 150);
 }
-function printOrder(o, quote) {
+function orderDoc(o, quote) {
   const rows = o.items.map((l, i) => [i + 1, esc(l.name) + (l.spec ? `<br><small>${esc(l.spec)}</small>` : ''), esc(l.uname), fq(l.qty), num(l.price), num(l.amount)]);
   const totals = [['Cộng tiền hàng', fmt(o.sub)]];
   if (o.disc) totals.push(['Chiết khấu', '-' + fmt(o.disc)]);
@@ -1213,12 +1219,115 @@ function printOrder(o, quote) {
     if (o.debt) totals.push(['Còn nợ đơn này', fmt(o.debt), 1]);
     if (o.customerId && (o.oldDebt || o.debt)) totals.push(['Nợ cũ', fmt(o.oldDebt)], ['TỔNG NỢ HIỆN TẠI', fmt(o.oldDebt + o.debt), 1]);
   }
-  printDoc({ title: quote ? 'Bảng báo giá' : o.void ? 'Phiếu xuất kho (ĐÃ HỦY)' : 'Phiếu xuất kho kiêm hóa đơn', sub: quote ? 'Báo giá có hiệu lực trong 7 ngày' : '', code: o.code, time: o.time,
+  return { title: quote ? 'Bảng báo giá' : o.void ? 'Phiếu xuất kho (ĐÃ HỦY)' : 'Phiếu xuất kho kiêm hóa đơn', sub: quote ? 'Báo giá có hiệu lực trong 7 ngày' : '', code: o.code, time: o.time,
     party: [['Khách hàng', o.customerName || 'Khách lẻ'], ...(o.phone ? [['Điện thoại', o.phone]] : []), ...(o.addr ? [['Địa chỉ giao', o.addr]] : []), ...(quote ? [] : [['Người lập', o.staffName]])],
     cols: ['STT', 'Tên hàng - Quy cách', 'ĐVT', 'SL', 'Đơn giá', 'Thành tiền'], rows, rows80: o.items.map(l => [esc(l.name), `${fq(l.qty)} ${esc(l.uname)} x ${num(l.price)}`, num(l.amount)]),
     totals, words: o.total, note: o.note, qr: hasBank() && (quote || o.debt || o.method === 'bank') ? { amount: quote ? o.total : o.debt || o.total, info: o.code } : null,
-    sigs: quote ? ['Khách hàng', 'Người báo giá'] : ['Người mua hàng', 'Người giao hàng', 'Thủ kho', 'Người lập phiếu'], footer: quote ? '' : S.settings.footer });
+    sigs: quote ? ['Khách hàng', 'Người báo giá'] : ['Người mua hàng', 'Người giao hàng', 'Thủ kho', 'Người lập phiếu'], footer: quote ? '' : S.settings.footer };
 }
+function printOrder(o, quote) { printDoc(orderDoc(o, quote)); }
+
+/* ================= GỬI HÓA ĐƠN QUA ZALO =================
+   Điện thoại: mở bảng chia sẻ của máy kèm ảnh hóa đơn (chọn Zalo → chọn khách).
+   Máy tính: chép ảnh hóa đơn vào clipboard, mở khung chat Zalo của khách (nếu có SĐT) để dán (Ctrl+V). */
+const ZALO_ACCENT = '#1d232a';
+const zaloBox = (id, phone, quote) => `<div class="zalo-box"><div class="row"><input id="zaloPhone" type="tel" inputmode="tel" value="${esc(phone || '')}" placeholder="SĐT Zalo của khách (không bắt buộc)" class="grow">
+  <button class="btn zalo" data-act="${quote ? 'quoteZalo' : 'zaloSend'}" data-id="${esc(id || '')}">💬 Gửi Zalo</button></div>
+  <p class="muted small">Điện thoại: chọn <b>Zalo</b> trong bảng chia sẻ. Máy tính: ảnh được chép sẵn, mở Zalo rồi bấm <b>Ctrl+V</b>.</p></div>`;
+const zaloPlain = h => new DOMParser().parseFromString(String(h), 'text/html').body.textContent;
+function zaloText(d) {
+  const s = S.settings, L = [`🧾 ${d.title} - ${s.shopName}`];
+  if (s.address) L.push(s.address); if (s.phone) L.push('ĐT: ' + s.phone);
+  L.push(`Số ${d.code} · ${ddmmyy(d.time)} ${hhmm(d.time)}`); d.party.forEach(([k, v]) => L.push(`${k}: ${v}`)); L.push('');
+  d.lines.forEach(l => L.push(`• ${l.name} — ${l.sub} = ${l.amount}`)); L.push('');
+  d.totals.forEach(([k, v, b]) => L.push(b ? `${k}: ${v}` : `${k}: ${v}`));
+  if (d.qr && hasBank()) L.push('', `Chuyển khoản: ${bankLabel(s.bankId)} · ${s.bankAcc} · ${s.bankName}`, `Số tiền: ${fmt(d.qr.amount)} · Nội dung: ${norm(d.qr.info).toUpperCase()}`);
+  if (d.note) L.push('', 'Ghi chú: ' + d.note);
+  if (d.footer) L.push('', d.footer);
+  return L.join('\n');
+}
+const zaloLoadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('img')); im.src = src; });
+async function zaloImage(d) {
+  const s = S.settings, W = 560, M = 28, FAM = '-apple-system,"Segoe UI",Roboto,Arial,sans-serif', AC = ZALO_ACCENT;
+  let logo = null, qr = null;
+  try { logo = await zaloLoadImg('icons/icon-192.png'); } catch (e) {}
+  if (d.qr && hasBank()) try { qr = await zaloLoadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(qrSvg(d.qr.amount, d.qr.info).replace('<svg ', '<svg width="400" height="400" '))); } catch (e) {}
+  const paint = (g, draw) => {
+    let y = M; const R_ = W - M;
+    const txt = (t, x, font, color, align = 'left') => { g.font = font; g.fillStyle = color; g.textAlign = align; if (draw) g.fillText(t, x, y); };
+    const wrapLines = (t, font, maxW) => { g.font = font; const out = []; let cur = ''; for (const w of String(t).split(' ')) { const nt = cur ? cur + ' ' + w : w; if (g.measureText(nt).width > maxW && cur) { out.push(cur); cur = w; } else cur = nt; } if (cur) out.push(cur); return out; };
+    const hr = dashed => { y += 6; if (draw) { g.strokeStyle = '#cfc6bb'; g.lineWidth = 1; g.setLineDash(dashed ? [5, 4] : []); g.beginPath(); g.moveTo(M, y); g.lineTo(R_, y); g.stroke(); } y += 14; };
+    const hx = logo ? M + 62 : M;
+    if (logo && draw) { g.save(); g.beginPath(); g.roundRect(M, y, 52, 52, 12); g.clip(); g.drawImage(logo, M, y, 52, 52); g.restore(); }
+    y += 22; txt(s.shopName || '', hx, `700 21px ${FAM}`, '#1c1c1c');
+    y += 22; txt([s.address, s.phone && 'ĐT: ' + s.phone].filter(Boolean).join(' · '), hx, `14px ${FAM}`, '#777'); y += 22;
+    hr(false);
+    y += 18; txt(d.title, W / 2, `700 18px ${FAM}`, AC, 'center');
+    if (d.sub) { y += 20; txt(d.sub, W / 2, `italic 13.5px ${FAM}`, '#777', 'center'); }
+    y += 24; txt(`Số ${d.code}  ·  ${ddmmyy(d.time)} ${hhmm(d.time)}`, W / 2, `14px ${FAM}`, '#777', 'center');
+    d.party.forEach(([k, v]) => { y += 20; wrapLines(`${k}: ${v}`, `14px ${FAM}`, W - 2 * M).forEach((t, i) => { if (i) y += 18; txt(t, W / 2, `14px ${FAM}`, '#555', 'center'); }); });
+    y += 6; hr(true);
+    for (const l of d.lines) {
+      const nm = wrapLines(l.name, `600 16px ${FAM}`, W - 2 * M - 120);
+      nm.forEach((t, i) => { y += 22; txt(t, M, `600 16px ${FAM}`, '#1c1c1c'); if (i === 0) txt(l.amount, R_, `600 16px ${FAM}`, '#1c1c1c', 'right'); });
+      y += 19; txt(l.sub, M, `13.5px ${FAM}`, '#777'); y += 4;
+    }
+    hr(true);
+    d.totals.forEach(([k, v, b]) => { y += b ? 32 : 24; const f = b ? `800 ${/TỔNG CỘNG/.test(k) ? 22 : 17}px ${FAM}` : `15px ${FAM}`, c = b ? AC : '#1c1c1c'; txt(k, M, f, c); txt(v, R_, f, c, 'right'); });
+    if (qr) {
+      y += 14; hr(true); y += 4; if (draw) g.drawImage(qr, (W - 240) / 2, y, 240, 240); y += 250;
+      y += 14; txt(d.qr.label || 'Quét mã để chuyển khoản', W / 2, `600 14px ${FAM}`, '#1c1c1c', 'center');
+      y += 20; txt(`${bankLabel(s.bankId)} · ${s.bankAcc}`, W / 2, `14px ${FAM}`, '#1c1c1c', 'center');
+      y += 20; txt(s.bankName || '', W / 2, `14px ${FAM}`, '#1c1c1c', 'center');
+    }
+    if (d.note) { y += 14; wrapLines('Ghi chú: ' + d.note, `13.5px ${FAM}`, W - 2 * M).forEach(t => { y += 18; txt(t, M, `13.5px ${FAM}`, '#555'); }); }
+    if (d.footer) { y += 14; hr(false); y += 14; txt(d.footer, W / 2, `italic 14.5px ${FAM}`, AC, 'center'); }
+    return y + M;
+  };
+  const meas = document.createElement('canvas').getContext('2d'), H = Math.ceil(paint(meas, false));
+  const cv = document.createElement('canvas'), SC = 2; cv.width = W * SC; cv.height = H * SC;
+  const g = cv.getContext('2d'); g.scale(SC, SC); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H); g.textBaseline = 'alphabetic';
+  paint(g, true);
+  return await new Promise((res, rej) => cv.toBlob(b2 => b2 ? res(b2) : rej(new Error('Không tạo được ảnh')), 'image/png'));
+}
+let zaloCache = null;
+async function zaloShare(d, ph) {
+  const text = zaloText(d), key = text + '|' + hasBank();
+  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const blobP = zaloCache && zaloCache.key === key ? Promise.resolve(zaloCache.blob) : zaloImage(d);
+  const fname = 'hoa-don-' + String(d.code).replace(/[^\w-]/g, '') + '.png';
+  try {
+    if (mobile && navigator.share && navigator.canShare) {
+      const blob = await blobP; zaloCache = { key, blob }; const file = new File([blob], fname, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file], text, title: d.title + ' ' + (S.settings.shopName || '') }); return; }
+        catch (e) { if (e.name === 'AbortError') return; if (e.name === 'NotAllowedError') return toast('Ảnh đã sẵn sàng, bấm "Gửi Zalo" thêm một lần nữa'); }
+      }
+    }
+    let how = '';
+    if (navigator.clipboard && window.ClipboardItem) { try { await navigator.clipboard.write([new ClipboardItem({ 'image/png': blobP })]); how = 'ảnh'; } catch (e) {} }
+    if (!how) { try { await navigator.clipboard.writeText(text); how = 'nội dung'; } catch (e) {} }
+    if (!how) { const blob = await blobP, a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fname; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); how = 'tải ảnh'; }
+    if (ph.length >= 9) { window.open('https://zalo.me/' + ph.replace(/^\+/, ''), '_blank', 'noopener'); toast(how === 'tải ảnh' ? 'Đã tải ảnh · gửi qua Zalo vừa mở' : `Đã chép ${how} · trong khung chat Zalo bấm Ctrl+V rồi Enter`); }
+    else toast(how === 'tải ảnh' ? 'Đã tải ảnh · hãy gửi qua Zalo' : `Đã chép ${how} · mở Zalo, chọn khách và bấm Ctrl+V`);
+  } catch (e) { toast('Không tạo được hóa đơn để gửi: ' + e.message); }
+}
+const zaloPhone = () => (($('#zaloPhone') || {}).value || '').replace(/[^\d+]/g, '');
+function zaloDocOfOrder(o, quote) {
+  const d = orderDoc(o, quote);
+  return { title: zaloPlain(d.title).toUpperCase(), sub: d.sub, code: d.code, time: d.time, party: d.party, lines: d.rows80.map(r => ({ name: zaloPlain(r[0]), sub: zaloPlain(r[1]), amount: zaloPlain(r[2]) + 'đ' })),
+    totals: d.totals, qr: d.qr ? { ...d.qr, label: 'Quét mã để chuyển khoản' } : null, note: d.note, footer: d.footer };
+}
+function zaloSend(id) { const o = S.orders.find(x => String(x.id) === String(id)); if (o) zaloShare(zaloDocOfOrder(o), zaloPhone()); }
+async function zaloQuote() {
+  const t = tkOf(); if (!t || !t.lines.length) return; const c = tkCalc(t), cu = custOf(t.customerId);
+  const ph = await ask('Gửi <b>báo giá</b> cho khách qua Zalo. Nhập SĐT Zalo của khách (có thể bỏ trống):', 'Gửi', false, 'SĐT Zalo của khách' + (cu && cu.phone ? ' (để trống = ' + cu.phone + ')' : ''));
+  if (ph === false) return;
+  const o = { code: 'BG-' + pad(t.no, 4), time: Date.now(), customerName: cu ? cu.name : '', phone: cu ? cu.phone : '', addr: cu ? cu.addr || '' : '', customerId: null, staffName: ME.name,
+    items: t.lines.map(l => ({ ...l, amount: Math.round(l.qty * l.price) })), sub: c.sub, disc: c.d, ship: c.ship, total: c.total };
+  zaloShare(zaloDocOfOrder(o, true), String(ph || (cu && cu.phone) || '').replace(/[^\d+]/g, ''));
+}
+
 
 /* ================= HÓA ĐƠN ================= */
 const ordF = { q: '', r: 'today', st: 'all' };
@@ -1274,6 +1383,7 @@ function orderDetail(id) {
         <div class="muted" style="font-size:12.5px;font-style:italic">Bằng chữ: ${docSo(o.total)}</div></div>
       ${o.void ? `<div class="warn" style="margin-top:10px">Đã hủy lúc ${ddmm(o.void.time)} ${hhmm(o.void.time)} bởi ${esc(o.void.by)} · Lý do: ${esc(o.void.reason)}</div>` : ''}
     </div>
+    ${zaloBox(o.id, o.phone)}
     <div class="dlg-f">${can('void') && !o.void ? `<button class="btn danger ghost" data-act="voidOrder" data-id="${o.id}">Hủy hóa đơn</button>` : ''}<span class="grow"></span><button class="btn yel" data-act="reprint" data-id="${o.id}">${ICON.print} In phiếu</button></div>`, 'lg');
 }
 async function voidOrder(id) {
@@ -1838,6 +1948,7 @@ const A = {
     printOrder({ code: 'BG-' + pad(t.no, 4), time: Date.now(), customerName: cu ? cu.name : '', phone: cu ? cu.phone : '', addr: cu ? cu.addr || '' : '', customerId: null, staffName: ME.name,
       items: t.lines.map(l => ({ ...l, amount: Math.round(l.qty * l.price) })), sub: c.sub, disc: c.d, ship: c.ship, total: c.total }, true); },
   checkout, openCart: () => $('#cartPanel').classList.add('open'), closeCart: () => $('#cartPanel').classList.remove('open'),
+  zaloSend: d => zaloSend(d.id), quoteZalo: () => zaloQuote(),
   reprint: d => { const o = S.orders.find(x => x.id === d.id); if (o) printOrder(o); },
   ordR: d => { ordF.r = d.v; vOrders(); }, order: d => orderDetail(d.id), voidOrder: d => voidOrder(d.id),
   stTab: d => { stF.tab = d.v; vStock(); }, stLow: () => { stF.low = !stF.low; tabTon(); },
