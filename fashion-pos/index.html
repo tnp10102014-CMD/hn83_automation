@@ -121,6 +121,12 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.22);padding:2px 6px;b
 .lock-user{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:16px}
 .auth-foot{margin-top:28px;font-size:12.5px;color:var(--muted);text-align:center}
 .link{color:var(--gold);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.trial{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,#e6cfa6,#c9a46b);color:#1f2a44;white-space:nowrap}
+.trial.urgent{background:var(--err);color:#fff}
+.devcode{font:700 21px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:2px;text-align:center;padding:14px;border-radius:14px;background:rgba(184,146,90,.12);border:1.5px dashed var(--gold);user-select:all;-webkit-user-select:all}
+.lic-st{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;margin-bottom:12px;background:var(--surface2)}
+.lic-st b{font-size:15px}
+.lic-st svg{width:22px;height:22px;flex-shrink:0;color:var(--gold)}
 @media(max-width:899px){
   .auth{grid-template-columns:1fr;grid-template-rows:auto 1fr}
   .auth-art{padding:calc(var(--st) + 28px) 24px 30px}
@@ -375,6 +381,7 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.22);padding:2px 6px;b
   <div class="content">
     <header class="topbar">
       <h1 id="vTitle"></h1>
+      <button class="trial hidden" id="trialBtn" data-act="license"></button>
       <span class="net hidden" id="net">● Ngoại tuyến</span>
       <button class="av" id="tbMe" data-act="meMenu" aria-label="Tài khoản"></button>
     </header>
@@ -551,6 +558,119 @@ setInterval(() => {
   if (ME && m > 0 && Date.now() - lastAct > m * 60000) lockScreen();
 }, 15000);
 
+/* ================= BẢN QUYỀN / DÙNG THỬ =================
+   - Mỗi thiết bị có 1 "Mã máy" ngẫu nhiên, dùng thử TRIAL_DAYS ngày kể từ lần mở đầu tiên.
+   - Mã kích hoạt = chữ ký số ECDSA P-256 trên (mã máy | ngày hết hạn | gói), chỉ tạo được bằng khóa bí mật
+     trong công cụ tạo mã của nhà cung cấp. App chỉ chứa khóa công khai để kiểm tra. */
+const TRIAL_DAYS = 15;
+const VENDOR = { name: 'Trần Hữu Nhật', phone: '0913.193.668', zalo: '0913.193.668', email: 'tnp10102014@gmail.com' }; // ← điền SĐT / Zalo nhận yêu cầu kích hoạt
+const LIC_PUB = {"kty": "EC", "crv": "P-256", "x": "Fk0wjs4OaHXIFnFez_YjA7gJqSY-5_2623ZQ83GV-Y4", "y": "UyAmF_0xLGYIjDQ6-B09So_LqDaXHQj6pa6mVXx3E2E"};
+const PLANS = { T15: 'Gia hạn dùng thử', M1: '1 tháng', M3: '3 tháng', M6: '6 tháng', Y1: '1 năm', LIFE: 'Vĩnh viễn', CUS: 'Theo thời hạn' };
+const B32 = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+let LIC = null, LST = null;
+const b64uDec = s => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((s.length + 3) % 4)), c => c.charCodeAt(0));
+function newDevId() { const r = crypto.getRandomValues(new Uint8Array(12)), c = [...r].map(b => B32[b & 31]).join(''); return `FS-${c.slice(0, 4)}-${c.slice(4, 8)}-${c.slice(8)}`; }
+async function licSave() { try { await IDB.set('kv', 'lic', LIC); } catch (e) {} try { localStorage.setItem('fspos-lic', JSON.stringify(LIC)); } catch (e) {} }
+async function licLoad() {
+  let l = null, ls = null;
+  try { l = await IDB.get('kv', 'lic'); } catch (e) {}
+  try { ls = JSON.parse(localStorage.getItem('fspos-lic')); } catch (e) {}
+  if (!l && ls) l = ls;
+  if (!l) l = { dev: newDevId(), start: Date.now(), last: Date.now(), key: '' };
+  if (ls && ls.dev === l.dev) { l.start = Math.min(l.start, ls.start || l.start); l.last = Math.max(l.last || 0, ls.last || 0); if (!l.key && ls.key) l.key = ls.key; }
+  l.last = Math.max(l.last || 0, Date.now());
+  LIC = l; await licSave();
+}
+async function verifyKey(key) {
+  try {
+    const m = String(key).replace(/\s+/g, '').match(/^FS1\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/);
+    if (!m) return { ok: false, why: 'Mã kích hoạt sai định dạng (phải bắt đầu bằng FS1.)' };
+    const payload = b64uDec(m[1]), sig = b64uDec(m[2]);
+    const pk = await crypto.subtle.importKey('jwk', LIC_PUB, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+    if (!(await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, pk, sig, payload))) return { ok: false, why: 'Mã kích hoạt không hợp lệ' };
+    const [tag, dev, expDays, plan] = new TextDecoder().decode(payload).split('|');
+    if (tag !== 'FS') return { ok: false, why: 'Mã kích hoạt không dành cho Thời Trang POS' };
+    if (dev !== LIC.dev) return { ok: false, why: 'Mã kích hoạt này dành cho máy khác (' + dev + ')' };
+    return { ok: true, exp: +expDays ? +expDays * DAY : 0, plan };
+  } catch (e) { return { ok: false, why: 'Mã kích hoạt không hợp lệ' }; }
+}
+async function licStatus() {
+  const now = Math.max(Date.now(), LIC.last), tamper = Date.now() < LIC.last - 2 * 3600000;
+  if (LIC.key) {
+    const k = await verifyKey(LIC.key);
+    if (k.ok) return { mode: 'licensed', plan: k.plan, exp: k.exp, active: !k.exp || now < k.exp, daysLeft: k.exp ? Math.ceil((k.exp - now) / DAY) : Infinity, tamper };
+  }
+  const left = TRIAL_DAYS - Math.floor((now - LIC.start) / DAY);
+  return { mode: 'trial', active: left > 0, daysLeft: Math.max(0, left), end: LIC.start + TRIAL_DAYS * DAY, tamper };
+}
+function updTrial() {
+  const b = $('#trialBtn'); if (!b || !LST) return;
+  const show = LST.mode === 'trial' || (LST.exp && LST.daysLeft <= 10);
+  b.classList.toggle('hidden', !show); b.classList.toggle('urgent', LST.daysLeft <= 3);
+  b.textContent = LST.mode === 'trial' ? `Dùng thử · còn ${LST.daysLeft} ngày` : `Bản quyền còn ${LST.daysLeft} ngày`;
+}
+async function licCheck() {
+  LIC.last = Math.max(LIC.last, Date.now()); await licSave();
+  LST = await licStatus(); updTrial();
+  if (!LST.active) { ME = null; sessSet(null); closeAllModals(); renderActivation(); return false; }
+  return true;
+}
+const digits = s => String(s).replace(/\D/g, '');
+const vendorLine = () => `Liên hệ <b>${esc(VENDOR.name)}</b>${VENDOR.phone ? ` · ĐT <a class="link" href="tel:${digits(VENDOR.phone)}">${esc(VENDOR.phone)}</a>` : ''}${VENDOR.zalo ? ` · Zalo <a class="link" href="https://zalo.me/${digits(VENDOR.zalo)}" target="_blank" rel="noopener">${esc(VENDOR.zalo)}</a>` : ''} để nhận mã kích hoạt.`;
+function copyText(t) {
+  const ok = () => toast('Đã sao chép: ' + t.slice(0, 40));
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, () => fallback()); else fallback();
+  function fallback() { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Hãy tự chọn và sao chép mã', 'err'); } a.remove(); }
+}
+const licDesc = st => st.mode === 'trial' ? (st.active ? `Dùng thử · còn <b>${st.daysLeft}</b>/${TRIAL_DAYS} ngày (đến ${ddmmyy(st.end)})` : `Đã hết ${TRIAL_DAYS} ngày dùng thử`)
+  : `${PLANS[st.plan] || 'Bản quyền'} · ${st.exp ? (st.active ? `hết hạn ${ddmmyy(st.exp - 1)} (còn ${st.daysLeft} ngày)` : `đã hết hạn ${ddmmyy(st.exp - 1)}`) : 'không giới hạn thời gian'}`;
+async function activate(key) {
+  const r = await verifyKey(key); if (!r.ok) return r;
+  if (r.exp && Math.max(Date.now(), LIC.last) >= r.exp) return { ok: false, why: 'Mã kích hoạt này đã hết hạn' };
+  LIC.key = String(key).replace(/\s+/g, ''); await licSave(); LST = await licStatus(); updTrial(); return r;
+}
+function renderActivation() {
+  const exp = LST.mode !== 'trial';
+  const f = authShell(`<h1>${exp ? 'Bản quyền đã hết hạn' : 'Hết hạn dùng thử'}</h1>
+    <p class="lead">${exp ? 'Thời hạn sử dụng đã kết thúc.' : `Bạn đã dùng thử ${TRIAL_DAYS} ngày.`} <b>Dữ liệu vẫn được giữ nguyên.</b> Gửi <b>Mã máy</b> dưới đây cho nhà cung cấp để nhận mã kích hoạt.</p>
+    <div class="f"><label>Mã máy</label><div class="devcode">${esc(LIC.dev)}</div></div>
+    <button type="button" class="btn ghost block" id="acCopy">Sao chép mã máy</button>
+    <p style="font-size:13.5px;color:#7a6572">${vendorLine()}</p>
+    <div class="f"><label for="acKey">Mã kích hoạt</label><textarea id="acKey" rows="3" placeholder="Dán mã kích hoạt bắt đầu bằng FS1."></textarea></div>
+    <div class="auth-msg" id="authMsg"></div>
+    <button class="btn gold block" type="submit">Kích hoạt</button>
+    ${LST.tamper ? '<div class="auth-msg">⚠ Ngày giờ trên máy đang lùi so với lần dùng trước. Hãy chỉnh lại đúng ngày giờ.</div>' : ''}
+    <div class="auth-foot">${S.users.length ? '<a href="#" class="link" id="acBackup">Tải bản sao lưu dữ liệu</a>' : ''}</div>`, exp ? 'Gia hạn để tiếp tục <em>kinh doanh</em>' : 'Cảm ơn bạn đã <em>dùng thử</em>');
+  $('#acCopy').onclick = () => copyText(LIC.dev);
+  const bk = $('#acBackup'); if (bk) bk.onclick = e => { e.preventDefault(); A.backup(); };
+  f.onsubmit = async e => {
+    e.preventDefault();
+    const r = await activate($('#acKey').value);
+    if (!r.ok) return authMsg(r.why);
+    toast('Kích hoạt thành công!');
+    if (!S.users.length) renderSetup(); else renderLogin('');
+    setTimeout(() => { const m = $('#authMsg'); if (m) { m.textContent = 'Kích hoạt thành công: ' + licDesc(LST).replace(/<[^>]+>/g, ''); m.style.color = 'var(--ok)'; } }, 30);
+  };
+}
+function licenseModal() {
+  const d = openModal(`<div class="dlg-h"><h3>Bản quyền phần mềm</h3><button class="ibtn" data-act="close">✕</button></div>
+    <div class="dlg-b"><div class="lic-st">${ICON.lock}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
+      <div class="f"><label>Mã máy</label><div class="devcode">${esc(LIC.dev)}</div></div>
+      <button class="btn ghost block" id="lmCopy">Sao chép mã máy</button>
+      <p class="muted" style="font-size:13px">${vendorLine()}</p>
+      <div class="f"><label>Mã kích hoạt</label><textarea id="lmKey" rows="3" placeholder="Dán mã kích hoạt bắt đầu bằng FS1." style="font:14px ui-monospace,Menlo,Consolas,monospace"></textarea></div>
+      <div class="auth-msg" id="lmMsg"></div></div>
+    <div class="dlg-f"><span class="grow"></span><button class="btn ghost" data-act="close">Đóng</button><button class="btn gold" id="lmOk">Kích hoạt</button></div>`, 'sm');
+  $('#lmCopy', d).onclick = () => copyText(LIC.dev);
+  $('#lmOk', d).onclick = async () => {
+    const r = await activate($('#lmKey', d).value);
+    if (!r.ok) return $('#lmMsg', d).textContent = r.why;
+    closeModal(); toast('Kích hoạt thành công!'); refresh();
+  };
+}
+window.addEventListener('pagehide', flush);
+
+
 function authShell(inner, artTitle) {
   $('#app').classList.add('hidden');
   const a = $('#auth'); a.classList.remove('hidden');
@@ -640,11 +760,12 @@ function lockScreen() {
   };
 }
 function login(u, resume) {
+  if (LST && !LST.active) return renderActivation();
   ME = u; lastAct = Date.now(); sessSet({ uid: u.id, last: lastAct });
   if (!resume) cart = newCart();
   $('#auth').classList.add('hidden'); $('#auth').innerHTML = '';
   $('#app').classList.remove('hidden');
-  renderShell(); go(resume ? cur : (location.hash.slice(2) || 'pos'));
+  renderShell(); updTrial(); go(resume ? cur : (location.hash.slice(2) || 'pos'));
   if (u.mustChange) changePassword(true);
   else if (!resume) toast(`Xin chào, ${u.name}!`);
 }
@@ -1377,6 +1498,10 @@ function vSettings() {
       <div class="lock-user"><span class="av">${esc(initials(ME.name))}</span><div><b>${esc(ME.name)}</b><br><small class="muted">@${esc(ME.username)} · ${ad ? 'Quản lý' : 'Nhân viên'}</small></div></div>
       <div class="set-actions"><button class="btn ghost" data-act="chpw">${ICON.lock} Đổi mật khẩu</button><button class="btn ghost" data-act="lock">${ICON.lock} Khóa màn hình</button><button class="btn danger ghost" data-act="logout">${ICON.logout} Đăng xuất</button></div></div>
     ${ad ? `
+    <div class="card"><h3>Bản quyền phần mềm</h3>
+      <div class="lic-st">${ICON.lock}<div><b>${LST.mode === 'trial' ? 'Bản dùng thử' : 'Đã kích hoạt'}</b><br><small class="muted">${licDesc(LST)}</small></div></div>
+      <div class="row"><span class="muted" style="font-size:13px">Mã máy</span><b style="font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:1px" class="grow">${esc(LIC.dev)}</b><button class="btn sm ghost" data-act="copyDev">Sao chép</button></div>
+      <button class="btn gold block" style="margin-top:12px" data-act="license">Nhập mã kích hoạt</button></div>
     <div class="card"><h3>Thông tin cửa hàng</h3>
       ${f('sShop', 'Tên cửa hàng', s.shopName)}${f('sAddr', 'Địa chỉ', s.address, 'In trên hóa đơn')}${f('sPhone', 'Số điện thoại', s.phone)}
       ${f('sFooter', 'Ghi chú cuối hóa đơn', s.footer)}
@@ -1405,7 +1530,7 @@ function vSettings() {
       <div><b>Android:</b> Chrome → ⋮ → <b>Cài đặt ứng dụng</b>.</div>
       <div><b>Windows / Mac / Linux:</b> Chrome hoặc Edge → biểu tượng <b>⊕ Cài đặt</b> ở cuối thanh địa chỉ.</div>
       <div class="muted">Sau khi cài, ứng dụng chạy toàn màn hình và dùng được khi mất mạng.</div></div></div>
-  </div><div class="ver">Thời Trang POS · phiên bản ${APP_VER}</div>`;
+  </div><div class="ver">Thời Trang POS · phiên bản ${APP_VER} · Mã máy ${esc(LIC.dev)}</div>`;
   const ri = $('#restoreIn'); if (ri) ri.onchange = restore;
   const ci = $('#catIn'); if (ci) ci.onkeydown = e => { if (e.key === 'Enter') A.addCat(); };
 }
@@ -1506,7 +1631,7 @@ function seedDemo(admin) {
 /* ================= SỰ KIỆN ================= */
 const A = {
   close: closeModal, go: d => go(d.v), lock: () => { closeAllModals(); lockScreen(); }, logout: () => { closeAllModals(); logout(); },
-  meMenu, chpw: () => { closeAllModals(); changePassword(false); },
+  license: () => licenseModal(), copyDev: () => copyText(LIC.dev), meMenu, chpw: () => { closeAllModals(); changePassword(false); },
   posAge: d => { posF.age = d.v; renderPosFilters(); renderPosGrid(); },
   posCat: d => { posF.cat = d.v; renderPosFilters(); renderPosGrid(); },
   pick: d => pick(d.id),
@@ -1552,7 +1677,7 @@ const A = {
   wipe: async () => {
     if (!(await ask('Xóa <b>TOÀN BỘ</b> dữ liệu: sản phẩm, hóa đơn, khách hàng, tài khoản? Nên sao lưu trước.', 'Tiếp tục', true))) return;
     if (!(await ask('Chắc chắn? Thao tác này <b>không thể hoàn tác</b>.', 'Xóa vĩnh viễn', true))) return;
-    await IDB.clear('kv'); await IDB.clear('img'); sessSet(null); location.reload();
+    await IDB.clear('kv'); await IDB.clear('img'); await licSave(); sessSet(null); location.reload();
   }
 };
 document.addEventListener('click', e => {
@@ -1578,6 +1703,9 @@ window.addEventListener('online', netUpd); window.addEventListener('offline', ne
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch (e) {}
   netUpd();
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  await licLoad();
+  if (!(await licCheck())) return;
+  setInterval(() => { if (LST && LST.active) licCheck(); }, 10 * 60000);
   if (!S.users.length) return renderSetup();
   const ss = sessGet(), u = ss && S.users.find(x => x.id === ss.uid && x.active);
   if (u) {
