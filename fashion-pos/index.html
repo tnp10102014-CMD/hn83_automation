@@ -120,6 +120,11 @@ kbd{font:600 11px var(--sans);background:rgba(255,255,255,.22);padding:2px 6px;b
 .check input{width:18px;height:18px;accent-color:var(--navy)}
 .lock-user{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:16px}
 .auth-foot{margin-top:28px;font-size:12.5px;color:var(--muted);text-align:center}
+.zalo-link{background:none;border:0;color:#0068ff;font-weight:600;font-size:13.5px;padding:8px 0 0;cursor:pointer;text-align:left}
+.zalo-list{margin-top:6px;border:1px solid rgba(128,128,128,.28);border-radius:12px;background:var(--surface);max-height:190px;overflow:auto}
+.zalo-list .zi{display:flex;justify-content:space-between;gap:10px;width:100%;padding:10px 12px;text-align:left;border-bottom:1px solid rgba(128,128,128,.18);font-size:14px}
+.zalo-list .zi:last-child{border:0}.zalo-list .zi span{color:var(--muted);white-space:nowrap}
+.zalo-list .zi b{overflow:hidden;text-overflow:ellipsis}
 .btn.zalo{background:#0068ff;color:#fff;white-space:nowrap}
 .zalo-box{margin:0 20px 14px;padding:10px 12px;border-radius:14px;background:var(--surface2)}
 .zalo-box .small{font-size:12px;margin:6px 0 0}
@@ -1145,8 +1150,9 @@ function printReceipt(o) {
    Điện thoại: mở bảng chia sẻ của máy kèm ảnh hóa đơn (chọn Zalo → chọn khách).
    Máy tính: chép ảnh hóa đơn vào clipboard, mở khung chat Zalo của khách (nếu có SĐT) để dán (Ctrl+V). */
 const ZALO_ACCENT = '#1f2a44';
-const zaloBox = (id, phone, quote) => `<div class="zalo-box"><div class="row"><input id="zaloPhone" type="tel" inputmode="tel" value="${esc(phone || '')}" placeholder="SĐT Zalo của khách (không bắt buộc)" class="grow">
+const zaloBox = (id, phone, quote) => `<div class="zalo-box"><div class="row"><input id="zaloPhone" type="tel" inputmode="tel" value="${esc(phone || '')}" placeholder="SĐT Zalo của khách" class="grow" autocomplete="off">
   <button class="btn zalo" data-act="${quote ? 'quoteZalo' : 'zaloSend'}" data-id="${esc(id || '')}">💬 Gửi Zalo</button></div>
+  <button type="button" class="zalo-link" data-act="zaloPick">📇 Chọn từ danh bạ</button><div class="zalo-list hidden" id="zaloList"></div>
   <p class="muted small">Điện thoại: chọn <b>Zalo</b> trong bảng chia sẻ. Máy tính: ảnh được chép sẵn, mở Zalo rồi bấm <b>Ctrl+V</b>.</p></div>`;
 const zaloPlain = h => new DOMParser().parseFromString(String(h), 'text/html').body.textContent;
 function zaloText(d) {
@@ -1210,6 +1216,7 @@ async function zaloShare(d, ph) {
   const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const blobP = zaloCache && zaloCache.key === key ? Promise.resolve(zaloCache.blob) : zaloImage(d);
   const fname = 'hoa-don-' + String(d.code).replace(/[^\w-]/g, '') + '.png';
+  if (ph.length >= 9) zaloRemember(ph, zaloWho(d));
   try {
     if (mobile && navigator.share && navigator.canShare) {
       const blob = await blobP; zaloCache = { key, blob }; const file = new File([blob], fname, { type: 'image/png' });
@@ -1226,6 +1233,46 @@ async function zaloShare(d, ph) {
     else toast(how === 'tải ảnh' ? 'Đã tải ảnh · hãy gửi qua Zalo' : `Đã chép ${how} · mở Zalo, chọn khách và bấm Ctrl+V`);
   } catch (e) { toast('Không tạo được hóa đơn để gửi: ' + e.message); }
 }
+/* ---- Chọn số Zalo từ danh bạ ----
+   Android (Chrome): mở danh bạ điện thoại. Máy khác: danh sách khách hàng đã lưu + các số đã gửi trước đây. */
+const ZALO_RK = 'fashion-pos-zalo-recent';
+const zaloRecent = () => { try { return JSON.parse(localStorage.getItem(ZALO_RK)) || []; } catch (e) { return []; } };
+function zaloRemember(phone, name) {
+  const k = String(phone).replace(/\D/g, ''); if (k.length < 9) return;
+  const L = zaloRecent().filter(x => String(x.phone).replace(/\D/g, '') !== k); L.unshift({ phone, name: name || '' });
+  try { localStorage.setItem(ZALO_RK, JSON.stringify(L.slice(0, 40))); } catch (e) {}
+}
+const zaloWho = d => { const n = String(((d.party || []).find(([k]) => /^Khách/.test(k)) || [])[1] || '').replace(/\s-\s[\d\s.+]+$/, ''); return /^Khách (lẻ|vãng lai)/i.test(n) ? '' : n; };
+const zaloNorm = t => String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase();
+function zaloList() {
+  const seen = new Set(), out = [];
+  for (const x of [...(typeof S.customers !== 'undefined' && S.customers ? S.customers : []).filter(c => c.phone).map(c => ({ name: c.name, phone: c.phone })), ...zaloRecent()]) {
+    const k = String(x.phone).replace(/\D/g, ''); if (k.length < 9 || seen.has(k)) continue; seen.add(k); out.push(x);
+  }
+  return out;
+}
+function zaloFilter() {
+  const box = $('#zaloList'), inp = $('#zaloPhone'); if (!box || !inp) return;
+  const q = zaloNorm(inp.value.trim()), dq = q.replace(/\D/g, '');
+  const L = zaloList().filter(x => !q || zaloNorm(x.name).includes(q) || (dq && String(x.phone).replace(/\D/g, '').includes(dq))).slice(0, 12);
+  box.innerHTML = L.map(x => `<button type="button" class="zi" data-act="zaloUse" data-p="${esc(x.phone)}"><b>${esc(x.name || 'Khách')}</b><span>${esc(x.phone)}</span></button>`).join('')
+    || `<div class="muted small" style="padding:10px 12px;margin:0">Chưa có số nào phù hợp. Cứ nhập số mới, lần sau app sẽ nhớ.</div>`;
+  box.classList.remove('hidden');
+}
+const zaloNormPhone = t => { let p = String(t || '').replace(/[^\d+]/g, ''); if (p.startsWith('+84')) p = '0' + p.slice(3); else if (/^84\d{9}$/.test(p)) p = '0' + p.slice(2); return p; };
+async function zaloPick() {
+  if (navigator.contacts && navigator.contacts.select && window.ContactsManager) {
+    try {
+      const r = await navigator.contacts.select(['name', 'tel'], { multiple: false });
+      if (r && r[0]) { const p = zaloNormPhone((r[0].tel || [])[0]); if (p) { $('#zaloPhone').value = p; zaloRemember(p, (r[0].name || [])[0]); $('#zaloList').classList.add('hidden'); } else toast('Liên hệ này chưa có số điện thoại'); }
+      return;
+    } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  zaloFilter();
+}
+document.addEventListener('input', e => { if (e.target && e.target.id === 'zaloPhone') zaloFilter(); });
+document.addEventListener('focusin', e => { if (e.target && e.target.id === 'zaloPhone' && zaloList().length) zaloFilter(); });
+document.addEventListener('click', e => { const b = $('#zaloList'); if (b && !e.target.closest('.zalo-box')) b.classList.add('hidden'); });
 const zaloPhone = () => (($('#zaloPhone') || {}).value || '').replace(/[^\d+]/g, '');
 function zaloDocOf(o) {
   const s = S.settings, rt = (o.returns || []).reduce((a, r) => a + r.amount, 0);
@@ -1745,7 +1792,7 @@ const A = {
   clearCart: async () => { if (await ask('Hủy toàn bộ sản phẩm trong đơn đang bán?', 'Hủy đơn', true)) { cart = newCart(); renderCart(); renderPosGrid(); } },
   checkout, pickCustomer, clearCustomer: (d, el, e) => { e.stopPropagation(); cart.customerId = null; renderCart(); },
   openCart: () => $('#cartPanel').classList.add('open'), closeCart: () => $('#cartPanel').classList.remove('open'),
-  zaloSend: d => zaloSend(d.id),
+  zaloSend: d => zaloSend(d.id), zaloPick, zaloUse: d => { $('#zaloPhone').value = d.p; $('#zaloList').classList.add('hidden'); },
   reprint: d => { const o = S.orders.find(x => x.id === d.id); if (o) printReceipt(o); },
   ordR: d => { ordF.r = d.v; vOrders(); }, order: d => orderDetail(d.id), returnOrder: d => returnOrder(d.id),
   prAge: d => { prodF.age = d.v; vProducts(); }, prLow: () => { prodF.low = !prodF.low; vProducts(); },
